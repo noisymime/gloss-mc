@@ -21,6 +21,7 @@ class VideoPlayer():
             tempVideo.importFromMythObject(record)
             self.videoLibrary.append(tempVideo)
             self.cover_viewer.add_image(tempVideo.getCoverfile())
+        dbMgr.close_db()
         ################################################################################
         
     def on_key_press_event (self, stage, event):
@@ -56,7 +57,21 @@ class VideoPlayer():
             
         
     def stop(self):
-        pass
+           
+        #Fade everything out
+        timeline_stop = clutter.Timeline(10,30)
+        alpha = clutter.Alpha(timeline_stop, clutter.ramp_inc_func)
+        stop_behaviour = clutter.BehaviourOpacity(alpha, 255, 0)
+        stop_behaviour.apply(self.cover_viewer)
+        stop_behaviour.apply(self.backdrop)
+        timeline_stop.connect('completed', self.destroyPlugin)
+        timeline_stop.start()
+    
+    def destroyPlugin(self, data):
+        self.stage.remove(self.cover_viewer)
+        self.backdrop.hide()
+        #self.stage.remove(self.overlay)
+        
         
     def pause(self):
         pass

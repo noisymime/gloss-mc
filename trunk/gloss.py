@@ -9,6 +9,7 @@ from Slideshow import Slideshow
 from VideoPlayer import VideoPlayer
 from MusicPlayer import MusicPlayer
 from TVPlayer import TVPlayer
+from DvdPlayer import DvdPlayer
 
 
 class MainApp:
@@ -34,7 +35,7 @@ class MainApp:
         menu1.addItem("Slideshow", "ui/gallery.png")        
         menu1.addItem("Videos", "ui/videos.png")
         menu1.addItem("Link", "ui/link.png")
-        menu1.addItem("nothing", "ui/music.png")
+        menu1.addItem("DVD", "ui/dvd.png")
         menu1.addItem("nothing", "ui/dvd.png")
         menu1.addItem("nothing", "ui/dvd.png")
         menu1.addItem("nothing", "ui/dvd.png")
@@ -62,15 +63,17 @@ class MainApp:
         self.mySlideshow = Slideshow(self.menuMgr, "images/")
         #self.mySlideshow.loadDir("images/", True)
        
-        #self.vidPlayer = VideoPlayer(self.stage)
+        self.vidPlayer = VideoPlayer(self.stage)
         self.tvPlayer = TVPlayer(self.stage)
+        self.dvdPlayer = DvdPlayer(self.stage)
         self.musicPlayer = MusicPlayer(self.stage)
         
         menu1.getItem(0).setAction(self.tvPlayer)
         #menu1.getItem(1).setAction(self.mySlideshow)
         menu1.getItem(1).setAction(self.mySlideshow.generateMenu())
-        #menu1.getItem(2).setAction(self.vidPlayer)
+        menu1.getItem(2).setAction(self.vidPlayer)
         menu1.getItem(3).setAction(self.menu2)
+        menu1.getItem(4).setAction(self.dvdPlayer)
         
         self.menu2.getItem(1).setAction(self.menu1)
         

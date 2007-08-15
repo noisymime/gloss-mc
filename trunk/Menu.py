@@ -163,6 +163,7 @@ class ListItem (clutter.Label):
         clutter.Label.__init__ (self)
         self.itemTexturesGroup = clutter.Group()
         font = menu.getMenuMgr().get_skinMgr().get_menu_font()
+        self.stage = menu.getMenuMgr().get_stage()
         self.set_font_name(font)
         self.set_text(itemLabel)
         self.color = clutter.Color(0xff, 0xff, 0xff, 0xdd)
@@ -226,7 +227,7 @@ class ListItem (clutter.Label):
 
         self.tempTexture.set_pixbuf(pixbuf)
         (abs_x, abs_y) = self.get_abs_position()
-        print abs_x
+
         x = abs_x# - self.tempTexture.get_width()
         y = (self.menu.getStage().get_height()/2) - (self.tempTexture.get_height()/2)
         self.tempTexture.set_position(x, y)
@@ -236,8 +237,9 @@ class ListItem (clutter.Label):
         self.tempTexture.hide_all()
         
         #Scale the image down by half
-        #self.tempTexture.set_width(self.tempTexture.get_width()/2)
-        #self.tempTexture.set_height(self.tempTexture.get_height()/2)
+        xy_ratio = self.tempTexture.get_width() / self.tempTexture.get_height()
+        self.tempTexture.set_width(int(self.stage.get_width() * 0.30)) #30% of the stages width
+        self.tempTexture.set_height(self.tempTexture.get_width() * xy_ratio ) #Just makes sure the sizes stay the same
         
         if useReflection:
             self.reflectionTexture = Texture_Reflection(self.tempTexture)

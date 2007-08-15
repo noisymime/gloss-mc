@@ -4,7 +4,7 @@ from Spinner import Spinner
 import pygtk
 import gtk
 
-class MenuMgr():
+class MenuMgr:
 
     def __init__ (self, stage):
         self.stage = stage

@@ -1,0 +1,29 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+
+This page will give a very brief overview on how to get Gloss up and running on your system. It assumes you already have a working MythTV setup.
+
+
+= Ubuntu =
+
+Gloss was developed on Ubuntu so hence I can give the best instructions for how to get it working on this platform:
+
+  # Depending on your distro version, add the appropriate repository:
+  `echo "deb http://debian.o-hand.com feisty/" | sudo tee -a /etc/apt/sources.list`
+  (Replace fiesty with edgy / dapper if required)
+  # `sudo apt-get update`
+  # `sudo apt-get install libclutter-0.4-0 libclutter-gst-0.4-0 python-clutter python-mysqldb subversion eyed3`
+  # `svn checkout http://gloss-mc.googlecode.com/svn/trunk/ gloss-mc`
+  # `cd gloss-mc`
+  # `python gloss.py`
+
+
+
+
+
+
+
+
+
+

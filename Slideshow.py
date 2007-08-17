@@ -54,16 +54,10 @@ class Slideshow:
         new_sound_list = filter(self.filterSoundFile, new_file_list)
         
         #Load pictures into textures array
-        i = len(self.textures)
         for pic in new_image_list:
-            self.textures.append(clutter.Texture())
             imgName = dirPath + "/" + pic
-            #print imgName
-            pixbuf = gtk.gdk.pixbuf_new_from_file(imgName)
-            self.textures[i].set_pixbuf(pixbuf)
-            self.textures[i].set_position(0,0)
-            self.image_texture_group.add(self.textures[i])
-            i = i+1
+            self.textures.append(imgName)
+            
             
         #Load sound into music array
         i = len(self.music)
@@ -108,7 +102,7 @@ class Slideshow:
             self.backdrop.set_height(self.stage.get_height())
             self.stage.add(self.backdrop)
         #Fade the backdrop in
-        self.image_texture_group.set_opacity(255)
+        #self.image_texture_group.set_opacity(255)
         self.backdrop.set_opacity(0)
         self.backdrop.show()
         timeline_backdrop = clutter.Timeline(10,30)
@@ -118,14 +112,15 @@ class Slideshow:
         timeline_backdrop.start()
         
         
-        self.stage.add(self.image_texture_group) 
         #print "No of children: " + str(self.image_texture_group.get_n_children())
         #Get a random texture
-        self.rand1 = random.randint(0, self.image_texture_group.get_n_children()-1)
-        self.currentTexture = self.textures[self.rand1]
+        self.rand1 = random.randint(0, len(self.textures)-1)
+        self.currentFilename = self.textures[self.rand1]
+        pixbuf = gtk.gdk.pixbuf_new_from_file(self.currentFilename)
+        self.currentTexture.set_pixbuf(pixbuf)
+        self.stage.add(self.currentTexture)
         #Make sure its visible
         self.currentTexture.set_opacity(255)
-        
         
         #Get a random song (if there's songs available)
         if not len(self.music) == 0:
@@ -134,13 +129,10 @@ class Slideshow:
             self.playNextSong(None)
         
         #Housekeeping
-        self.image_texture_group.hide_all()
-        self.nextTexture = None
         self.nextSong = None
         
         #Begin the show
         self.currentTexture.show()
-        self.image_texture_group.show()
         self.nextImage(self.currentTexture)
         
     def end(self):
@@ -157,10 +149,14 @@ class Slideshow:
         self.nextTexture = None
         while (self.nextTexture == None):
             self.rand1 = random.randint(0, len(self.textures)-1 )
-            self.nextTexture = self.image_texture_group.get_nth_child(self.rand1)
+            self.nextTexture = clutter.Texture()
+            self.newFilename = self.textures[self.rand1]
+            pixbuf = gtk.gdk.pixbuf_new_from_file(self.newFilename)
+            self.nextTexture.set_pixbuf(pixbuf)
             #Make sure we don't show the same photo twice
-            if (self.nextTexture == self.currentTexture) and (len(self.textures) > 1):
+            if (self.newFilename == self.currentFilename) and (len(self.textures) > 1):
                 self.nextTexture = None
+            
         #Make sure its not visible initially (Prevents a nasty flicker the first time a photo is shown)
         self.nextTexture.set_opacity(0)
                
@@ -203,7 +199,10 @@ class Slideshow:
         y_pos = random.randint(0, abs(self.stage.get_height() - self.nextTexture.get_height())  )
         self.nextTexture.set_position(x_pos, y_pos)
         
+        self.stage.remove(self.currentTexture)
         self.currentTexture = self.nextTexture
+        self.currentFilename = self.newFilename
+        self.stage.add(self.currentTexture)
         self.nextTexture.show()
         self.timeline_dissolve.start()
         self.nextImage(self.currentTexture)

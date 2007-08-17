@@ -90,8 +90,7 @@ class MenuMgr:
         
         self.entrance_behaviour_opacity.apply(newGroup)
         self.entrance_behaviour_opacity.apply(newMenuGroup)
-        self.entrance_behaviou
-        r_path.apply(newGroup)
+        self.entrance_behaviour_path.apply(newGroup)
         #newGroup.show_all()
         #newMenuGroup.show_all()
         toMenu.display()

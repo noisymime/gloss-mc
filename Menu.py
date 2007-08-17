@@ -117,10 +117,17 @@ class Menu:
             else:
                 self.selected = self.selected+1
             
-            self.menuItems[self.selected].scaleLabel(0, self.timeline)
-            self.menuItems[self.selected-1].scaleLabel(1, self.timeline)
-            if (self.selected >= (self.displayMin+2) ):
-                self.menuItems[self.selected-2].scaleLabel(2, self.timeline)
+            #This horrible loop does all the scaling
+            #This includes, the selected item and the ones on either side of it
+            for i in range(len(self.menuItems)):
+                if i == self.selected:
+                    self.menuItems[i].scaleLabel(0, self.timeline)
+                elif (i == self.selected-1) and (i >= self.displayMin+1):
+                    self.menuItems[i].scaleLabel(1, self.timeline)
+                elif (i == self.selected+1) and (i <= self.displayMax-1):
+                    self.menuItems[i].scaleLabel(1, self.timeline)
+                else:
+                    self.menuItems[i].scaleLabel(2, self.timeline)
                 
             #Check we're at the bottom of the viewable list
             if self.selected >= self.displayMax:
@@ -131,9 +138,6 @@ class Menu:
             else:
                 #move the selection bar
                 self.menuMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
-            
-        if self.selected != self.displayMax-1: #(len(self.menuItems)-1):
-            self.menuItems[self.selected+1].scaleLabel(1, self.timeline)
         
         self.timeline.start()
         self.moveQueue = 0
@@ -159,24 +163,28 @@ class Menu:
             else:
                 self.selected = self.selected-1
             
-            self.menuItems[self.selected].scaleLabel(0, self.timeline)
-            self.menuItems[self.selected+1].scaleLabel(1, self.timeline)
+            #This horrible loop does all the scaling
+            #This includes, the selected item and the ones on either side of it
+            for i in range(len(self.menuItems)):
+                if i == self.selected:
+                    self.menuItems[i].scaleLabel(0, self.timeline)
+                elif (i == self.selected-1) and (i >= self.displayMin+1):
+                    self.menuItems[i].scaleLabel(1, self.timeline)
+                elif (i == self.selected+1) and (i <= self.displayMax-1):
+                    self.menuItems[i].scaleLabel(1, self.timeline)
+                else:
+                    self.menuItems[i].scaleLabel(2, self.timeline)
             
             #Check we're at the top of the viewable list
             if self.selected < self.displayMin:
                 #If yes, move the menu, leave the selection bar where is
-                self.menuItems[self.selected].set_opacity(0)
-                self.menuItems[self.selected].show()
+                #self.menuItems[self.selected].set_opacity(0)
+                #self.menuItems[self.selected].show()
                 self.rollMenu( self.menuItems[self.selected], self.menuItems[self.selected+self.displaySize], self.timeline)
             else:
                 #move the selection bar
                 self.menuMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
             
-            if self.selected <= self.displayMax-3: # (len(self.menuItems)-3):
-                self.menuItems[self.selected+2].scaleLabel(2, self.timeline)
-            
-        if self.selected != self.displayMin:
-            self.menuItems[self.selected-1].scaleLabel(1, self.timeline)
         
         self.timeline.start()
         self.moveQueue = 0
@@ -204,19 +212,18 @@ class Menu:
         self.timeline.start()
         
     #When the menu needs to display a new item from the top or bottom, it rolls
-    def rollMenu(self, incomingMenuItem, outgoingMenuItem, timeline):
+    def rollMenu(self, incomingMenuItem, outgoingMenuItem, timeline):    
         (group_x, group_y) = self.itemGroup.get_abs_position()
         (bar_x, bar_y) = incomingMenuItem.get_menu().getMenuMgr().get_selector_bar().get_abs_position()
         (incoming_x, incoming_y) = incomingMenuItem.get_abs_position()
-        if incoming_y > bar_y:
+        if incoming_y > bar_y:  
             #Then the incoming item is below the selector bar
             gap = (incoming_y - bar_y) * -1
-            #print gap
             self.displayMin = self.displayMin+1
             self.displayMax = self.displayMax+1
         else:
             #Then the incoming item is above the selector bar
-            gap = bar_y - incoming_y
+            gap = bar_y - incoming_y + (self.item_gap/2)
             self.displayMin = self.displayMin-1
             self.displayMax = self.displayMax-1
         
@@ -289,6 +296,9 @@ class ListItem (clutter.Label):
             zoomTo = self.zoomLevel
             opacityTo = 255 - 2*self.opacityStep
             self.itemTexturesGroup.hide_all()
+            
+        if zoomTo == self.currentZoom:
+            return None
         
         alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
         self.behaviour1 = clutter.BehaviourScale(alpha, self.currentZoom, zoomTo, clutter.GRAVITY_WEST)

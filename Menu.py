@@ -12,6 +12,10 @@ class Menu:
         self.stage = self.menuMgr.get_stage()
         self.menuItems = []
         self.selected = 0
+        self.displayMin = 0 #The number of menu items that will be shown at a time
+        self.displayMax = 6
+        self.moveQueue = 0
+        self.displaySize = self.displayMax - self.displayMin
         self.displayPosition = (0, 0)
         self.itemGroup = clutter.Group()
         self.menuGroup = clutter.Group()
@@ -41,6 +45,17 @@ class Menu:
         self.itemGroup.set_position(group_x, group_y) 
         
         return newItem
+        
+    def display(self):
+        if self.displayMax > len(self.menuItems):
+            self.displayMax = len(self.menuItems)
+            self.displaySize = self.displayMax - self.displayMin
+        print self.displayMax
+        
+        for i in range(self.displaySize):
+            self.menuItems[i].show()
+            
+        self.itemGroup.show()
         
     def getItem(self, index):
         return self.menuItems[index]
@@ -86,51 +101,91 @@ class Menu:
         
         #Initially check whether the last animation is still going           
         if self.timeline.is_playing():
-            self.timeline.set_speed(1000) # Nasty hack to make sure the timeline finishes
-            
+            self.moveQueue = self.moveQueue + 1
+            #self.timeline.set_speed(1000) # Nasty hack to make sure the timeline finishes
+            return None
     
         self.timeline = clutter.Timeline (15,85)
+        self.timeline.connect('completed', self.completeMove)
+        
         #Check if we're at the last item in the list
         if (self.selected) != (len(self.menuItems)-1):
-            self.selected = self.selected+1
- 
+            if not self.moveQueue == 0:
+                self.selected = self.selected + self.moveQueue
+                if self.selected > (len(self.menuItems)-1):
+                    self.selected = (len(self.menuItems)-1)
+            else:
+                self.selected = self.selected+1
+            
             self.menuItems[self.selected].scaleLabel(0, self.timeline)
             self.menuItems[self.selected-1].scaleLabel(1, self.timeline)
-            if (self.selected >= 2):
+            if (self.selected >= (self.displayMin+2) ):
                 self.menuItems[self.selected-2].scaleLabel(2, self.timeline)
-            #Finally move the selection bar
-            self.menuMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
+                
+            #Check we're at the bottom of the viewable list
+            if self.selected >= self.displayMax:
+                #If yes, move the menu, leave the selection bar where is
+                self.menuItems[self.selected].set_opacity(0)
+                self.menuItems[self.selected].show()
+                self.rollMenu( self.menuItems[self.selected], self.menuItems[self.selected-self.displaySize], self.timeline)
+            else:
+                #move the selection bar
+                self.menuMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
             
-        if self.selected != (len(self.menuItems)-1):
+        if self.selected != self.displayMax-1: #(len(self.menuItems)-1):
             self.menuItems[self.selected+1].scaleLabel(1, self.timeline)
         
         self.timeline.start()
+        self.moveQueue = 0
         
     #Returns the newly selected item
     def selectPrevious(self):
         
         #Initially check whether the last animation is still going
         if self.timeline.is_playing():
-            self.timeline.set_speed(1000) # Nasty hack to make sure the timeline finishes
+            self.moveQueue = self.moveQueue - 1
+            #self.timeline.set_speed(1000) # Nasty hack to make sure the timeline finishes
+            return None
             
         self.timeline = clutter.Timeline (15,85)
-        self.timeline_completed=False
+        self.timeline.connect('completed', self.completeMove)
         
         #Check if we're at the first item in the list
         if (self.selected) != 0:
-            self.selected = self.selected-1
-            #Move the selection bar
-            self.menuMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
+            if not self.moveQueue == 0:
+                self.selected = self.selected + self.moveQueue
+                if self.selected < 0:
+                    self.selected = 0
+            else:
+                self.selected = self.selected-1
             
             self.menuItems[self.selected].scaleLabel(0, self.timeline)
             self.menuItems[self.selected+1].scaleLabel(1, self.timeline)
-            if self.selected <= (len(self.menuItems)-3):
+            
+            #Check we're at the top of the viewable list
+            if self.selected < self.displayMin:
+                #If yes, move the menu, leave the selection bar where is
+                self.menuItems[self.selected].set_opacity(0)
+                self.menuItems[self.selected].show()
+                self.rollMenu( self.menuItems[self.selected], self.menuItems[self.selected+self.displaySize], self.timeline)
+            else:
+                #move the selection bar
+                self.menuMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
+            
+            if self.selected <= self.displayMax-3: # (len(self.menuItems)-3):
                 self.menuItems[self.selected+2].scaleLabel(2, self.timeline)
             
-        if self.selected != 0:
+        if self.selected != self.displayMin:
             self.menuItems[self.selected-1].scaleLabel(1, self.timeline)
         
         self.timeline.start()
+        self.moveQueue = 0
+        
+    def completeMove(self, data):
+        if self.moveQueue > 0:
+            self.selectNext()
+        elif self.moveQueue < 0:
+            self.selectPrevious()
             
     def selectFirst(self, moveBar):
         self.timeline = clutter.Timeline(15, 75)
@@ -147,6 +202,35 @@ class Menu:
             self.menuMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
         
         self.timeline.start()
+        
+    #When the menu needs to display a new item from the top or bottom, it rolls
+    def rollMenu(self, incomingMenuItem, outgoingMenuItem, timeline):
+        (group_x, group_y) = self.itemGroup.get_abs_position()
+        (bar_x, bar_y) = incomingMenuItem.get_menu().getMenuMgr().get_selector_bar().get_abs_position()
+        (incoming_x, incoming_y) = incomingMenuItem.get_abs_position()
+        if incoming_y > bar_y:
+            #Then the incoming item is below the selector bar
+            gap = (incoming_y - bar_y) * -1
+            #print gap
+            self.displayMin = self.displayMin+1
+            self.displayMax = self.displayMax+1
+        else:
+            #Then the incoming item is above the selector bar
+            gap = bar_y - incoming_y
+            self.displayMin = self.displayMin-1
+            self.displayMax = self.displayMax-1
+        
+        knots = (\
+            (group_x, group_y),\
+            (group_x, group_y+gap)\
+            )
+                
+        alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
+        behaviour = clutter.BehaviourPath(alpha, knots)
+        behaviour2 = clutter.BehaviourOpacity(alpha, outgoingMenuItem.get_opacity(), 0)
+        
+        behaviour.apply(self.itemGroup)
+        behaviour2.apply(outgoingMenuItem)
         
     def get_item_gap(self):
         return self.item_gap

@@ -46,7 +46,7 @@ class MainApp:
         self.menu1.selectFirst(True)
         
         
-        self.menu1.getItemGroup().show_all()
+        self.menu1.display()
         
         self.menu2 = Menu(self.menuMgr)
         self.menu2.addItem("Nothing", "ui/dvd.png")

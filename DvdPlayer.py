@@ -19,6 +19,10 @@ class DvdPlayer:
                 self.pause()
         if event.keyval == clutter.keysyms.q:
             clutter.main_quit()
+        if event.keyval == clutter.keysyms.left:
+            clutter.main_quit()
+        if event.keyval == clutter.keysyms.right:
+            clutter.main_quit()
         
     def begin(self, MenuMgr):
         self.stage.add(self.video)
@@ -26,10 +30,12 @@ class DvdPlayer:
         self.video.set_playing(True)
         
         #Resize for fullscreen
-        print self.video.get_height()
-        xy_ratio = self.video.get_width() / self.video.get_height()
+        #while self.video.get_buffer_percent() < 5:
+        print self.video.get_position()
+
+        #xy_ratio = self.video.get_width() / self.video.get_height()
         self.video.set_width( int(self.stage.get_width()) )
-        self.video.set_height(self.video.get_width() * xy_ratio)
+        #self.video.set_height(self.video.get_width() * xy_ratio)
         
         self.video.show()
         

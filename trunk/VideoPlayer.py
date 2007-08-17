@@ -77,7 +77,7 @@ class VideoPlayer():
         pass
         
     def unpause(self):
-        pass
+        passnews/page2
         
 class videoItem():
     def __init(self):

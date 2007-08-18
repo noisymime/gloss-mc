@@ -185,6 +185,7 @@ class Slideshow:
     def image_timeline_end_event(self, data):
         #Add the timeline for the dissolve at the end
         self.timeline_dissolve = clutter.Timeline(30,30)
+        self.timeline_dissolve.connect('completed', self.dissolve_timeline_end_event)
         self.alpha_dissolve = clutter.Alpha(self.timeline_dissolve, clutter.ramp_inc_func)
     
         #Setup the dissolve to the next image
@@ -199,13 +200,16 @@ class Slideshow:
         y_pos = random.randint(0, abs(self.stage.get_height() - self.nextTexture.get_height())  )
         self.nextTexture.set_position(x_pos, y_pos)
         
-        self.stage.remove(self.currentTexture)
+        self.oldTexture = self.currentTexture
         self.currentTexture = self.nextTexture
         self.currentFilename = self.newFilename
         self.stage.add(self.currentTexture)
         self.nextTexture.show()
         self.timeline_dissolve.start()
         self.nextImage(self.currentTexture)
+        
+    def dissolve_timeline_end_event(self, data):
+        self.stage.remove(self.currentTexture)
         
     #Begins playing a new song
     def playNextSong(self, data):

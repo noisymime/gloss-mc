@@ -11,11 +11,11 @@ import thread
 class Slideshow:
     image_file_types = ["jpg", "gif", "jpeg", "png", "bmp"]
     sound_file_types = ["mp3", "wav", "ogg"] #possibly more supported by default?
-    imageDuration = 5 # In seconds
+    imageDuration = 7 # In seconds
     effect_FPS = 50
 
     def __init__(self, MenuMgr, basedir):
-        self.image_texture_group = clutter.Group()
+        #self.image_texture_group = clutter.Group()
         self.baseDir = basedir
         self.MenuMgr = MenuMgr
         self.currentTexture = clutter.Texture()
@@ -209,7 +209,7 @@ class Slideshow:
         self.nextImage(self.currentTexture)
         
     def dissolve_timeline_end_event(self, data):
-        self.stage.remove(self.currentTexture)
+        self.stage.remove(self.oldTexture)
         
     #Begins playing a new song
     def playNextSong(self, data):
@@ -290,7 +290,7 @@ class Slideshow:
         timeline_stop = clutter.Timeline(10,30)
         alpha = clutter.Alpha(timeline_stop, clutter.ramp_inc_func)
         stop_behaviour = clutter.BehaviourOpacity(alpha, 255, 0)
-        stop_behaviour.apply(self.image_texture_group)
+        stop_behaviour.apply(self.currentTexture)
         stop_behaviour.apply(self.backdrop)
         stop_behaviour.apply(self.overlay)
         timeline_stop.connect('completed', self.destroySlideshow)
@@ -304,7 +304,8 @@ class Slideshow:
         
         
     def destroySlideshow(self, data):
-        self.stage.remove(self.image_texture_group)
+        self.stage.remove(self.currentTexture)
+        #self.stage.remove(self.nextTexture)
         self.backdrop.hide()
         #self.stage.remove(self.overlay)
         

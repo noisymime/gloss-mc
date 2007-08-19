@@ -89,8 +89,11 @@ class Slideshow:
         self.MenuMgr.get_selector_bar().set_spinner(True)
         self.stage.queue_redraw()
         
-
-        slideName = self.baseDir + "/" + self.MenuMgr.get_current_menu().get_current_item().get_text()
+        #Clear out music and texture lists
+        self.textures = [] 
+        self.music = []
+        #Then load them back up
+        slideName = self.baseDir + "/" + self.MenuMgr.get_current_menu().get_current_item().get_data()
         self.loadDir(slideName, True)
         self.MenuMgr.get_selector_bar().set_spinner(False)
         

@@ -261,6 +261,7 @@ class ListItem (clutter.Label):
         self.set_color(self.color)
         self.currentOpacity = 255
         self.menu = menu
+        self.data = itemLabel #By default the items data is simply its label
         
         #Text is actually scaled down in 'regular' position so that it doesn't get jaggies when zoomed in
         self.set_scale(self.zoomLevel, self.zoomLevel)
@@ -340,6 +341,12 @@ class ListItem (clutter.Label):
             #self.reflectionTexture.set_position(0, 0)#self.tempTexture.get_height())
             self.itemTexturesGroup.add(self.reflectionTexture)
         self.itemTexturesGroup.hide_all()
+        
+    def set_data(self, data):
+        self.data = data
+        
+    def get_data(self):
+        return self.data
     
     def setAction(self, newAction):
         self.action = newAction

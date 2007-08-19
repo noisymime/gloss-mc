@@ -9,6 +9,7 @@ class MenuMgr:
     def __init__ (self, stage):
         self.stage = stage
         self.menus = []
+        self.menuHistory = [] #A list that contains menus in the order that they've been viewed
         self.currentMenu = None
         
         self.skinMgr = SkinMgr(self.stage)
@@ -26,6 +27,7 @@ class MenuMgr:
         #If this is the first menu, make it the active one
         if self.currentMenu == None:
             self.currentMenu = newMenu
+            self.menuHistory.append(newMenu)
             self.currentMenu.getItemGroup().show_all()
             self.currentMenu.getMenuGroup().show_all()
             self.selector_bar.set_menu(self.currentMenu)
@@ -124,6 +126,7 @@ class MenuMgr:
             action = self.currentMenu.get_current_item().getAction()
             if action.__class__.__name__ == "Menu": # Check whether we're a pointing to a menu object
                 self.transition_fade_zoom(self.currentMenu, action)
+                self.menuHistory.append(action)
             else:
                 #We have a plugin and need to start it
                 self.currentPlugin = action
@@ -131,9 +134,15 @@ class MenuMgr:
         if event.keyval == clutter.keysyms.p:
             self.mySlideshow.startShow(self.stage)
         if event.keyval == clutter.keysyms.Escape:
+            #If there's a plugin running then end it
             if not self.currentPlugin == None:
                 self.currentPlugin.stop()
                 self.currentPlugin = None
+            #If there's no plugin running, go back one in the menu list (Providing we're not already at the first item.
+            else:
+                if len(self.menus)>1:
+                    self.transition_fade_zoom(self.menuHistory.pop(), self.menuHistory[-1])
+                    self.currentMenu = self.menuHistory[-1]
         #print event.hardware_keycode
     
     def get_current_menu(self):

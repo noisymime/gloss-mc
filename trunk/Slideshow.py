@@ -6,7 +6,7 @@ import os.path
 import pygtk
 import gtk
 import random
-import thread
+#import thread
 
 class Slideshow:
     image_file_types = ["jpg", "gif", "jpeg", "png", "bmp"]
@@ -328,7 +328,7 @@ class Slideshow:
             subdir = self.baseDir + "/" + directoryEntry
             if os.path.isdir(subdir):
                 imgPath = subdir + "/" + os.listdir(subdir)[0]
-                print imgPath
+                #print imgPath
                 tempItem = tempMenu.addItem(directoryEntry, "/home/josh/.mythtv/MythVideo/0088763.jpg")
                 tempItem.setAction(self)
                 

@@ -1,24 +1,27 @@
 import MySQLdb
 import os
 
-class mythVideoDB():
+class mythDB():
 
     def __init__(self):
+        """
         self.server = "127.0.0.1" #"192.168.0.1"
         self.db = "mythconverg"
         self.uid = "root"
         self.passwd = ""
-        self.connected = True
+        """
+        #self.connected = False
         self.read_config()
         
         try:
             self.db = MySQLdb.connect(self.server, self.uid, self.passwd,self.db)
+            self.connected = True
         except MySQLdb.Error, e:
             print "Error %d: %s" % (e.args[0], e.args[1])
             self.connected = False
         
         self.cursor = self.db.cursor()
-        self.get_gallery_directory()
+        #self.get_gallery_directory()
 
         #cursor.execute("SELECT * FROM videometadatagenre")
         # get the resultset as a tuple
@@ -72,6 +75,24 @@ class mythVideoDB():
         self.cursor.execute(sql)
         # get the resultset as a tuple
         return self.cursor.fetchall()[1][1]
+    
+    #Gets the backend server details, which, in theory, can be different from the SQL server details and/or default port
+    def get_backend_server(self):
+        if not self.connected:
+            print "Unable to get backend details, could not establish connection to SQL server"
+            return None
+        
+        sql = "SELECT * FROM settings where value = 'BackendServerIP'"
+        self.cursor.execute(sql)
+        # get the resultset as a tuple
+        server =  self.cursor.fetchall()[0][1]
+       
+        sql = "SELECT * FROM settings where value = 'BackendServerPort'"
+        self.cursor.execute(sql)
+        # get the resultset as a tuple
+        port =  self.cursor.fetchall()[0][1]
+        
+        return (server, int(port))
     
     def close_db(self):
         if self.connected:

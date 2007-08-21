@@ -11,6 +11,8 @@ from MusicPlayer import MusicPlayer
 from TVPlayer import TVPlayer
 from DvdPlayer import DvdPlayer
 
+from myth.MythMySQL import mythDB
+
 
 class MainApp:
     def __init__ (self):
@@ -62,9 +64,12 @@ class MainApp:
         
         self.mySlideshow = Slideshow(self.menuMgr, "images/")
         #self.mySlideshow.loadDir("images/", True)
+        
+        #Create a master mySQL connection
+        self. dbMgr = mythDB()
        
-        self.vidPlayer = VideoPlayer(self.stage)
-        self.tvPlayer = TVPlayer(self.stage)
+        self.vidPlayer = VideoPlayer(self.stage, self.dbMgr)
+        self.tvPlayer = TVPlayer(self.stage, self.dbMgr)
         self.dvdPlayer = DvdPlayer(self.stage)
         self.musicPlayer = MusicPlayer(self.stage)
         

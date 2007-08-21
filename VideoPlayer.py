@@ -1,11 +1,10 @@
 import pygtk
 import gtk
 import clutter
-from myth.MythMySQL import mythVideoDB
 
 class VideoPlayer():
 
-    def __init__(self, stage):
+    def __init__(self, stage, dbMgr):
         self.stage = stage
         self.cover_viewer = coverViewer(self.stage)
         self.videoLibrary = []
@@ -13,7 +12,6 @@ class VideoPlayer():
         self.is_playing = False
         
         #This block can be moved to begin() but causes a performance hit when loading the module *shrug*
-        dbMgr = mythVideoDB()
         results = dbMgr.get_videos()
         
         for record in results:
@@ -21,7 +19,7 @@ class VideoPlayer():
             tempVideo.importFromMythObject(record)
             self.videoLibrary.append(tempVideo)
             self.cover_viewer.add_image(tempVideo.getCoverfile())
-        dbMgr.close_db()
+        #dbMgr.close_db()
         ################################################################################
         
     def on_key_press_event (self, stage, event):

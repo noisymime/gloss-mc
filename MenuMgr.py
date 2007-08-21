@@ -130,9 +130,7 @@ class MenuMgr:
             else:
                 #We have a plugin and need to start it
                 self.currentPlugin = action
-                action.begin(self)
-        if event.keyval == clutter.keysyms.p:
-            self.mySlideshow.startShow(self.stage)
+                action.begin( self )
         if event.keyval == clutter.keysyms.Escape:
             #If there's a plugin running then end it
             if not self.currentPlugin == None:

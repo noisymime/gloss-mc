@@ -1,19 +1,24 @@
 import socket
 import time
 import threading
+import os
 
 class MythBackendConnection(threading.Thread):
 
-    def __init__(self, videoPlayer):    
+    def __init__(self, videoPlayer, server, port):    
         self.protocolVersion = 31
         self.localhost_name = "myhost" # Change this later
-        self.server = "192.168.0.8"
-        self.server_port = 6543
+        self.server = server #"192.168.0.8"
+        self.server_port = port #6543
+        self.addr = (self.server, self.server_port)
         self.videoPlayer = videoPlayer
         
         #2 Sockets, 1 for cmds, 1 for data
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.data_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.data_sock.connect((self.server, self.server_port))
+        #self.data_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        #self.data_sock.bind( ("127.0.0.1", self.server_port) )
         
         #self.sock.connect( ("192.168.0.8", 6543) )
         self.connected = False
@@ -46,7 +51,20 @@ class MythBackendConnection(threading.Thread):
         cmd = str(len(base_cmd)).ljust(8) + base_cmd
         sock.send(cmd)
         #print "write-->" + cmd  
-         
+        
+    """def send_datagram(self, sock, base_cmd):
+        cmd = str(len(base_cmd)).ljust(8) + base_cmd
+        #sock.sendto(cmd, self.addr)
+        sock.sendto(cmd, ("192.168.0.8", 6543) )
+        
+    def receive_datagram(self, sock):
+        ret = ""
+        data, addr = sock.recvfrom(8)
+        count = int(data)
+        #debug("REPLY LEN: %d" % count)
+        ret, addr = sock.recvfrom(count)
+        return ret
+       """  
     def connect(self, host, port):
         self.sock.connect((host, port))
         
@@ -110,11 +128,13 @@ class MythBackendConnection(threading.Thread):
             self.send_cmd(self.sock, check_string)
         
         #Create a new data socket
-        self.data_sock.connect( (self.server, self.server_port) )
+        #self.data_sock.connect( (self.server, self.server_port) )
         protString = "MYTH_PROTO_VERSION "+ str(self.protocolVersion)
         self.send_cmd(self.data_sock, protString)
+        #self.send_datagram(self.data_sock, protString)
         protRecvString = "ACCEPT[]:[]" + str(self.protocolVersion)
         result = self.receive_reply(self.data_sock)
+        #result = self.receive_datagram(self.data_sock)
         
         #This is just a hack to make sure the channel has locked, I'll fix it later
         time.sleep(5)
@@ -133,6 +153,7 @@ class MythBackendConnection(threading.Thread):
         announce_cmd = "ANN FileTransfer " + self.localhost_name + "[]:[]" + filename
         self.send_cmd(self.data_sock, announce_cmd)
         result = self.receive_reply(self.data_sock)
+        #result = self.receive_datagram(self.data_sock)
         result_list = result.rsplit("[]:[]")
         data_socket_id = result_list[1]
         print "Socket ID: " + str(data_socket_id)
@@ -155,38 +176,40 @@ class MythBackendConnection(threading.Thread):
         #Create a buffer file
         self.buffer_file = open("test.mpg","w")
 
-        print "grunt0"
         #read some data
-        x=0
+
         request_size = 32768
         
+        
         #Need to create a bit of a buffer so playback will begin
+        x=0
         while x<80:
             transfer_cmd = "QUERY_FILETRANSFER "+ str(socket_id) + "[]:[]REQUEST_BLOCK[]:[]"+str(request_size)
             self.send_cmd(cmd_sock, transfer_cmd)
             num_bytes = int(self.receive_reply(cmd_sock))
             data = data_sock.recv(num_bytes)
             self.buffer_file.write(data)
-            self.buffer_file.flush()
             x=x+1
+            
+        self.buffer_file_reader = open("test.mpg","r")
+        self.videoPlayer.begin_playback(self.buffer_file_reader.fileno())
+        #self.videoPlayer.begin_playback(self.data_sock.fileno())
         
-        #data_sock.flush()
-        tempfile = data_sock.makefile("r", request_size)
-        tempfile.flush()
-        self.videoPlayer.begin_playback(tempfile.fileno())
         print "BEGINNING PLAYBACK!"
-        while x<1000:
+        self.Playing = True
+        while self.Playing:
             transfer_cmd = "QUERY_FILETRANSFER "+ str(socket_id) + "[]:[]REQUEST_BLOCK[]:[]"+str(request_size)
             self.send_cmd(cmd_sock, transfer_cmd)
             num_bytes = int(self.receive_reply(cmd_sock))
-            data_sock.recv(num_bytes)
-            #self.buffer_file.write(data)
-            #self.buffer_file.flush()
-            x=x+1
+            data = data_sock.recv(num_bytes)
+            self.buffer_file.write(data)
         
         print "Ending playback"
         self.buffer_file.close()
 
     def end_stream(self):
         self.stream = False
+        
+    def stop(self):
+        self.Playing = False
         

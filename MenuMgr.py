@@ -197,14 +197,42 @@ class MenuSelector(clutter.Texture):
         self.menu = menu
         
     def set_spinner(self, state):
+        self.timeline = clutter.Timeline(25, 25)
+        self.alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
+        self.behaviour = clutter.BehaviourOpacity(self.alpha, 0,255)
         if state:
             self.spinner = Spinner()
+            
+            height = self.get_height() - int(self.get_height() * 0.11)
+            #Height has to be even otherwise spinner rotates on a slightly off axis
+            if (height % 2) == 1:
+                height = height -1
+            
+            width = height
+            self.spinner.set_size(width, height)
+            
+            (x, y) = self.get_abs_position()
+            x = x + self.get_width() - int(self.get_width() * 0.11)
+            y = y + int(self.get_height() * 0.05)
+            self.spinner.set_position(x, y)
+            
+            self.spinner.set_opacity(0)
             self.spinner.show()
             self.menuMgr.get_stage().add(self.spinner)
+            self.behaviour = clutter.BehaviourOpacity(self.alpha, 0,255)
+            self.spinner.start()
         else:
-            self.menuMgr.get_stage().remove(self.spinner)
-            self.spinner = None
+            self.behaviour = clutter.BehaviourOpacity(self.alpha, 255,0)
+            self.timeline.connect('completed', self.spinner_end_event)
+            #self.menuMgr.get_stage().remove(self.spinner)
+            #self.spinner = None
         
+        self.behaviour.apply(self.spinner)
+        self.timeline.start()
+        
+    def spinner_end_event(self, data):
+        self.menuMgr.get_stage().remove(self.spinner)
+        self.spinner = None
         
     def get_x_offset(self):
         return self.x_offset

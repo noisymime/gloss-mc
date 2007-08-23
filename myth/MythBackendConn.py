@@ -1,6 +1,7 @@
 import socket
 import time
 import threading
+import thread
 import os
 
 class MythBackendConnection(threading.Thread):
@@ -12,13 +13,16 @@ class MythBackendConnection(threading.Thread):
         self.server_port = port #6543
         self.addr = (self.server, self.server_port)
         self.videoPlayer = videoPlayer
+        self.lock = False #Dictakes whether or not we have a signal lock
         
-        #2 Sockets, 1 for cmds, 1 for data
+        #3 Sockets, 1 for cmds, 1 for data, 1 for monitoring messages
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.data_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.data_sock.connect((self.server, self.server_port))
-        #self.data_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        #self.data_sock.bind( ("127.0.0.1", self.server_port) )
+        self.msg_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.msg_sock.connect((self.server, self.server_port))
+        
+        thread.start_new_thread(self.message_socket_mgr,(self.msg_sock,))
         
         #self.sock.connect( ("192.168.0.8", 6543) )
         self.connected = False
@@ -52,19 +56,6 @@ class MythBackendConnection(threading.Thread):
         sock.send(cmd)
         #print "write-->" + cmd  
         
-    """def send_datagram(self, sock, base_cmd):
-        cmd = str(len(base_cmd)).ljust(8) + base_cmd
-        #sock.sendto(cmd, self.addr)
-        sock.sendto(cmd, ("192.168.0.8", 6543) )
-        
-    def receive_datagram(self, sock):
-        ret = ""
-        data, addr = sock.recvfrom(8)
-        count = int(data)
-        #debug("REPLY LEN: %d" % count)
-        ret, addr = sock.recvfrom(count)
-        return ret
-       """  
     def connect(self, host, port):
         self.sock.connect((host, port))
         
@@ -138,6 +129,8 @@ class MythBackendConnection(threading.Thread):
         
         #This is just a hack to make sure the channel has locked, I'll fix it later
         time.sleep(5)
+        #while not self.lock:
+        #   pass
         
         #Get the recording filename
         filename_string = "QUERY_RECORDER "+str(self.recorder)+"[]:[]GET_CURRENT_RECORDING"
@@ -155,8 +148,8 @@ class MythBackendConnection(threading.Thread):
         result = self.receive_reply(self.data_sock)
         #result = self.receive_datagram(self.data_sock)
         result_list = result.rsplit("[]:[]")
-        data_socket_id = result_list[1]
-        print "Socket ID: " + str(data_socket_id)
+        self.data_socket_id = result_list[1]
+        #print "Socket ID: " + str(data_socket_id)
         
         #Do some housekeeping
         frontend_ready_cmd = "QUERY_RECORDER "+str(self.recorder) +"[]:[]FRONTEND_READY"
@@ -170,16 +163,12 @@ class MythBackendConnection(threading.Thread):
         result = self.receive_reply(self.sock)  
         
         #Start a recording thread
-        self.buffer_live(self.sock, self.data_sock, data_socket_id)
+        self.buffer_live(self.sock, self.data_sock, self.data_socket_id)
     
     def buffer_live(self, cmd_sock, data_sock, socket_id):
         #Create a buffer file
         self.buffer_file = open("test.mpg","w")
-
-        #read some data
-
-        request_size = 32768
-        
+        request_size = 32768 
         
         #Need to create a bit of a buffer so playback will begin
         x=0
@@ -190,7 +179,7 @@ class MythBackendConnection(threading.Thread):
             data = data_sock.recv(num_bytes)
             self.buffer_file.write(data)
             x=x+1
-            
+        self.buffer_file.flush()
         self.buffer_file_reader = open("test.mpg","r")
         self.videoPlayer.begin_playback(self.buffer_file_reader.fileno())
         #self.videoPlayer.begin_playback(self.data_sock.fileno())
@@ -206,6 +195,40 @@ class MythBackendConnection(threading.Thread):
         
         print "Ending playback"
         self.buffer_file.close()
+        
+    def message_socket_mgr(self, msg_socket):
+        #Do the protocol version check
+        print "Starting the msg thread"
+        protString = "MYTH_PROTO_VERSION "+ str(self.protocolVersion)
+        self.send_cmd(self.msg_sock, protString)
+        protRecvString = "ACCEPT[]:[]" + str(self.protocolVersion)
+        result = self.receive_reply(self.msg_sock)
+        print result
+        if not result == protRecvString:
+            #Protocol Version check failed
+            raise RuntimeError, "Myth Protocol version failure. Aborting."
+        
+        #Perform the mandatory ANN (The 1 at the end says that we want to receive all messages from the server)
+        ANNstring = "ANN Monitor " + self.localhost_name + " 1"
+        self.send_cmd(self.msg_sock, ANNstring)
+        ANN_recv_string = "OK" #What a successful return should be
+        result = self.receive_reply(self.msg_sock)
+        if not result == ANN_recv_string:
+            raise RuntimeError, "Myth: ANN connection failed"
+       
+        while not self.lock:
+            #ANN_recv_string = "OK" #What a successful return should be
+            result = self.receive_reply(self.msg_sock)
+            result_list = result.rsplit("[]:[]")
+            print result
+            
+            if result_list[1] == "RECORDING_LIST_CHANGE":
+                #print resul
+                self.lock = True
+        
+    def change_channel(self):
+        if self.Playing:
+            pass #self.Playing = False
 
     def end_stream(self):
         self.stream = False
@@ -213,3 +236,10 @@ class MythBackendConnection(threading.Thread):
     def stop(self):
         self.Playing = False
         
+        stop_cmd = "QUERY_RECORDER "+str(self.recorder) +"[]:[]STOP_LIVETV"
+        self.send_cmd(self.sock, stop_cmd)
+        result = self.receive_reply(self.sock)
+        
+        end_transfer_cmd = "QUERY_FILETRANSFER "+str(self.data_socket_id) +"[]:[]DONE"
+        self.send_cmd(self.sock, end_transfer_cmd)
+        result = self.receive_reply(self.sock)

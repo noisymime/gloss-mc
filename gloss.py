@@ -82,6 +82,8 @@ class MainApp:
         
         self.menu2.getItem(1).setAction(self.menu1)
         
+        #print self.menuMgr.get_selector_bar().get_abs_position()
+        #self.menuMgr.get_selector_bar().set_spinner(True)
 
 
     def on_button_press_event (self, stage, event):

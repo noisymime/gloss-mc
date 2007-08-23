@@ -2,6 +2,7 @@ import gst
 import pygtk
 import pygst
 import os
+import clutter
 
 from clutter import cluttergst
 from myth.MythBackendConn import MythBackendConnection
@@ -26,9 +27,13 @@ class TVPlayer:
         #self.db_conn = mythVideoDB()
         
     def begin(self, menuMgr):
+        self.menuMgr = menuMgr
+        #self.buffer_file_reader = open("test.mpg","r")
+        menuMgr.get_selector_bar().set_spinner(True)
         (server, port) = self.dbMgr.get_backend_server()
         self.myConn = MythBackendConnection(self, server, port)
         self.myConn.start()
+        #self.begin_playback(self.buffer_file_reader.fileno())
         
     def begin_playback(self, fd):
         #self.video.set_filename("test.mpg")
@@ -36,14 +41,23 @@ class TVPlayer:
         #self.buffer_file = open("test.mpg","r")
         #fd = self.buffer_file.fileno()
         #print os.read(fd, 100)
-        """
+        self.menuMgr.get_selector_bar().set_spinner(False)
         self.video.set_uri("fd://"+str(fd))
+        #self.video.set_property("fullscreen", True)
+        self.video.set_opacity(0)        
         self.video.show()
+        
+        timeline = clutter.Timeline(15, 25)
+        alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
+        behaviour = clutter.BehaviourOpacity(alpha, 0,255)
+        behaviour.apply(self.video)
         
         self.stage.add(self.video)
         self.video.set_playing(True)
+        timeline.start()
         
-        return None"""
+        return None
+        """
         self.pipeline = gst.Pipeline("mypipeline")
         self.pbin = gst.element_factory_make("playbin", "pbin");
         self.pbin.set_property("uri", "fd://"+str(fd))
@@ -51,10 +65,27 @@ class TVPlayer:
         # add elements to the pipeline
         self.pipeline.add(self.pbin)
         self.pipeline.set_state(gst.STATE_PLAYING)
+        """
+    def stop(self):
+        if self.video.get_playing():
+            self.video.set_playing(False)
+            self.myConn.stop()
+            
+            timeline = clutter.Timeline(15, 25)
+            timeline.connect('completed', self.end_video_event)
+            alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
+            behaviour = clutter.BehaviourOpacity(alpha, 255,0)
+            behaviour.apply(self.video)
+        
+            timeline.start()
+            
+            
+    def end_video_event(self, data):
+        self.stage.remove(self.video) 
     
     def on_key_press_event (self, stage, event):
         #print event.hardware_keycode
-        #self.myConn.stop()
+
         """if event.keyval == clutter.keysyms.p:
             if self.paused:
                 self.unpause()

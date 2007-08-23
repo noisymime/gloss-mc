@@ -184,8 +184,7 @@ class Menu:
             else:
                 #move the selection bar
                 self.menuMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
-            
-        
+
         self.timeline.start()
         self.moveQueue = 0
         
@@ -196,7 +195,7 @@ class Menu:
             self.selectPrevious()
             
     def selectFirst(self, moveBar):
-        self.timeline = clutter.Timeline(15, 75)
+        self.timeline = clutter.Timeline(1, 75)
         self.selected = 0
         for i in range(0,len(self.menuItems)):
             if i == 0:

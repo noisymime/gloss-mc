@@ -165,11 +165,7 @@ class MenuSelector(clutter.Texture):
     def selectItem(self, selectee, timeline):
         (x, y) = selectee.get_abs_position()
         
-        group_x = selectee.get_menu().getItemGroup().get_x()
-        group_y = selectee.get_menu().getItemGroup().get_y()
-        
         x = x + self.x_offset
-        self.timeline = timeline
        
         #Check if we're going up or down
         if y > self.get_y():     
@@ -179,16 +175,15 @@ class MenuSelector(clutter.Texture):
             #Going up
             y = int(y - selectee.get_menu().get_item_gap()/2)
             
-        self.move_to(x, y, self.timeline)
+        self.move_to(x, y, timeline)
         
     def move_to(self, x, y, timeline):  
-        self.timeline = timeline
         knots = (\
                 (self.get_x(), self.get_y()),\
                 (x, y)\
                 )
                 
-        self.alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
+        self.alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
         self.behaviour = clutter.BehaviourPath(self.alpha, knots)
         
         self.behaviour.apply(self)
@@ -212,8 +207,8 @@ class MenuSelector(clutter.Texture):
             self.spinner.set_size(width, height)
             
             (x, y) = self.get_abs_position()
-            x = x + self.get_width() - int(self.get_width() * 0.11)
-            y = y + int(self.get_height() * 0.05)
+            x = x + self.get_width() - int(self.get_width() * 0.13)
+            y = y + int(self.get_height() * 0.03)
             self.spinner.set_position(x, y)
             
             self.spinner.set_opacity(0)

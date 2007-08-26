@@ -19,6 +19,7 @@ class mythDB():
         except MySQLdb.Error, e:
             print "Error %d: %s" % (e.args[0], e.args[1])
             self.connected = False
+            return None
         
         self.cursor = self.db.cursor()
         #self.get_gallery_directory()

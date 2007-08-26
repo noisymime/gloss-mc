@@ -24,7 +24,9 @@ class MainApp:
         self.stage.set_property("fullscreen", True)
         self.stage.connect('button-press-event', self.on_button_press_event)
         self.stage.show_all()
-                
+        
+        #hide the cursor
+        self.stage.hide_cursor()
 
         #color = clutter.Color(0xff, 0xcc, 0xcc, 0xdd)
         color = clutter.Color(0, 0, 0, 0)
@@ -45,10 +47,8 @@ class MainApp:
         #menu1.setListFont('Tahoma 42')
         menu1.setMenuPositionByName("center")
         self.menu1 = menu1
-        self.menu1.selectFirst(True)
-        
-        
         self.menu1.display()
+        self.menu1.selectFirst(True)
         
         self.menu2 = Menu(self.menuMgr)
         self.menu2.addItem("Nothing", "ui/dvd.png")

@@ -1,6 +1,10 @@
 import pygtk
 import gtk
+import pygst
+import gst
+import gobject
 import clutter
+from clutter import cluttergst
 
 class VideoPlayer():
 
@@ -13,6 +17,10 @@ class VideoPlayer():
         
         #This block can be moved to begin() but causes a performance hit when loading the module *shrug*
         results = dbMgr.get_videos()
+        
+        if results == None:
+            print "VideoPlayer: No connection to DB or no videos found in DB"
+            return None
         
         for record in results:
             tempVideo = videoItem()
@@ -52,8 +60,39 @@ class VideoPlayer():
         begin_behaviour.apply(self.cover_viewer)
         
         timeline_begin.start()
-            
         
+        """
+        video = customBin()
+
+        video.get_texture().show()
+        video.get_texture().set_opacity(255)
+        self.stage.add(video.get_texture())
+        video.startPlayback()
+        
+        self.video_texture = clutter.Texture() #cluttergst.VideoTexture()
+        self.pipeline = gst.Pipeline("mypipeline")
+        self.filesrc = gst.element_factory_make("filesrc", "file")
+        self.filesrc.set_property("location", "/home/josh/clutter/toys/gloss/cast1.avi")
+        #self.pbin.set_property("uri", "file://cast1.avi")
+        self.pbin = gst.element_factory_make("decodebin", "pbin")
+
+        #self.pbin = gst.element_factory_make("videotestsrc", "video")
+        self.sink = gst.element_factory_make("xvimagesink", "sink")
+        #self.sink = cluttergst.video_sink_new(self.video_texture)
+        #self.sink = cluttergst.VideoSink(self.video_texture)
+
+
+        # add elements to the pipeline
+        self.pipeline.add(self.pbin)
+        self.pipeline.add(self.sink)
+        self.pipeline.add(self.filesrc)
+        self.pbin.link(self.sink)
+        self.pbin.link(self.filesrc)
+        self.pipeline.set_state(gst.STATE_PLAYING)
+        
+        self.stage.add(self.video_texture)
+        #self.stage.add(self.sink)
+        """
     def stop(self):
            
         #Fade everything out
@@ -75,7 +114,7 @@ class VideoPlayer():
         pass
         
     def unpause(self):
-        passnews/page2
+        pass
         
 class videoItem():
     def __init(self):
@@ -145,8 +184,95 @@ class coverViewer(clutter.Group):
             y = (i % self.num_rows) * self.cover_size 
             tempTexture.set_position(x, y)"""
         
+class customBin:
 
-        
-        
-        
+    def __init__(self):
+        self.gstInit()
     
+    def gstInit(self):
+        self.texture = gobject.new(cluttergst.VideoTexture, tiled=False) # , "sync-size=False"
+
+        #self.texture = clutter.Texture() #cluttergst.VideoTexture()
+        self.texture.set_property("sync-size", False)
+        
+        # declare our pipeline and GST elements
+        self.pipeline = gst.Pipeline("mypipeline")
+        """
+        
+        self.src = gst.element_factory_make("filesrc", "src");
+        self.src.set_property("location", "test.mpg")
+        self.demux = gst.element_factory_make("ffdemux_mpegts", "demux")
+        self.queue1 = gst.element_factory_make("queue", "queue1")
+        self.queue2 = gst.element_factory_make("queue", "queue2")
+        self.deinterlace = gst.element_factory_make("ffdeinterlace", "deinterlace")
+        self.vdecode = gst.element_factory_make("mpeg2dec", "vdecode")
+        self.adecode = gst.element_factory_make("mad", "adecode")
+        #self.vsink = gst.element_factory_make("xvimagesink", "vsink")
+        self.vsink = cluttergst.VideoSink(self.video_texture)
+        self.asink = gst.element_factory_make("alsasink", "asink")
+        """
+        self.src = gst.element_factory_make("videotestsrc", "src")
+        #self.warp = gst.element_factory_make ("warptv", "warp")
+        self.colorspace = gst.element_factory_make ("ffmpegcolorspace", "color")
+        self.pipeline.add(self.colorspace)
+        #self.demux = gst.element_factory_make("ffdemux_mpegts", "demux")
+        self.sink = cluttergst.VideoSink (self.texture)
+        #self.sink = gst.element_factory_make("autovideosink", "vsink")
+        self.sink.set_property("qos", True)
+        self.sink.set_property("sync", True)
+    
+        # add elements to the pipeline
+        self.pipeline.add(self.src)
+        #self.pipeline.add(self.warp)
+        #self.pipeline.add(self.demux)
+        #self.pipeline.add(self.colorspace)
+        self.pipeline.add(self.sink)
+        
+        """
+        self.pipeline.add(self.demux)
+        self.pipeline.add(self.queue1)
+        self.pipeline.add(self.queue2)
+        self.pipeline.add(self.vdecode)
+        self.pipeline.add(self.deinterlace)
+        self.pipeline.add(self.adecode)
+        self.pipeline.add(self.vsink)
+        self.pipeline.add(self.asink)
+        
+        
+        # we can"t link demux until the audio and video pads are added
+        # we need to listen for "pad-added" signals
+        self.demux.connect("pad-added", self.on_pad_added)
+        """
+        self.texture.set_width(200)
+        self.texture.set_height(200)
+        #self.pipeline.add_signal_watch()
+        #self.pipeline.add_many(self.pipeline, self.src, self.warp, self.colorspace, self.sink)
+        gst.element_link_many(self.src, self.sink) #self.warp, self.colorspace, 
+        # link all elements apart from demux
+        #gst.element_link_many(self.src, self.demux)
+        #gst.element_link_many(self.queue1, self.vsink) #self.vdecode, self.deinterlace, 
+        #gst.element_link_many(self.queue2, self.adecode, self.asink)
+        
+        #self.pipeline.set_state(gst.STATE_PLAYING)
+        
+    def on_pad_added(self, element, src_pad):
+        caps = src_pad.get_caps()
+        name = caps[0].get_name()
+        # link demux to vdecode when video/mpeg pad added to demux
+        if name == "video/mpeg":
+            sink_pad = self.queue1.get_pad("sink")
+        elif name == "audio/mpeg":
+            sink_pad = self.queue2.get_pad("sink")
+        else:
+            return
+        
+        if not sink_pad.is_linked():
+            src_pad.link(sink_pad)
+        
+    def startPlayback(self):
+        # start playback
+        self.pipeline.set_state(gst.STATE_PLAYING)
+        
+    def get_texture(self):
+        return self.texture
+        

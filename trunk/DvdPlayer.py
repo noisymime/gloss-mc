@@ -19,10 +19,7 @@ class DvdPlayer:
                 self.pause()
         if event.keyval == clutter.keysyms.q:
             clutter.main_quit()
-        if event.keyval == clutter.keysyms.left:
-            clutter.main_quit()
-        if event.keyval == clutter.keysyms.right:
-            clutter.main_quit()
+
         
     def begin(self, MenuMgr):
         self.stage.add(self.video)
@@ -41,7 +38,19 @@ class DvdPlayer:
         
         
     def stop(self):
-        pass
+        if self.video.get_playing():
+            self.video.set_playing(False)
+            #self.myConn.stop()
+            
+            timeline = clutter.Timeline(15, 25)
+            timeline.connect('completed', self.end_video_event)
+            alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
+            behaviour = clutter.BehaviourOpacity(alpha, 255,0)
+            behaviour.apply(self.video)
+        
+            timeline.start()
+    def end_video_event(self, data):
+        self.stage.remove(self.video) 
         
     def pause(self):
         self.paused = True

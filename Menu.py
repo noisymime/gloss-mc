@@ -50,7 +50,6 @@ class Menu:
         if self.displayMax > len(self.menuItems):
             self.displayMax = len(self.menuItems)
             self.displaySize = self.displayMax - self.displayMin
-        print self.displayMax
         
         for i in range(self.displaySize):
             self.menuItems[i].show()
@@ -104,14 +103,15 @@ class Menu:
             self.moveQueue = self.moveQueue + 1
             #self.timeline.set_speed(1000) # Nasty hack to make sure the timeline finishes
             return None
-    
-        self.timeline = clutter.Timeline (15,85)
-        self.timeline.connect('completed', self.completeMove)
-        
+
         #Check if we're at the last item in the list
-        if (self.selected) != (len(self.menuItems)-1):
+        if (self.selected) != (len(self.menuItems)-1):           
+            self.timeline = clutter.Timeline (15,85)
+            self.timeline.connect('completed', self.completeMove)
+
             if not self.moveQueue == 0:
-                self.selected = self.selected + self.moveQueue
+                self.selected = self.selected +1 #+ self.moveQueue
+                self.moveQueue = self.moveQueue - 1 #0
                 if self.selected > (len(self.menuItems)-1):
                     self.selected = (len(self.menuItems)-1)
             else:
@@ -130,7 +130,7 @@ class Menu:
                     self.menuItems[i].scaleLabel(2, self.timeline)
                 
             #Check we're at the bottom of the viewable list
-            if self.selected >= self.displayMax:
+            if self.selected >= (self.displayMax):
                 #If yes, move the menu, leave the selection bar where is
                 self.menuItems[self.selected].set_opacity(0)
                 self.menuItems[self.selected].show()
@@ -139,25 +139,26 @@ class Menu:
                 #move the selection bar
                 self.menuMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
         
-        self.timeline.start()
-        self.moveQueue = 0
+            self.timeline.start()
+            self.moveQueue = 0
         
     #Returns the newly selected item
     def selectPrevious(self):
-        
-        #Initially check whether the last animation is still going
+         #Initially check whether the last animation is still going
         if self.timeline.is_playing():
             self.moveQueue = self.moveQueue - 1
             #self.timeline.set_speed(1000) # Nasty hack to make sure the timeline finishes
-            return None
+            return None       
             
-        self.timeline = clutter.Timeline (15,85)
-        self.timeline.connect('completed', self.completeMove)
-        
+                
         #Check if we're at the first item in the list
-        if (self.selected) != 0:
+        if (self.selected) != 0:        
+            self.timeline = clutter.Timeline (15,85)
+            self.timeline.connect('completed', self.completeMove)
+                
             if not self.moveQueue == 0:
-                self.selected = self.selected + self.moveQueue
+                self.selected = self.selected -1 #+ self.moveQueue
+                self.moveQueue = self.moveQueue + 1 # 0
                 if self.selected < 0:
                     self.selected = 0
             else:
@@ -165,7 +166,8 @@ class Menu:
             
             #This horrible loop does all the scaling
             #This includes, the selected item and the ones on either side of it
-            for i in range(len(self.menuItems)):
+            for i in range(len(self.menuItems)-1):
+                #print str(i)
                 if i == self.selected:
                     self.menuItems[i].scaleLabel(0, self.timeline)
                 elif (i == self.selected-1) and (i >= self.displayMin+1):
@@ -174,9 +176,15 @@ class Menu:
                     self.menuItems[i].scaleLabel(1, self.timeline)
                 else:
                     self.menuItems[i].scaleLabel(2, self.timeline)
+                    
+            #This is a hack but it seems to fix a wierd bug (If rmeoving this, remove the -1 from the for loop above
+            if (self.selected == (len(self.menuItems)-2) ):
+                self.menuItems[len(self.menuItems)-1].scaleLabel(1, self.timeline)
+            if (self.selected == (len(self.menuItems)-3) ):
+                self.menuItems[len(self.menuItems)-1].scaleLabel(2, self.timeline)
             
             #Check we're at the top of the viewable list
-            if self.selected < self.displayMin:
+            if self.selected < (self.displayMin):
                 #If yes, move the menu, leave the selection bar where is
                 #self.menuItems[self.selected].set_opacity(0)
                 #self.menuItems[self.selected].show()
@@ -185,16 +193,20 @@ class Menu:
                 #move the selection bar
                 self.menuMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
 
-        self.timeline.start()
-        self.moveQueue = 0
+            self.timeline.start()
+            self.moveQueue = 0
         
     def completeMove(self, data):
+        #print self.itemGroup.get_abs_position()
         if self.moveQueue > 0:
             self.selectNext()
         elif self.moveQueue < 0:
             self.selectPrevious()
             
     def selectFirst(self, moveBar):
+        if self.timeline.is_playing:
+            "ERROR: Timeline should NOT be playing here!"
+            
         self.timeline = clutter.Timeline(1, 75)
         self.selected = 0
         for i in range(0,len(self.menuItems)):
@@ -211,31 +223,43 @@ class Menu:
         self.timeline.start()
         
     #When the menu needs to display a new item from the top or bottom, it rolls
+    # The distance the menu moves is the distance (in pixels) between the incoming item and the selector bar
     def rollMenu(self, incomingMenuItem, outgoingMenuItem, timeline):    
         (group_x, group_y) = self.itemGroup.get_abs_position()
         (bar_x, bar_y) = incomingMenuItem.get_menu().getMenuMgr().get_selector_bar().get_abs_position()
         (incoming_x, incoming_y) = incomingMenuItem.get_abs_position()
+        
+        #print self.itemGroup.get_abs_position()
+        #print "Starting group position: " + self.itemGroup.get_abs_position()
+        
         if incoming_y > bar_y:  
             #Then the incoming item is below the selector bar
-            gap = (incoming_y - bar_y) * -1
+            gap = (incoming_y - bar_y - (self.item_gap/2)) * -1
+            #gap = -65
             self.displayMin = self.displayMin+1
             self.displayMax = self.displayMax+1
         else:
             #Then the incoming item is above the selector bar
             gap = bar_y - incoming_y + (self.item_gap/2)
+            #gap = 65
             self.displayMin = self.displayMin-1
             self.displayMax = self.displayMax-1
         
+        #print "Gap: " + str(gap)
+        new_y = (group_y+gap)
         knots = (\
             (group_x, group_y),\
-            (group_x, group_y+gap)\
+            (group_x, new_y )\
             )
                 
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
-        behaviour = clutter.BehaviourPath(alpha, knots)
+        behaviour1 = clutter.BehaviourPath(alpha, knots)
         behaviour2 = clutter.BehaviourOpacity(alpha, outgoingMenuItem.get_opacity(), 0)
         
-        behaviour.apply(self.itemGroup)
+        #print "Going to: "+ str(new_y)
+        #print behaviour1.get_knots()
+        
+        behaviour1.apply(self.itemGroup)
         behaviour2.apply(outgoingMenuItem)
         
     def get_item_gap(self):
@@ -264,8 +288,7 @@ class ListItem (clutter.Label):
         
         #Text is actually scaled down in 'regular' position so that it doesn't get jaggies when zoomed in
         self.set_scale(self.zoomLevel, self.zoomLevel)
-        self.currentZoom = self.zoomLevel
-        
+        self.currentZoom = 0        
         
         #(label_width, label_height) = self.label.get_size()
         label_x = 0 #x #self.stage.get_width() - label_width - 50
@@ -278,9 +301,7 @@ class ListItem (clutter.Label):
         self.itemTexturesGroup.hide_all()
         
     def scaleLabel(self, level, timeline):
-        self.timeline = timeline
-        self.timeline.set_loop(False)
-        
+       
         #Determine the zooming level
         zoomTo=0
         opacityTo = 255
@@ -300,16 +321,14 @@ class ListItem (clutter.Label):
         if zoomTo == self.currentZoom:
             return None
         
-        alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
+        alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
         self.behaviour1 = clutter.BehaviourScale(alpha, self.currentZoom, zoomTo, clutter.GRAVITY_WEST)
         self.behaviour2 = clutter.BehaviourOpacity(alpha, self.currentOpacity, opacityTo)
         self.behaviour1.apply(self)
         self.behaviour2.apply(self)
 
-        
         self.currentZoom = zoomTo
         self.currentOpacity = opacityTo
-        return self.timeline
         
     def get_zoom_level(self):
         return self.zoomLevel

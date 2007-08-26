@@ -41,6 +41,7 @@ class TVPlayer:
         #self.buffer_file = open("test.mpg","r")
         #fd = self.buffer_file.fileno()
         #print os.read(fd, 100)
+        stage = self.menuMgr.get_stage()
         self.menuMgr.get_selector_bar().set_spinner(False)
         self.video.set_uri("fd://"+str(fd))
         #self.video.set_property("fullscreen", True)
@@ -57,11 +58,26 @@ class TVPlayer:
         timeline.start()
         
         return None
+        playbin = self.video.get_playbin() .get_by_name("decodebin0")
+        for element in playbin.elements():
+            print element.get_name()
+        
+        sink = playbin.elements().next()
+        deinterlace = gst.element_factory_make("ffdeinterlace", "deinterlace")
+        playbin.add(deinterlace)
+        #gst.element_link_many(sink, deinterlace)
+        self.video.set_size(stage.get_width(), stage.get_height())
+        self.video.set_size(800, 600)
+        #self.video.set_height(stage.get_height())
+        
+        
         """
+        self.video_texture = clutter.Texture()
         self.pipeline = gst.Pipeline("mypipeline")
         self.pbin = gst.element_factory_make("playbin", "pbin");
+        self.sink = cluttergst.video_sink_new(self.video_texture)
         self.pbin.set_property("uri", "fd://"+str(fd))
-  
+
         # add elements to the pipeline
         self.pipeline.add(self.pbin)
         self.pipeline.set_state(gst.STATE_PLAYING)

@@ -86,8 +86,8 @@ class Slideshow:
     def begin(self, MenuMgr):
         self.stage = self.MenuMgr.get_stage()
         
-        self.MenuMgr.get_selector_bar().set_spinner(True)
-        self.stage.queue_redraw()
+        #self.MenuMgr.get_selector_bar().set_spinner(True)
+        #self.stage.queue_redraw()
         
         #Clear out music and texture lists
         self.textures = [] 
@@ -95,7 +95,7 @@ class Slideshow:
         #Then load them back up
         slideName = self.baseDir + "/" + self.MenuMgr.get_current_menu().get_current_item().get_data()
         self.loadDir(slideName, True)
-        self.MenuMgr.get_selector_bar().set_spinner(False)
+        #self.MenuMgr.get_selector_bar().set_spinner(False)
         
         if self.backdrop == None:
             #Create a rectangle that serves as the backdrop for the slideshow
@@ -321,14 +321,15 @@ class Slideshow:
     def generateMenu(self):
         
         tempMenu = Menu(self.MenuMgr)
-        print self.baseDir
+        #print self.baseDir
         file_list = os.listdir(self.baseDir)
         
         for directoryEntry in file_list:
             subdir = self.baseDir + "/" + directoryEntry
             if os.path.isdir(subdir):
-                imgPath = subdir + "/" + os.listdir(subdir)[0]
-                #print imgPath
+                if not (len(os.listdir(subdir)) == 0):
+                    imgPath = subdir + "/" + os.listdir(subdir)[0]
+                    #print imgPath
                 tempItem = tempMenu.addItem(directoryEntry, "/home/josh/.mythtv/MythVideo/0088763.jpg")
                 tempItem.setAction(self)
                 

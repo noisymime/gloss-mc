@@ -7,11 +7,13 @@ import clutter
 from clutter import cluttergst
 from myth.MythBackendConn import MythBackendConnection
 from Menu import Menu
+from VideoController import VideoController
 
 class TVPlayer:
 
     def __init__(self, stage, dbMgr):
         self.video = cluttergst.VideoTexture()
+        self.video.connect('size-change', self.video_size_change)
         self.stage = stage
         self.dbMgr = dbMgr
         #audio.set_filename('cast1.avi')
@@ -33,6 +35,8 @@ class TVPlayer:
         (server, port) = self.dbMgr.get_backend_server()
         self.myConn = MythBackendConnection(self, server, port)
         self.myConn.start()
+        #vid = VideoController()
+        #vid.begin(self.stage)
         #self.begin_playback(self.buffer_file_reader.fileno())
         
     def begin_playback(self, fd):
@@ -45,7 +49,7 @@ class TVPlayer:
         self.menuMgr.get_selector_bar().set_spinner(False)
         self.video.set_uri("fd://"+str(fd))
         #self.video.set_property("fullscreen", True)
-        self.video.set_opacity(0)        
+        self.video.set_opacity(0)  
         self.video.show()
         
         timeline = clutter.Timeline(15, 25)
@@ -55,9 +59,29 @@ class TVPlayer:
         
         self.stage.add(self.video)
         self.video.set_playing(True)
+        self.video.set_size(400, 300)
         timeline.start()
+        #return None
         
-        return None
+    def video_size_change(self, texture, width, height):
+        self.video.set_property("sync-size", False)
+        self.video.set_position(0, 0)
+        xy_ratio = float(width / height)
+        print "XY Ratio: " + str(xy_ratio)
+        
+        width = int(self.stage.get_width())
+        height = int (width / xy_ratio)
+        height = 768
+        
+        print "Width: " + str(width)
+        print "Height: " + str(height)
+        
+       
+        self.video.set_size(width, height)
+        
+        
+        
+        """
         playbin = self.video.get_playbin() .get_by_name("decodebin0")
         for element in playbin.elements():
             print element.get_name()
@@ -67,11 +91,11 @@ class TVPlayer:
         playbin.add(deinterlace)
         #gst.element_link_many(sink, deinterlace)
         self.video.set_size(stage.get_width(), stage.get_height())
-        self.video.set_size(800, 600)
+
         #self.video.set_height(stage.get_height())
         
         
-        """
+        
         self.video_texture = clutter.Texture()
         self.pipeline = gst.Pipeline("mypipeline")
         self.pbin = gst.element_factory_make("playbin", "pbin");

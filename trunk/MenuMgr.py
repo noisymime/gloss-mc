@@ -138,7 +138,7 @@ class MenuMgr:
                 self.currentPlugin = None
             #If there's no plugin running, go back one in the menu list (Providing we're not already at the first item.
             else:
-                if len(self.menus)>1:
+                if len(self.menuHistory)>1:
                     self.transition_fade_zoom(self.menuHistory.pop(), self.menuHistory[-1])
                     self.currentMenu = self.menuHistory[-1]
         #print event.hardware_keycode

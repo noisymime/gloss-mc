@@ -7,7 +7,7 @@ import clutter
 from clutter import cluttergst
 from myth.MythBackendConn import MythBackendConnection
 from Menu import Menu
-from VideoController import VideoController
+from VideoController import osd
 
 class TVPlayer:
 
@@ -16,17 +16,8 @@ class TVPlayer:
         self.video.connect('size-change', self.video_size_change)
         self.stage = stage
         self.dbMgr = dbMgr
-        #audio.set_filename('cast1.avi')
-        #audio.show()
-        
-        #test = cluttercairo.Cairo()
-        #audio = cluttergst.Audio()
-        #audio.set_filename('test.mp3')
-        
-        #stage.add(audio)
-        #audio.set_playing(True)
-        
-        #self.db_conn = mythVideoDB()
+        self.isRunning = False
+
         
     def begin(self, menuMgr):
         self.menuMgr = menuMgr
@@ -35,20 +26,15 @@ class TVPlayer:
         (server, port) = self.dbMgr.get_backend_server()
         self.myConn = MythBackendConnection(self, server, port)
         self.myConn.start()
-        #vid = VideoController()
+        self.osd = osd(self.stage)
         #vid.begin(self.stage)
-        #self.begin_playback(self.buffer_file_reader.fileno())
+        
+        self.isRunning = True
         
     def begin_playback(self, fd):
-        #self.video.set_filename("test.mpg")
-        #print "File Descriptor: " + str(fd)
-        #self.buffer_file = open("test.mpg","r")
-        #fd = self.buffer_file.fileno()
-        #print os.read(fd, 100)
         stage = self.menuMgr.get_stage()
         self.menuMgr.get_selector_bar().set_spinner(False)
         self.video.set_uri("fd://"+str(fd))
-        #self.video.set_property("fullscreen", True)
         self.video.set_opacity(0)  
         self.video.show()
         
@@ -59,7 +45,6 @@ class TVPlayer:
         
         self.stage.add(self.video)
         self.video.set_playing(True)
-        self.video.set_size(400, 300)
         timeline.start()
         #return None
         
@@ -73,39 +58,8 @@ class TVPlayer:
         height = int (width / xy_ratio)
         height = 768
         
-        print "Width: " + str(width)
-        print "Height: " + str(height)
-        
-       
         self.video.set_size(width, height)
         
-        
-        
-        """
-        playbin = self.video.get_playbin() .get_by_name("decodebin0")
-        for element in playbin.elements():
-            print element.get_name()
-        
-        sink = playbin.elements().next()
-        deinterlace = gst.element_factory_make("ffdeinterlace", "deinterlace")
-        playbin.add(deinterlace)
-        #gst.element_link_many(sink, deinterlace)
-        self.video.set_size(stage.get_width(), stage.get_height())
-
-        #self.video.set_height(stage.get_height())
-        
-        
-        
-        self.video_texture = clutter.Texture()
-        self.pipeline = gst.Pipeline("mypipeline")
-        self.pbin = gst.element_factory_make("playbin", "pbin");
-        self.sink = cluttergst.video_sink_new(self.video_texture)
-        self.pbin.set_property("uri", "fd://"+str(fd))
-
-        # add elements to the pipeline
-        self.pipeline.add(self.pbin)
-        self.pipeline.set_state(gst.STATE_PLAYING)
-        """
     def stop(self):
         if self.video.get_playing():
             self.video.set_playing(False)
@@ -124,6 +78,8 @@ class TVPlayer:
         self.stage.remove(self.video) 
     
     def on_key_press_event (self, stage, event):
+        if self.isRunning:
+            self.osd.on_key_press_event(event)
         #print event.hardware_keycode
 
         """if event.keyval == clutter.keysyms.p:

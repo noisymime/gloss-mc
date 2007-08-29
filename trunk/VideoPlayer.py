@@ -11,7 +11,6 @@ class VideoPlayer():
     def __init__(self, stage, dbMgr):
         self.stage = stage
         self.cover_viewer = coverViewer(self.stage)
-        self.videoLibrary = []
         
         self.is_playing = False
         
@@ -25,8 +24,8 @@ class VideoPlayer():
         for record in results:
             tempVideo = videoItem()
             tempVideo.importFromMythObject(record)
-            self.videoLibrary.append(tempVideo)
-            self.cover_viewer.add_image(tempVideo.getCoverfile())
+            self.cover_viewer.add_video(tempVideo)
+            #self.cover_viewer.add_image(tempVideo.getCoverfile())
         #dbMgr.close_db()
         ################################################################################
         
@@ -38,6 +37,16 @@ class VideoPlayer():
                 self.pause()
         if event.keyval == clutter.keysyms.q:
             clutter.main_quit()
+            
+        up = clutter.keysyms.Up
+        down = clutter.keysyms.Down
+        left = clutter.keysyms.Left
+        right= clutter.keysyms.Right
+        if (event.keyval == up) or (event.keyval == down) or (event.keyval == left) or (event.keyval == right):
+            self.cover_viewer.on_cursor_press_event(event)
+        
+            
+        
         
     def begin(self, MenuMgr):
         
@@ -144,19 +153,24 @@ class videoItem():
         return self.coverfile        
         
 class coverViewer(clutter.Group):
+    scaleFactor = 1.4
 
     def __init__(self, stage):
         clutter.Group.__init__(self)
         self.stage = stage
-        self.covers = []
+        self.videoLibrary = []
         self.num_covers = 0
         self.cover_size = 200 #A cover will be cover_size * cover_size (X * Y)
-        self.cover_gap = 10
+        self.cover_gap = 1
         
-        self.num_rows = 2
-        self.num_columns = int(self.stage.get_width() / self.cover_size)
+        self.num_rows = 3
+        self.num_columns = 4 #int(self.stage.get_width() / self.cover_size)
         
-    def add_image(self, imagePath):
+        self.currentSelection = 0
+        
+    def add_video(self, video):
+        self.videoLibrary.append(video)
+        imagePath = video.getCoverfile()
         tempTexture = clutter.Texture()
         pixbuf = gtk.gdk.pixbuf_new_from_file(imagePath)
         tempTexture.set_pixbuf(pixbuf)
@@ -175,104 +189,46 @@ class coverViewer(clutter.Group):
         self.add(tempTexture)
         self.num_covers = self.num_covers +1
         
+    def select_item(self, incomingItem, outgoingItem):
+        outgoingTexture = self.get_nth_child(outgoingItem)
+        incomingTexture = self.get_nth_child(incomingItem)
+        
+        #Make sure the new texture is on the top
+        #incomingTexture.raise_top()
+        
+        self.timeline = clutter.Timeline(20,80)
+        alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
+        behaviourNew = clutter.BehaviourScale(alpha, 1, self.scaleFactor, clutter.GRAVITY_CENTER)
+        behaviourOld = clutter.BehaviourScale(alpha, self.scaleFactor, 1, clutter.GRAVITY_CENTER)
+        
+        behaviourNew.apply(incomingTexture)
+        behaviourOld.apply(outgoingTexture)
+        
+        self.currentSelection = incomingItem
+        
+        self.timeline.start()
+        
+    def on_cursor_press_event(self, event):
+        newItem = None
+        if event.keyval == clutter.keysyms.Left:
+            newItem = self.currentSelection - self.num_rows
+        if event.keyval == clutter.keysyms.Right:
+            newItem = self.currentSelection + self.num_rows
+        if event.keyval == clutter.keysyms.Down:
+            #Check if we're already on the bottom row
+            if not ((self.currentSelection % self.num_rows) == (self.num_rows-1)):
+                newItem = self.currentSelection + 1
+        if event.keyval == clutter.keysyms.Up:
+            #Check if we're already on the top row
+            if not (self.currentSelection % self.num_rows) == 0:
+                newItem = self.currentSelection - 1
+        
+        if (newItem < 0) and (not newItem == None):
+            newItem = self.currentSelection
 
+        #If there is movement, make the scale happen
+        if not newItem == None:
+            self.select_item(newItem, self.currentSelection)
+            
         
-        #Redo positioning on all textures to add new one :(
-        """for i in range(self.num_covers):
-            tempTexture = self.get_nth_child(i)
-            x = (self.cover_gap + self.cover_size) * i
-            y = (i % self.num_rows) * self.cover_size 
-            tempTexture.set_position(x, y)"""
-        
-class customBin:
 
-    def __init__(self):
-        self.gstInit()
-    
-    def gstInit(self):
-        self.texture = gobject.new(cluttergst.VideoTexture, tiled=False) # , "sync-size=False"
-
-        #self.texture = clutter.Texture() #cluttergst.VideoTexture()
-        self.texture.set_property("sync-size", False)
-        
-        # declare our pipeline and GST elements
-        self.pipeline = gst.Pipeline("mypipeline")
-        """
-        
-        self.src = gst.element_factory_make("filesrc", "src");
-        self.src.set_property("location", "test.mpg")
-        self.demux = gst.element_factory_make("ffdemux_mpegts", "demux")
-        self.queue1 = gst.element_factory_make("queue", "queue1")
-        self.queue2 = gst.element_factory_make("queue", "queue2")
-        self.deinterlace = gst.element_factory_make("ffdeinterlace", "deinterlace")
-        self.vdecode = gst.element_factory_make("mpeg2dec", "vdecode")
-        self.adecode = gst.element_factory_make("mad", "adecode")
-        #self.vsink = gst.element_factory_make("xvimagesink", "vsink")
-        self.vsink = cluttergst.VideoSink(self.video_texture)
-        self.asink = gst.element_factory_make("alsasink", "asink")
-        """
-        self.src = gst.element_factory_make("videotestsrc", "src")
-        #self.warp = gst.element_factory_make ("warptv", "warp")
-        self.colorspace = gst.element_factory_make ("ffmpegcolorspace", "color")
-        self.pipeline.add(self.colorspace)
-        #self.demux = gst.element_factory_make("ffdemux_mpegts", "demux")
-        self.sink = cluttergst.VideoSink (self.texture)
-        #self.sink = gst.element_factory_make("autovideosink", "vsink")
-        self.sink.set_property("qos", True)
-        self.sink.set_property("sync", True)
-    
-        # add elements to the pipeline
-        self.pipeline.add(self.src)
-        #self.pipeline.add(self.warp)
-        #self.pipeline.add(self.demux)
-        #self.pipeline.add(self.colorspace)
-        self.pipeline.add(self.sink)
-        
-        """
-        self.pipeline.add(self.demux)
-        self.pipeline.add(self.queue1)
-        self.pipeline.add(self.queue2)
-        self.pipeline.add(self.vdecode)
-        self.pipeline.add(self.deinterlace)
-        self.pipeline.add(self.adecode)
-        self.pipeline.add(self.vsink)
-        self.pipeline.add(self.asink)
-        
-        
-        # we can"t link demux until the audio and video pads are added
-        # we need to listen for "pad-added" signals
-        self.demux.connect("pad-added", self.on_pad_added)
-        """
-        self.texture.set_width(200)
-        self.texture.set_height(200)
-        #self.pipeline.add_signal_watch()
-        #self.pipeline.add_many(self.pipeline, self.src, self.warp, self.colorspace, self.sink)
-        gst.element_link_many(self.src, self.sink) #self.warp, self.colorspace, 
-        # link all elements apart from demux
-        #gst.element_link_many(self.src, self.demux)
-        #gst.element_link_many(self.queue1, self.vsink) #self.vdecode, self.deinterlace, 
-        #gst.element_link_many(self.queue2, self.adecode, self.asink)
-        
-        #self.pipeline.set_state(gst.STATE_PLAYING)
-        
-    def on_pad_added(self, element, src_pad):
-        caps = src_pad.get_caps()
-        name = caps[0].get_name()
-        # link demux to vdecode when video/mpeg pad added to demux
-        if name == "video/mpeg":
-            sink_pad = self.queue1.get_pad("sink")
-        elif name == "audio/mpeg":
-            sink_pad = self.queue2.get_pad("sink")
-        else:
-            return
-        
-        if not sink_pad.is_linked():
-            src_pad.link(sink_pad)
-        
-    def startPlayback(self):
-        # start playback
-        self.pipeline.set_state(gst.STATE_PLAYING)
-        
-    def get_texture(self):
-        return self.texture
-        

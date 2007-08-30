@@ -1,21 +1,20 @@
 import clutter
 from clutter import cluttergst
-from VideoController import osd
+from VideoController import VideoController
 
 class DvdPlayer:
 
     def __init__(self, Stage):
         self.stage = Stage
-        self.video = cluttergst.VideoTexture()
         self.paused = False
         self.isPlaying = False
         self.overlay = None
         
-        self.video.set_uri("dvd://1")
+        
         
     def on_key_press_event (self, stage, event):
         if self.isPlaying:
-            self.osd.on_key_press_event(event)
+            self.videoController.on_key_press_event(event)
             
         if event.keyval == clutter.keysyms.p:
             if self.paused:
@@ -27,22 +26,14 @@ class DvdPlayer:
 
         
     def begin(self, MenuMgr):
-        self.osd = osd(self.stage)
-        self.stage.add(self.video)
-        
-        self.video.set_playing(True)
+        uri = "dvd://1"
+        self.videoController = VideoController(self.stage)
+        self.video = self.videoController.play_video(uri)
         self.isPlaying = True
-        
-        #Set fullscreen event
-        self.video.connect('size-change', self.osd.set_fullscreen)
-        
-        self.video.show()
-        
         
     def stop(self):
         if self.video.get_playing():
-            self.video.set_playing(False)
-            #self.myConn.stop()
+            self.videoController.stop_video()
             
             timeline = clutter.Timeline(15, 25)
             timeline.connect('completed', self.end_video_event)

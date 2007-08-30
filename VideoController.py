@@ -4,32 +4,41 @@ import threading
 
 class VideoController:
 
-    def __init__(self):
+    def __init__(self, stage):
+        self.stage = stage
         # Primary video texture & sink definition
         self.video_texture = clutter.cluttergst.VideoTexture()
         self.video_sink = clutter.cluttergst.VideoSink(self.video_texture)
+        self.video_texture.connect('size-change', self.set_fullscreen)
         self.video_texture.set_position(0,0)
         
         self.pipeline = gst.Pipeline()
-        #self.tester()
+        self.osd = osd(stage)
         """
         src = gst.element_factory_make ("videotestsrc")
         
         gst.Bin.add (self.pipeline, filesrc, colorspace, deinterlace, video_sink)
         gst.element_link_many (filesrc, colorspace, deinterlace, video_sink)
         """
-    
-    
-    def begin(self, stage):
-        self.osd = osd(stage)
+        
+    def on_key_press_event(self, event):
         self.osd.enter()
-        
-        return None
-        stage.add(self.video_texture)
+    
+    def play_video(self, uri):
+        self.stage.add(self.video_texture)
+        self.video_texture.set_uri(uri)
         self.video_texture.show()
-        self.pipeline.set_state(gst.STATE_PLAYING)
         
-    def tester(self):
+        self.video_texture.set_playing(True)
+        self.isPlaying = True
+        
+        return self.video_texture
+        
+    def stop_video(self):
+        self.video_texture.set_playing(False)
+        self.isPlaying = False
+        
+    def customBin(self):
         self.src = gst.element_factory_make("filesrc", "src");
         self.src.set_property("location", "/home/josh/clutter/toys/gloss/test.mpg")
         self.demux = gst.element_factory_make("ffdemux_mpegts", "demux")
@@ -78,6 +87,18 @@ class VideoController:
             return
         if not sink_pad.is_linked():
             src_pad.link(sink_pad)
+        
+    def set_fullscreen(self, texture, width, height):
+        texture.set_property("sync-size", False)
+        texture.set_position(0, 0)
+        xy_ratio = float(width / height)
+        #print "XY Ratio: " + str(xy_ratio)
+        
+        width = int(self.stage.get_width())
+        height = int (width / xy_ratio)
+        height = 768
+        
+        texture.set_size(width, height)
 
 class osd:
 
@@ -133,19 +154,8 @@ class osd:
     def exit_end_event(self, data):
         self.stage.remove(self.bar_group)
         
-    def on_key_press_event(self, event):
-        self.enter()
+
         
-    def set_fullscreen(self, texture, width, height):
-        texture.set_property("sync-size", False)
-        texture.set_position(0, 0)
-        xy_ratio = float(width / height)
-        #print "XY Ratio: " + str(xy_ratio)
-        
-        width = int(self.stage.get_width())
-        height = int (width / xy_ratio)
-        height = 768
-        
-        texture.set_size(width, height)
+
         
         

@@ -87,8 +87,8 @@ class osd:
         self.bar_group = clutter.Group()
     
         self.background = clutter.Texture()
-        self.background.set_pixbuf( gtk.gdk.pixbuf_new_from_file("ui/osd_bar.png") )
-        self.background.set_opacity(120)
+        self.background.set_pixbuf( gtk.gdk.pixbuf_new_from_file("ui/osd_bar3.png") )
+        self.background.set_opacity(255)
         self.background.set_width(stage.get_width())
         self.bar_group.add(self.background)
         self.bar_group.show_all()
@@ -135,5 +135,17 @@ class osd:
         
     def on_key_press_event(self, event):
         self.enter()
+        
+    def set_fullscreen(self, texture, width, height):
+        texture.set_property("sync-size", False)
+        texture.set_position(0, 0)
+        xy_ratio = float(width / height)
+        #print "XY Ratio: " + str(xy_ratio)
+        
+        width = int(self.stage.get_width())
+        height = int (width / xy_ratio)
+        height = 768
+        
+        texture.set_size(width, height)
         
         

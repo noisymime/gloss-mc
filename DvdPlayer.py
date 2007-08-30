@@ -1,5 +1,6 @@
 import clutter
 from clutter import cluttergst
+from VideoController import osd
 
 class DvdPlayer:
 
@@ -7,11 +8,15 @@ class DvdPlayer:
         self.stage = Stage
         self.video = cluttergst.VideoTexture()
         self.paused = False
+        self.isPlaying = False
         self.overlay = None
         
         self.video.set_uri("dvd://1")
         
     def on_key_press_event (self, stage, event):
+        if self.isPlaying:
+            self.osd.on_key_press_event(event)
+            
         if event.keyval == clutter.keysyms.p:
             if self.paused:
                 self.unpause()
@@ -22,17 +27,14 @@ class DvdPlayer:
 
         
     def begin(self, MenuMgr):
+        self.osd = osd(self.stage)
         self.stage.add(self.video)
         
         self.video.set_playing(True)
+        self.isPlaying = True
         
-        #Resize for fullscreen
-        #while self.video.get_buffer_percent() < 5:
-        print self.video.get_position()
-
-        #xy_ratio = self.video.get_width() / self.video.get_height()
-        self.video.set_width( int(self.stage.get_width()) )
-        #self.video.set_height(self.video.get_width() * xy_ratio)
+        #Set fullscreen event
+        self.video.connect('size-change', self.osd.set_fullscreen)
         
         self.video.show()
         

@@ -62,11 +62,12 @@ class MainApp:
         #self.menu2.setListFont('Tahoma 42')
         self.menu2.setMenuPositionByName("center")
         
-        self.mySlideshow = Slideshow(self.menuMgr, "images/")
-        #self.mySlideshow.loadDir("images/", True)
+
         
         #Create a master mySQL connection
         self. dbMgr = mythDB()
+        
+        self.mySlideshow = Slideshow(self.menuMgr, self.dbMgr)
        
         self.vidPlayer = VideoPlayer(self.stage, self.dbMgr)
         self.tvPlayer = TVPlayer(self.stage, self.dbMgr)

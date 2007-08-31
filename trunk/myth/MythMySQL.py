@@ -4,12 +4,7 @@ import os
 class mythDB():
 
     def __init__(self):
-        """
-        self.server = "127.0.0.1" #"192.168.0.1"
-        self.db = "mythconverg"
-        self.uid = "root"
-        self.passwd = ""
-        """
+
         #self.connected = False
         self.read_config()
         
@@ -72,6 +67,18 @@ class mythDB():
             return None
         
         sql = "SELECT * FROM settings where value = 'GalleryDir'"
+        
+        self.cursor.execute(sql)
+        # get the resultset as a tuple
+        return self.cursor.fetchall()[1][1]
+    
+    #Gets an arbitary setting from the settings table
+    def get_setting(self, setting_name):
+        if not self.connected:
+            print "Error: Could not establish connection to SQL server. Unable to obtain setting '" + setting_name + "'"
+            return None
+        
+        sql = "SELECT * FROM settings where value = '" + setting_name + "'"
         
         self.cursor.execute(sql)
         # get the resultset as a tuple

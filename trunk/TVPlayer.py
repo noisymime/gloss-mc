@@ -7,13 +7,12 @@ import clutter
 from clutter import cluttergst
 from myth.MythBackendConn import MythBackendConnection
 from Menu import Menu
-from VideoController import osd
+from VideoController import VideoController
 
 class TVPlayer:
 
     def __init__(self, stage, dbMgr):
-        self.video = cluttergst.VideoTexture()
-        self.video.connect('size-change', self.video_size_change)
+        self.videoController = VideoController(stage)
         self.stage = stage
         self.dbMgr = dbMgr
         self.isRunning = False
@@ -26,18 +25,16 @@ class TVPlayer:
         (server, port) = self.dbMgr.get_backend_server()
         self.myConn = MythBackendConnection(self, server, port)
         self.myConn.start()
-        self.osd = osd(self.stage)
         #vid.begin(self.stage)
         
         self.isRunning = True
         
-    def begin_playback(self, fd):
-        stage = self.menuMgr.get_stage()
+    def begin_playback(self, buffer_file):
         self.menuMgr.get_selector_bar().set_spinner(False)
-        self.video.set_uri("fd://"+str(fd))
-        self.video.set_opacity(0)  
-        self.video.show()
+        uri = "file://" + os.getcwd() +"/" + buffer_file
+        self.videoController.play_video(uri)
         
+        """
         timeline = clutter.Timeline(15, 25)
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
         behaviour = clutter.BehaviourOpacity(alpha, 0,255)
@@ -47,6 +44,7 @@ class TVPlayer:
         self.video.set_playing(True)
         timeline.start()
         #return None
+        """
         
     def video_size_change(self, texture, width, height):
         self.video.set_property("sync-size", False)
@@ -61,25 +59,13 @@ class TVPlayer:
         self.video.set_size(width, height)
         
     def stop(self):
-        if self.video.get_playing():
-            self.video.set_playing(False)
-            self.myConn.stop()
+        self.videoController.stop_video()
+        self.myConn.stop() # Stops the backend / frontend streaming
             
-            timeline = clutter.Timeline(15, 25)
-            timeline.connect('completed', self.end_video_event)
-            alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
-            behaviour = clutter.BehaviourOpacity(alpha, 255,0)
-            behaviour.apply(self.video)
-        
-            timeline.start()
-            
-            
-    def end_video_event(self, data):
-        self.stage.remove(self.video) 
     
     def on_key_press_event (self, stage, event):
         if self.isRunning:
-            self.osd.on_key_press_event(event)
+            self.videoController.on_key_press_event(event)
         #print event.hardware_keycode
 
         """if event.keyval == clutter.keysyms.p:

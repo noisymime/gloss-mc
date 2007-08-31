@@ -14,9 +14,7 @@ class Slideshow:
     imageDuration = 7 # In seconds
     effect_FPS = 50
 
-    def __init__(self, MenuMgr, basedir):
-        #self.image_texture_group = clutter.Group()
-        self.baseDir = basedir
+    def __init__(self, MenuMgr, dbMgr):
         self.MenuMgr = MenuMgr
         self.currentTexture = clutter.Texture()
         self.currentSong = None
@@ -25,6 +23,9 @@ class Slideshow:
         self.music = []
         self.overlay = clutter.Rectangle()
         self.backdrop = None
+        
+        #Load the base image directory. This is pulled from the myth db's settings table
+        self.baseDir = dbMgr.get_setting('GalleryDir')
         
     def on_key_press_event (self, stage, event):
         #print event.hardware_keycode

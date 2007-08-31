@@ -22,6 +22,11 @@ class VideoController:
         """
         
     def on_key_press_event(self, event):
+        if event.keyval == clutter.keysyms.Left:
+            self.skip(-20)
+        if event.keyval == clutter.keysyms.Right:
+            self.skip(20)
+            
         self.osd.enter()
     
     def play_video(self, uri):
@@ -33,10 +38,21 @@ class VideoController:
         self.isPlaying = True
         
         return self.video_texture
-        
+    
     def stop_video(self):
-        self.video_texture.set_playing(False)
-        self.isPlaying = False
+        if self.video_texture.get_playing():
+            self.isPlaying = False
+            self.video_texture.set_playing(False)
+            
+            timeline = clutter.Timeline(15, 25)
+            timeline.connect('completed', self.end_video_event)
+            alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
+            behaviour = clutter.BehaviourOpacity(alpha, 255,0)
+            behaviour.apply(self.video_texture)
+        
+            timeline.start()
+    def end_video_event(self, data):
+        self.stage.remove(self.video_texture) 
         
     def customBin(self):
         self.src = gst.element_factory_make("filesrc", "src");
@@ -91,14 +107,34 @@ class VideoController:
     def set_fullscreen(self, texture, width, height):
         texture.set_property("sync-size", False)
         texture.set_position(0, 0)
-        xy_ratio = float(width / height)
+        xy_ratio = float(height) / float(width)
         #print "XY Ratio: " + str(xy_ratio)
         
         width = int(self.stage.get_width())
-        height = int (width / xy_ratio)
-        height = 768
+        height = int (width * xy_ratio)
+        #height = 768
         
         texture.set_size(width, height)
+        
+    def skip(self, amount):
+        self.video_texture.set_playing(False)
+        if not self.video_texture.get_can_seek():
+            self.video_texture.set_playing(True)
+            return
+    
+        current_pos = self.video_texture.get_position()
+        new_pos = current_pos + amount
+        
+        if new_pos >= self.video_texture.get_duration():
+            new_pos = self.video_texture.get_duration() - 4
+        if new_pos <= 0:
+            new_pos = 1
+        
+        # There's apparently a collision in the python bindings with the following method. Change this when its fixed in the bindings
+        #self.video_texture.set_position(new_pos)
+        #Until then use:
+        self.video_texture.set_property("position", new_pos)
+        self.video_texture.set_playing(True)
 
 class osd:
 

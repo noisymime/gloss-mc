@@ -167,7 +167,8 @@ class MythBackendConnection(threading.Thread):
     
     def buffer_live(self, cmd_sock, data_sock, socket_id):
         #Create a buffer file
-        self.buffer_file = open("test.mpg","w")
+        buffer_file_name = "test.mpg"
+        self.buffer_file = open(buffer_file_name,"w")
         request_size = 32768 
         
         #Need to create a bit of a buffer so playback will begin
@@ -180,8 +181,7 @@ class MythBackendConnection(threading.Thread):
             self.buffer_file.write(data)
             x=x+1
         self.buffer_file.flush()
-        self.buffer_file_reader = open("test.mpg","r")
-        self.videoPlayer.begin_playback(self.buffer_file_reader.fileno())
+        self.videoPlayer.begin_playback(buffer_file_name)
         #self.videoPlayer.begin_playback(self.data_sock.fileno())
         
         print "BEGINNING PLAYBACK!"
@@ -242,4 +242,5 @@ class MythBackendConnection(threading.Thread):
         
         end_transfer_cmd = "QUERY_FILETRANSFER "+str(self.data_socket_id) +"[]:[]DONE"
         self.send_cmd(self.sock, end_transfer_cmd)
-        result = self.receive_reply(self.sock)
+        #Shouldn't need to monitor for a reply here, we're done.
+        #result = self.receive_reply(self.sock)

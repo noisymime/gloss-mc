@@ -148,13 +148,14 @@ class MenuMgr:
         
 class MenuSelector(clutter.Texture):
     x_offset = -50
+    width = 400
 
     def __init__ (self, menuMgr):
         clutter.Texture.__init__ (self)
         self.menuMgr = menuMgr
         pixbuf = gtk.gdk.pixbuf_new_from_file("ui/active_bar.png")
         self.set_pixbuf(pixbuf)
-        self.set_width(400)
+        self.set_width(self.width)
         
         pixbuf = gtk.gdk.pixbuf_new_from_file("ui/spinner1.gif")
         self.spinner = clutter.Texture()
@@ -231,4 +232,6 @@ class MenuSelector(clutter.Texture):
         
     def get_x_offset(self):
         return self.x_offset
+    def get_width(self):
+        return self.width
         

@@ -1,6 +1,7 @@
 import clutter
 import pygtk
 import gtk
+import pango
 import time
 from ReflectionTexture import Texture_Reflection
 
@@ -285,7 +286,10 @@ class ListItem (clutter.Label):
         self.currentOpacity = 255
         self.menu = menu
         self.data = itemLabel #By default the items data is simply its label
-        
+        #The width is the length of the selector bar minus its offset
+        width = menu.getMenuMgr().get_selector_bar().get_width() + menu.getMenuMgr().get_selector_bar().get_x_offset()
+        self.set_width(width)
+        self.set_ellipsize(pango.ELLIPSIZE_END)
         #Text is actually scaled down in 'regular' position so that it doesn't get jaggies when zoomed in
         self.set_scale(self.zoomLevel, self.zoomLevel)
         self.currentZoom = 0        

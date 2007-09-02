@@ -6,6 +6,7 @@ class VideoController:
 
     def __init__(self, stage):
         self.stage = stage
+        self.overlay = None
         # Primary video texture & sink definition
         self.video_texture = clutter.cluttergst.VideoTexture()
         self.video_sink = clutter.cluttergst.VideoSink(self.video_texture)
@@ -27,7 +28,7 @@ class VideoController:
         if event.keyval == clutter.keysyms.Right:
             self.skip(20)
             
-        self.osd.enter()
+        #self.osd.enter()
     
     def play_video(self, uri):
         self.stage.add(self.video_texture)
@@ -116,30 +117,70 @@ class VideoController:
         
         texture.set_size(width, height)
         
-    def skip(self, amount):
+    def pause_video(self):
+        #Use the overlay to go over show
+        if self.overlay == None:
+            self.overlay = clutter.Texture()
+            pixbuf = gtk.gdk.pixbuf_new_from_file('ui/backdrop.png')
+            self.overlay.set_pixbuf(pixbuf)
+            self.overlay.set_width(self.stage.get_width())
+            self.overlay.set_height(self.stage.get_height())
+        self.overlay.set_opacity(0)
+        self.overlay.show()
+
+        self.stage.add(self.overlay)
+        #self.video_texture.lower_actor(self.overlay)
+        #self.overlay.raise_actor(self.video_texture)
+        #Fade the overlay in
+        timeline_overlay = clutter.Timeline(10,30)
+        alpha = clutter.Alpha(timeline_overlay, clutter.ramp_inc_func)
+        overlay_behaviour = clutter.BehaviourOpacity(alpha, 0, 230)
+        #video_behaviour = clutter.BehaviourOpacity(alpha, 255, 80)
+        overlay_behaviour.apply(self.overlay)
+        #video_behaviour.apply(self.video_texture)
+        timeline_overlay.start()
+        
+        #Pause the video
         self.video_texture.set_playing(False)
+        
+    def unpause_video(self):
+        #Fade the backdrop in
+        timeline_unpause = clutter.Timeline(10,30)
+        alpha = clutter.Alpha(timeline_unpause, clutter.ramp_inc_func)
+        overlay_behaviour = clutter.BehaviourOpacity(alpha, 230, 0)
+        #video_behaviour = clutter.BehaviourOpacity(alpha, 80, 255)
+        overlay_behaviour.apply(self.overlay)
+        #video_behaviour.apply(self.video_texture)
+        timeline_unpause.start()
+        
+        #Resume the video
+        self.video_texture.set_playing(True)
+        
+    def skip(self, amount):
         if not self.video_texture.get_can_seek():
-            self.video_texture.set_playing(True)
             return
-    
+        
         current_pos = self.video_texture.get_position()
-        new_pos = current_pos + amount
+        new_pos = int(current_pos + amount)
         
         if new_pos >= self.video_texture.get_duration():
-            new_pos = self.video_texture.get_duration() - 4
+            new_pos = self.video_texture.get_duration()-1
         if new_pos <= 0:
             new_pos = 1
         
         # There's apparently a collision in the python bindings with the following method. Change this when its fixed in the bindings
         #self.video_texture.set_position(new_pos)
         #Until then use:
-        self.video_texture.set_property("position", new_pos)
-        self.video_texture.set_playing(True)
+        self.video_texture.set_property("position", int(new_pos))
+        self.osd.shift_video(self.video_texture, amount)
+        
+import time
 
 class osd:
 
     def __init__(self, stage):
         self.stage = stage
+        self.timerRunning = False
         
         self.bar_group = clutter.Group()
     
@@ -189,9 +230,85 @@ class osd:
         self.timeline.start()
     def exit_end_event(self, data):
         self.stage.remove(self.bar_group)
+    
+    #Is called when the video is skipped forwards or backwards
+    def shift_video(self, video, shift_amount):
+        #Firstly check whether the label is already there from last time
+        if self.timerRunning:
+            self.timer.cancel()
+            self.timer = threading.Timer(1.5, self.label_exit)
+            self.timerRunning = True
+            self.timer.start()
+            return
+            
+        shiftDistance = 100
         
-
+        self.shift_label = clutter.Label()
+        self.shift_label.set_font_name("Lucida Grande 60")
+        self.shift_label.set_opacity(0)
+        self.shift_label.set_color(clutter.color_parse('White'))
+    
+        #Set the string for the fast forward / rewind as well as the 
+        if shift_amount > 0:
+            self.shift_label.set_text("+" + str(shift_amount) + "s >")
+            shift_label_x = int(self.stage.get_width() - self.shift_label.get_width() - shiftDistance)
+            direction = 1
+        else:
+            self.shift_label.set_text("< " + str(shift_amount) + "s")
+            shift_label_x = int(0 + shiftDistance)
+            direction = -1
         
+        shift_label_y = int(self.stage.get_height() - self.shift_label.get_height()) 
+        self.shift_label.set_position( shift_label_x, shift_label_y )
+        incoming_label_knots = (\
+            ( shift_label_x, shift_label_y ),\
+            ( int(shift_label_x + (shiftDistance*direction)), shift_label_y )\
+            )
+        
+        self.incoming_text_timeline = clutter.Timeline(20, 60)
+        alpha = clutter.Alpha(self.incoming_text_timeline, clutter.ramp_inc_func)
+        behaviour1 = clutter.BehaviourPath(alpha, incoming_label_knots)
+        behaviour2 = clutter.BehaviourOpacity(alpha, 0, 120)
+        
+        behaviour1.apply(self.shift_label)
+        behaviour2.apply(self.shift_label)
+        self.stage.add(self.shift_label)
+        self.shift_label.show()
+        
+        self.timer = threading.Timer(1.5, self.label_exit)
+        self.timerRunning = True
+        self.timer.start()
+        
+        self.incoming_text_timeline.start()
+        #print time.strftime("%H:%M:%S", time.gmtime(amount))
+        
+    def label_exit(self):
+        self.timerRunning = False
+        #Check which way this label needs to go
+        if self.shift_label.get_text()[0] == "<":
+            end_x = int(self.shift_label.get_width() * -1)
+        else:
+            end_x = int(self.stage.get_width())
+        
+        (starting_pos_x, starting_pos_y) = self.shift_label.get_abs_position()
+        outgoing_label_knots = (\
+        ( starting_pos_x, starting_pos_y ),\
+        ( end_x, starting_pos_y )\
+        )
+        
+        self.outgoing_text_timeline = clutter.Timeline(20, 60)
+        self.outgoing_text_timeline.connect('completed', self.removeLabel)
+        alpha = clutter.Alpha(self.outgoing_text_timeline, clutter.ramp_inc_func)
+        behaviour1 = clutter.BehaviourPath(alpha, outgoing_label_knots)
+        behaviour2 = clutter.BehaviourOpacity(alpha, self.shift_label.get_opacity() , 0)
+        
+        behaviour1.apply(self.shift_label)
+        behaviour2.apply(self.shift_label)
+        
+        self.outgoing_text_timeline.start()
+        
+    def removeLabel(self, data):
+        self.stage.remove(self.shift_label)   
 
         
         

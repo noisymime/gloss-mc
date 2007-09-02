@@ -47,41 +47,10 @@ class DvdPlayer:
         
     def pause(self):
         self.paused = True
+        self.videoController.pause_video()
         
-    
-        #Use the overlay to go over show
-        if self.overlay == None:
-            self.overlay = clutter.Rectangle()
-            self.overlay.set_color(clutter.color_parse('Black'))
-            self.overlay.set_width(self.stage.get_width())
-            self.overlay.set_height(self.stage.get_height())
-        self.overlay.set_opacity(0)
-        self.overlay.show()
-
-        self.stage.add(self.overlay)
-        #Fade the overlay in
-        timeline_overlay = clutter.Timeline(10,30)
-        alpha = clutter.Alpha(timeline_overlay, clutter.ramp_inc_func)
-        overlay_behaviour = clutter.BehaviourOpacity(alpha, 0, 100)
-        overlay_behaviour2 = clutter.BehaviourOpacity(alpha, 255, 100) #Used on the backdrop
-        overlay_behaviour.apply(self.overlay)
-        overlay_behaviour2.apply(self.video)
-        timeline_overlay.start()
-        
-        #Pause the main slideshow
-        self.video.set_playing(False)
         
     def unpause(self):
         self.paused = False
-        
-        #Fade the backdrop in
-        timeline_overlay = clutter.Timeline(10,30)
-        alpha = clutter.Alpha(timeline_overlay, clutter.ramp_inc_func)
-        overlay_behaviour = clutter.BehaviourOpacity(alpha, 100, 0)
-        overlay_behaviour2 = clutter.BehaviourOpacity(alpha, 100, 255) #Used on the backdrop
-        overlay_behaviour.apply(self.overlay)
-        overlay_behaviour2.apply(self.video)
-        timeline_overlay.start()
-        
-        #Resume the video
-        self.video.set_playing(True)
+        self.videoController.unpause_video()
+

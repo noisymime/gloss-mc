@@ -125,16 +125,17 @@ class VideoController:
             self.overlay.set_pixbuf(pixbuf)
             self.overlay.set_width(self.stage.get_width())
             self.overlay.set_height(self.stage.get_height())
+            self.stage.add(self.overlay)
         self.overlay.set_opacity(0)
         self.overlay.show()
 
-        self.stage.add(self.overlay)
+
         #self.video_texture.lower_actor(self.overlay)
         #self.overlay.raise_actor(self.video_texture)
         #Fade the overlay in
         timeline_overlay = clutter.Timeline(10,30)
         alpha = clutter.Alpha(timeline_overlay, clutter.ramp_inc_func)
-        overlay_behaviour = clutter.BehaviourOpacity(alpha, 0, 230)
+        overlay_behaviour = clutter.BehaviourOpacity(alpha, 0, 200)
         #video_behaviour = clutter.BehaviourOpacity(alpha, 255, 80)
         overlay_behaviour.apply(self.overlay)
         #video_behaviour.apply(self.video_texture)
@@ -147,7 +148,7 @@ class VideoController:
         #Fade the backdrop in
         timeline_unpause = clutter.Timeline(10,30)
         alpha = clutter.Alpha(timeline_unpause, clutter.ramp_inc_func)
-        overlay_behaviour = clutter.BehaviourOpacity(alpha, 230, 0)
+        overlay_behaviour = clutter.BehaviourOpacity(alpha, 200, 0)
         #video_behaviour = clutter.BehaviourOpacity(alpha, 80, 255)
         overlay_behaviour.apply(self.overlay)
         #video_behaviour.apply(self.video_texture)

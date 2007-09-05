@@ -66,6 +66,8 @@ class TVPlayer:
     def on_key_press_event (self, stage, event):
         if self.isRunning:
             self.videoController.on_key_press_event(event)
+        if event.keyval == clutter.keysyms.Escape:
+            return True
         #print event.hardware_keycode
 
         """if event.keyval == clutter.keysyms.p:

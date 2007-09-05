@@ -36,6 +36,8 @@ class Slideshow:
                 self.pause()
         if event.keyval == clutter.keysyms.q:
             clutter.main_quit()
+        if event.keyval == clutter.keysyms.Escape:
+            return True
         
     def loadDir(self, dirPath, recurse):
         if not os.path.isdir(dirPath):

@@ -7,6 +7,7 @@ class VideoController:
     def __init__(self, stage):
         self.stage = stage
         self.overlay = None
+        self.blackdrop = None
         # Primary video texture & sink definition
         self.video_texture = clutter.cluttergst.VideoTexture()
         self.video_sink = clutter.cluttergst.VideoSink(self.video_texture)
@@ -33,6 +34,7 @@ class VideoController:
     def play_video(self, uri):
         self.stage.add(self.video_texture)
         self.video_texture.set_uri(uri)
+        self.video_texture.set_position(0, 0)
         self.video_texture.show()
         
         self.video_texture.set_playing(True)
@@ -50,10 +52,13 @@ class VideoController:
             alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
             behaviour = clutter.BehaviourOpacity(alpha, 255,0)
             behaviour.apply(self.video_texture)
+            behaviour.apply(self.blackdrop)
         
             timeline.start()
     def end_video_event(self, data):
-        self.stage.remove(self.video_texture) 
+        self.stage.remove(self.video_texture)
+        self.stage.remove(self.blackdrop)
+        self.blackdrop = None 
         
     def customBin(self):
         self.src = gst.element_factory_make("filesrc", "src");
@@ -113,7 +118,20 @@ class VideoController:
         
         width = int(self.stage.get_width())
         height = int (width * xy_ratio)
-        #height = 768
+        
+        if height < self.stage.get_height():
+            #Create a black backdrop that the video can sit on
+            self.blackdrop = clutter.Rectangle()
+            self.blackdrop.set_color(clutter.color_parse('Black'))
+            self.blackdrop.set_size(self.stage.get_width(), self.stage.get_height())
+            self.stage.remove(self.video_texture)
+            self.stage.add(self.blackdrop)
+            self.stage.add(self.video_texture)
+            self.blackdrop.show()
+            
+            #And move the video into the vertical center
+            pos_y = int((self.stage.get_height() - height) / 2)
+            self.video_texture.set_position(0, pos_y)
         
         texture.set_size(width, height)
         

@@ -6,12 +6,14 @@ import gobject
 import pango
 import clutter
 from clutter import cluttergst
+from VideoController import VideoController
 
 class VideoPlayer():
 
     def __init__(self, stage, dbMgr):
         self.stage = stage
         self.cover_viewer = coverViewer(self.stage, 600, 600)
+        self.videoController = VideoController(stage)
         self.is_playing = False
         
         #This block can be moved to begin() but causes a performance hit when loading the module *shrug*
@@ -28,6 +30,15 @@ class VideoPlayer():
         
             
     def on_key_press_event (self, stage, event):
+        if self.is_playing:
+            if event.keyval == clutter.keysyms.Escape:
+                self.videoController.stop_video()
+                self.is_playing = False
+            else:
+                self.videoController.on_key_press_event(event)
+            
+            return False
+    
         if event.keyval == clutter.keysyms.p:
             if self.paused:
                 self.unpause()
@@ -42,6 +53,15 @@ class VideoPlayer():
         right= clutter.keysyms.Right
         if (event.keyval == up) or (event.keyval == down) or (event.keyval == left) or (event.keyval == right):
             self.cover_viewer.on_cursor_press_event(event)
+        
+        if event.keyval == clutter.keysyms.Return:
+            vid = self.cover_viewer.get_current_video()
+            uri = "file://" + str(vid.filename)
+            self.videoController.play_video(uri)
+            self.is_playing = True
+            
+        if event.keyval == clutter.keysyms.Escape:
+            return True
         
             
         
@@ -153,17 +173,18 @@ class coverViewer(clutter.Group):
         #self.stage.add(self.current_video_description)
         self.current_video_details.show()
         self.current_video_details.show_all()
+        
             
     #Turns the description group off and on
     def toggle_details(self):
         if self.current_video_details.get_parent() == None:
-            self.stage.add(self.current_video_details)
+            self.add(self.current_video_details)
             #Set the position of the details group
             (pos_x, pos_y) = self.get_abs_position()
             #The next two lines are horribly ugly, but all they do is position the details viewer in the middle of the gap between the bottom of the visible cover viewer and the bottom of the stage
             viewer_lower_y = int(pos_y + (self.max_visible_rows * self.cover_size))
-            pos_y = viewer_lower_y + int( (self.stage.get_height() - viewer_lower_y) / 2 - int(self.current_video_details.get_height()/2))
-            self.current_video_details.set_position(pos_x, pos_y)
+            pos_y = viewer_lower_y# + int( (self.stage.get_height() - viewer_lower_y) / 2 - int(self.current_video_details.get_height()/2))
+            self.current_video_details.set_position(20, pos_y)
         else:
             self.stage.remove(self.current_video_details)
         
@@ -266,7 +287,7 @@ class coverViewer(clutter.Group):
     # moveUp: True if the covers are to come up, false if they're to go down
     def rollViewer(self, moveUp, timeline):
         if moveUp:
-            new_y = self.get_y() - self.cover_size
+            new_y = self.covers_group.get_y() - self.cover_size
             self.max_visible_rows = self.max_visible_rows + 1
             self.min_visible_rows = self.min_visible_rows + 1
             
@@ -276,7 +297,7 @@ class coverViewer(clutter.Group):
             min_incoming = (self.max_visible_rows-1) * self.num_columns
             max_incoming = min_incoming + self.num_columns
         else:
-            new_y = self.get_y() + self.cover_size
+            new_y = self.covers_group.get_y() + self.cover_size
             self.max_visible_rows = self.max_visible_rows - 1
             self.min_visible_rows = self.min_visible_rows - 1
 
@@ -288,8 +309,8 @@ class coverViewer(clutter.Group):
         
         
         knots = (\
-                (self.get_x(), self.get_y()),\
-                (self.get_x(), new_y) \
+                (self.covers_group.get_x(), self.covers_group.get_y()),\
+                (self.covers_group.get_x(), new_y) \
                 )
         
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
@@ -297,13 +318,15 @@ class coverViewer(clutter.Group):
         behaviour_incoming = clutter.BehaviourOpacity(alpha, 0, self.inactiveOpacity)
         behaviour_outgoing = clutter.BehaviourOpacity(alpha, self.inactiveOpacity, 0)
         
-        behaviour_path.apply(self)
+        behaviour_path.apply(self.covers_group)
         #Also need to change a few opacities - This is really messy, but works
         for i in range(min_outgoing, max_outgoing):
             behaviour_outgoing.apply(self.textureLibrary[i])
         for i in range(min_incoming, max_incoming):
             behaviour_incoming.apply(self.textureLibrary[i])
-        
+    
+    def get_current_video(self):
+        return self.videoLibrary[self.currentSelection]
         
     def on_cursor_press_event(self, event):
         newItem = None
@@ -386,6 +409,8 @@ class video_details_group(clutter.Group):
         self.show_all()
 
     def set_video(self, video):
+        self.video = video
+        
         self.title.set_text(video.title)
         self.title.set_width(self.width)
         

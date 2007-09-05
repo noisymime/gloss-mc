@@ -134,8 +134,10 @@ class MenuMgr:
         if event.keyval == clutter.keysyms.Escape:
             #If there's a plugin running then end it
             if not self.currentPlugin == None:
-                self.currentPlugin.stop()
-                self.currentPlugin = None
+                #Plugins on_key_press_event should return true if the plugin is finishing
+                if self.currentPlugin.on_key_press_event(stage, event):
+                    self.currentPlugin.stop()
+                    self.currentPlugin = None
             #If there's no plugin running, go back one in the menu list (Providing we're not already at the first item.
             else:
                 if len(self.menuHistory)>1:

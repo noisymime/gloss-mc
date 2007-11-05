@@ -77,8 +77,8 @@ class VideoPlayer():
         #Fade the backdrop in
         timeline_begin = clutter.Timeline(10,40)
         alpha = clutter.Alpha(timeline_begin, clutter.ramp_inc_func)
-        begin_behaviour = clutter.BehaviourOpacity(alpha, 0, 255)
-        begin_behaviour.apply(self.backdrop)
+        self.begin_behaviour = clutter.BehaviourOpacity(alpha, 0, 255)
+        self.begin_behaviour.apply(self.backdrop)
 
         self.cover_viewer.set_opacity(0)    
         self.cover_viewer.show_all()
@@ -88,7 +88,7 @@ class VideoPlayer():
         self.cover_viewer.set_position(cover_x, 40)
         self.cover_viewer.toggle_details() #Turns the details group on
         self.cover_viewer.select_first()
-        begin_behaviour.apply(self.cover_viewer)
+        self.begin_behaviour.apply(self.cover_viewer)
         
         timeline_begin.start()
         
@@ -97,9 +97,9 @@ class VideoPlayer():
         #Fade everything out
         timeline_stop = clutter.Timeline(10,30)
         alpha = clutter.Alpha(timeline_stop, clutter.ramp_inc_func)
-        stop_behaviour = clutter.BehaviourOpacity(alpha, 255, 0)
-        stop_behaviour.apply(self.cover_viewer)
-        stop_behaviour.apply(self.backdrop)
+        self.stop_behaviour = clutter.BehaviourOpacity(alpha, 255, 0)
+        self.stop_behaviour.apply(self.cover_viewer)
+        self.stop_behaviour.apply(self.backdrop)
         timeline_stop.connect('completed', self.destroyPlugin)
         timeline_stop.start()
     
@@ -241,24 +241,24 @@ class coverViewer(clutter.Group):
         incomingTexture = self.textureLibrary[incomingItem]
         
         alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
-        behaviourNew_scale = clutter.BehaviourScale(alpha, 1, self.scaleFactor, clutter.GRAVITY_CENTER)
-        behaviourNew_z = clutter.BehaviourDepth(alpha, 1, 2)
+        self.behaviourNew_scale = clutter.BehaviourScale(alpha, 1, self.scaleFactor, clutter.GRAVITY_CENTER)
+        self.behaviourNew_z = clutter.BehaviourDepth(alpha, 1, 2)
         #If we're performing a roll (See above) then the incoming opacity should start at 0 rather than the normal inactive opacity
         if rolling:
-            behaviourNew_opacity = clutter.BehaviourOpacity(alpha, 0, 255)
+            self.behaviourNew_opacity = clutter.BehaviourOpacity(alpha, 0, 255)
         else:
-            behaviourNew_opacity = clutter.BehaviourOpacity(alpha, self.inactiveOpacity, 255)
+            self.behaviourNew_opacity = clutter.BehaviourOpacity(alpha, self.inactiveOpacity, 255)
         
-        behaviourOld_scale = clutter.BehaviourScale(alpha, self.scaleFactor, 1, clutter.GRAVITY_CENTER)
-        behaviourOld_z = clutter.BehaviourDepth(alpha, 2, 1)
-        behaviourOld_opacity = clutter.BehaviourOpacity(alpha, 255, self.inactiveOpacity)
+        self.behaviourOld_scale = clutter.BehaviourScale(alpha, self.scaleFactor, 1, clutter.GRAVITY_CENTER)
+        self.behaviourOld_z = clutter.BehaviourDepth(alpha, 2, 1)
+        self.behaviourOld_opacity = clutter.BehaviourOpacity(alpha, 255, self.inactiveOpacity)
         
-        behaviourNew_scale.apply(incomingTexture)
-        behaviourNew_z.apply(incomingTexture)
-        behaviourNew_opacity.apply(incomingTexture)
-        behaviourOld_scale.apply(outgoingTexture)
-        behaviourOld_z.apply(outgoingTexture)
-        behaviourOld_opacity.apply(outgoingTexture)
+        self.behaviourNew_scale.apply(incomingTexture)
+        self.behaviourNew_z.apply(incomingTexture)
+        self.behaviourNew_opacity.apply(incomingTexture)
+        self.behaviourOld_scale.apply(outgoingTexture)
+        self.behaviourOld_z.apply(outgoingTexture)
+        self.behaviourOld_opacity.apply(outgoingTexture)
         
         self.currentSelection = incomingItem
         
@@ -272,13 +272,13 @@ class coverViewer(clutter.Group):
         incomingTexture = self.textureLibrary[incomingItem]
         
         alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
-        behaviourNew_scale = clutter.BehaviourScale(alpha, 1, self.scaleFactor, clutter.GRAVITY_CENTER)
-        behaviourNew_z = clutter.BehaviourDepth(alpha, 1, 2)
-        behaviourNew_opacity = clutter.BehaviourOpacity(alpha, self.inactiveOpacity, 255)
+        self.behaviourNew_scale = clutter.BehaviourScale(alpha, 1, self.scaleFactor, clutter.GRAVITY_CENTER)
+        self.behaviourNew_z = clutter.BehaviourDepth(alpha, 1, 2)
+        self.behaviourNew_opacity = clutter.BehaviourOpacity(alpha, self.inactiveOpacity, 255)
         
-        behaviourNew_scale.apply(incomingTexture)
-        behaviourNew_z.apply(incomingTexture)
-        behaviourNew_opacity.apply(incomingTexture)
+        self.behaviourNew_scale.apply(incomingTexture)
+        self.behaviourNew_z.apply(incomingTexture)
+        self.behaviourNew_opacity.apply(incomingTexture)
         
         self.currentSelection = incomingItem
         self.timeline.start()
@@ -314,16 +314,16 @@ class coverViewer(clutter.Group):
                 )
         
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
-        behaviour_path = clutter.BehaviourPath(alpha, knots)
-        behaviour_incoming = clutter.BehaviourOpacity(alpha, 0, self.inactiveOpacity)
-        behaviour_outgoing = clutter.BehaviourOpacity(alpha, self.inactiveOpacity, 0)
+        self.behaviour_path = clutter.BehaviourPath(alpha, knots)
+        self.behaviour_incoming = clutter.BehaviourOpacity(alpha, 0, self.inactiveOpacity)
+        self.behaviour_outgoing = clutter.BehaviourOpacity(alpha, self.inactiveOpacity, 0)
         
-        behaviour_path.apply(self.covers_group)
+        self.behaviour_path.apply(self.covers_group)
         #Also need to change a few opacities - This is really messy, but works
         for i in range(min_outgoing, max_outgoing):
-            behaviour_outgoing.apply(self.textureLibrary[i])
+            self.behaviour_outgoing.apply(self.textureLibrary[i])
         for i in range(min_incoming, max_incoming):
-            behaviour_incoming.apply(self.textureLibrary[i])
+            self.behaviour_incoming.apply(self.textureLibrary[i])
     
     def get_current_video(self):
         return self.videoLibrary[self.currentSelection]

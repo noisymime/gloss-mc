@@ -254,14 +254,14 @@ class Menu:
             )
                 
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
-        behaviour1 = clutter.BehaviourPath(alpha, knots)
-        behaviour2 = clutter.BehaviourOpacity(alpha, outgoingMenuItem.get_opacity(), 0)
+        self.behaviour1 = clutter.BehaviourPath(alpha, knots)
+        self.behaviour2 = clutter.BehaviourOpacity(alpha, outgoingMenuItem.get_opacity(), 0)
         
         #print "Going to: "+ str(new_y)
         #print behaviour1.get_knots()
         
-        behaviour1.apply(self.itemGroup)
-        behaviour2.apply(outgoingMenuItem)
+        self.behaviour1.apply(self.itemGroup)
+        self.behaviour2.apply(outgoingMenuItem)
         
     def get_item_gap(self):
         return self.item_gap
@@ -289,7 +289,8 @@ class ListItem (clutter.Label):
         #The width is the length of the selector bar minus its offset
         width = menu.getMenuMgr().get_selector_bar().get_width() + menu.getMenuMgr().get_selector_bar().get_x_offset()
         self.set_width(width)
-        self.set_ellipsize(pango.ELLIPSIZE_END)
+        #Pango ellipses seem to be having problems, disabling for now
+        #self.set_ellipsize(pango.ELLIPSIZE_END)
         #Text is actually scaled down in 'regular' position so that it doesn't get jaggies when zoomed in
         self.set_scale(self.zoomLevel, self.zoomLevel)
         self.currentZoom = 0        

@@ -113,8 +113,8 @@ class Slideshow:
         self.backdrop.show()
         timeline_backdrop = clutter.Timeline(10,30)
         alpha = clutter.Alpha(timeline_backdrop, clutter.ramp_inc_func)
-        backdrop_behaviour = clutter.BehaviourOpacity(alpha, 0, 255)
-        backdrop_behaviour.apply(self.backdrop)
+        self.backdrop_behaviour = clutter.BehaviourOpacity(alpha, 0, 255)
+        self.backdrop_behaviour.apply(self.backdrop)
         timeline_backdrop.start()
         
         
@@ -295,10 +295,10 @@ class Slideshow:
         #Fade everything out
         timeline_stop = clutter.Timeline(10,30)
         alpha = clutter.Alpha(timeline_stop, clutter.ramp_inc_func)
-        stop_behaviour = clutter.BehaviourOpacity(alpha, 255, 0)
-        stop_behaviour.apply(self.currentTexture)
-        stop_behaviour.apply(self.backdrop)
-        stop_behaviour.apply(self.overlay)
+        self.stop_behaviour = clutter.BehaviourOpacity(alpha, 255, 0)
+        self.stop_behaviour.apply(self.currentTexture)
+        self.stop_behaviour.apply(self.backdrop)
+        self.stop_behaviour.apply(self.overlay)
         timeline_stop.connect('completed', self.destroySlideshow)
         timeline_stop.start()
         

@@ -14,9 +14,9 @@ class Spinner (clutter.Texture):
         self.timeline = clutter.Timeline(40,20)
         self.timeline.set_loop(True)
         alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
-        spin_behaviour = clutter.BehaviourRotate(alpha, clutter.Z_AXIS, clutter.ROTATE_CW, 0, 359)
-        spin_behaviour.set_center(self.get_width()/2,self.get_height()/2, 0) 
-        spin_behaviour.apply(self)
+        self.spin_behaviour = clutter.BehaviourRotate(alpha, clutter.Z_AXIS, clutter.ROTATE_CW, 0, 359)
+        self.spin_behaviour.set_center(self.get_width()/2,self.get_height()/2, 0) 
+        self.spin_behaviour.apply(self)
         self.timeline.start()
         
     def stop(self):

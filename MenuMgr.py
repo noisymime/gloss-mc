@@ -159,10 +159,10 @@ class MenuSelector(clutter.Texture):
         self.set_pixbuf(pixbuf)
         self.set_width(self.width)
         
-        pixbuf = gtk.gdk.pixbuf_new_from_file("ui/spinner1.gif")
-        self.spinner = clutter.Texture()
-        self.spinner.set_pixbuf(pixbuf)
-        self.spinner.hide()
+        #pixbuf = gtk.gdk.pixbuf_new_from_file("ui/spinner1.gif")
+        #self.spinner = clutter.Texture()
+        #self.spinner.set_pixbuf(pixbuf)
+        #self.spinner.hide()
         
 
     def selectItem(self, selectee, timeline):

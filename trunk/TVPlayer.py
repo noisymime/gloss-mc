@@ -32,7 +32,7 @@ class TVPlayer:
     def begin_playback(self, buffer_file):
         self.menuMgr.get_selector_bar().set_spinner(False)
         uri = "file://" + os.getcwd() +"/" + buffer_file
-        self.videoController.play_video(uri)
+        self.videoController.play_video(uri, self)
         
         """
         timeline = clutter.Timeline(15, 25)
@@ -61,7 +61,9 @@ class TVPlayer:
     def stop(self):
         self.videoController.stop_video()
         self.myConn.stop() # Stops the backend / frontend streaming
-            
+        
+    def stop_video(self):
+        self.stop()    
     
     def on_key_press_event (self, stage, event):
         if self.isRunning:

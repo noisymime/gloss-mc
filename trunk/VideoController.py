@@ -1,4 +1,4 @@
-import sys, clutter, clutter.cluttergst, gst, pygst, gtk, pygtk
+import sys, clutter, clutter.cluttergst, gst, pygst, gtk, pygtk, gobject
 import threading
 
 
@@ -31,33 +31,59 @@ class VideoController:
             
         #self.osd.enter()
     
-    def play_video(self, uri):
+    def play_video(self, uri, player):
+        self.player = player
         self.stage.add(self.video_texture)
         self.video_texture.set_uri(uri)
         self.video_texture.set_position(0, 0)
         self.video_texture.show()
+
+        #We need to connect to the message queue on the playbin to watch for any message (ie codec or file not found errors)
+        bus = self.video_texture.get_playbin().get_bus()
+        bus.add_signal_watch()
+        bus.connect('message', self.on_bus_message)
         
+        #Now we can start the video
         self.video_texture.set_playing(True)
         self.isPlaying = True
         
         return self.video_texture
     
+    def on_bus_message(self, bus, message):
+        t = message.type
+        
+        if t == gst.MESSAGE_ELEMENT:
+            #This occurs when an invalid codec is attempted to be played
+            #Need to insert some form of message to the user here
+            struc = message.structure
+            if struc is None:
+                return
+            
+            if struc.get_name() == "missing-plugin":
+                self.isPlaying = False
+                self.video_texture.set_playing(False)
+                self.player.stop_video()
+        elif t == gst.STREAM_ERROR:
+            print "OHH NOES!"
+    
     def stop_video(self):
         if self.video_texture.get_playing():
             self.isPlaying = False
+            self.player = None
             self.video_texture.set_playing(False)
             
             timeline = clutter.Timeline(15, 25)
             timeline.connect('completed', self.end_video_event)
             alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
-            behaviour = clutter.BehaviourOpacity(alpha, 255,0)
-            behaviour.apply(self.video_texture)
-            behaviour.apply(self.blackdrop)
+            self.behaviour = clutter.BehaviourOpacity(alpha, 255,0)
+            self.behaviour.apply(self.video_texture)
+            #behaviour.apply(self.blackdrop)
         
             timeline.start()
+            
     def end_video_event(self, data):
         self.stage.remove(self.video_texture)
-        self.stage.remove(self.blackdrop)
+        # self.stage.remove(self.blackdrop)
         self.blackdrop = None 
         
     def customBin(self):
@@ -247,6 +273,7 @@ class osd:
         
         self.exit_behaviour_path.apply(self.bar_group)
         self.timeline.start()
+        
     def exit_end_event(self, data):
         self.stage.remove(self.bar_group)
     
@@ -254,10 +281,10 @@ class osd:
     def shift_video(self, video, shift_amount):
         #Firstly check whether the label is already there from last time
         if self.timerRunning:
-            self.timer.cancel()
-            self.timer = threading.Timer(1.5, self.label_exit)
-            self.timerRunning = True
-            self.timer.start()
+            #self.timer.cancel()
+            #self.timer = threading.Timer(1.5, self.label_exit)
+            #self.timerRunning = True
+            #self.timer.start()
             return
             
         shiftDistance = 100
@@ -286,17 +313,18 @@ class osd:
         
         self.incoming_text_timeline = clutter.Timeline(20, 60)
         alpha = clutter.Alpha(self.incoming_text_timeline, clutter.ramp_inc_func)
-        behaviour1 = clutter.BehaviourPath(alpha, incoming_label_knots)
-        behaviour2 = clutter.BehaviourOpacity(alpha, 0, 120)
+        self.behaviour1 = clutter.BehaviourPath(alpha, incoming_label_knots)
+        self.behaviour2 = clutter.BehaviourOpacity(alpha, 0, 120)
         
-        behaviour1.apply(self.shift_label)
-        behaviour2.apply(self.shift_label)
+        self.behaviour1.apply(self.shift_label)
+        self.behaviour2.apply(self.shift_label)
         self.stage.add(self.shift_label)
         self.shift_label.show()
         
-        self.timer = threading.Timer(1.5, self.label_exit)
+        #self.timer = threading.Timer(1.5, self.label_exit)
+        gobject.timeout_add(1500, self.label_exit)
         self.timerRunning = True
-        self.timer.start()
+        #self.timer.start()
         
         self.incoming_text_timeline.start()
         #print time.strftime("%H:%M:%S", time.gmtime(amount))
@@ -318,13 +346,15 @@ class osd:
         self.outgoing_text_timeline = clutter.Timeline(20, 60)
         self.outgoing_text_timeline.connect('completed', self.removeLabel)
         alpha = clutter.Alpha(self.outgoing_text_timeline, clutter.ramp_inc_func)
-        behaviour1 = clutter.BehaviourPath(alpha, outgoing_label_knots)
-        behaviour2 = clutter.BehaviourOpacity(alpha, self.shift_label.get_opacity() , 0)
+        self.behaviour1 = clutter.BehaviourPath(alpha, outgoing_label_knots)
+        self.behaviour2 = clutter.BehaviourOpacity(alpha, self.shift_label.get_opacity() , 0)
         
-        behaviour1.apply(self.shift_label)
-        behaviour2.apply(self.shift_label)
+        self.behaviour1.apply(self.shift_label)
+        self.behaviour2.apply(self.shift_label)
         
         self.outgoing_text_timeline.start()
+        
+        return False
         
     def removeLabel(self, data):
         self.stage.remove(self.shift_label)   

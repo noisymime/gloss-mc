@@ -44,7 +44,7 @@ class SplashScr():
         pos_x = self.spinner.get_x()
         pos_x = pos_x + int (self.spinner.get_width() * 1.1)
         self.message.set_position(pos_x, 0)
-        self.message.set_text("dslkfjlds")
+        self.message.set_text("Loading...")
         self.main_group.add(self.message)
         
         self.detail = clutter.Label()
@@ -69,6 +69,7 @@ class SplashScr():
     def remove(self):
         self.stage.remove(self.main_group)
         self.stage.remove(self.backdrop)
+        self.spinner.stop()
         
         
     def set_msg(self, msg):

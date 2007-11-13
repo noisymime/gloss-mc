@@ -3,7 +3,8 @@ import clutter
 #import gobject
 import pygtk
 import gtk
-import threading
+import gobject
+#import threading
 from SplashScr import SplashScr
 from Menu import Menu
 from MenuMgr import MenuMgr
@@ -36,6 +37,7 @@ class MainApp:
         self.splashScreen.display()
         #self.timer = threading.Timer(1, self.loadGloss)
         #self.timer.start()
+        gobject.timeout_add(500, self.loadGloss)
     
     def loadGloss(self):
 
@@ -106,6 +108,8 @@ class MainApp:
         self.stage.connect('key-press-event', self.menuMgr.on_key_press_event)
         self.menu1.display()
         self.menu1.selectFirst(True)
+        
+        return False
         #print self.menuMgr.get_selector_bar().get_abs_position()
         #self.menuMgr.get_selector_bar().set_spinner(True)
 
@@ -126,7 +130,7 @@ def main (args):
     app = MainApp()
     #thread.start_new_thread(app.run, (None,))
     #thread.start_new_thread(app.loadGloss, (None,))
-    app.loadGloss()
+    #app.loadGloss()
     app.run()
 
     

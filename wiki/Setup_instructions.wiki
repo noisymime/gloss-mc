@@ -9,12 +9,10 @@ Gloss was developed on Ubuntu so hence I can give the best instructions for how 
 
   # `echo "deb http://debian.o-hand.com feisty/" | sudo tee -a /etc/apt/sources.list` (Replace fiesty with edgy / dapper if required)
   # `sudo apt-get update`
-  # `sudo apt-get install libclutter-0.4-0 libclutter-gst-0.4-0 python-clutter python-mysqldb subversion eyed3 gstreamer0.10-fluendo-mpegdemux`
+  # `sudo apt-get install libclutter-0.4-0 libclutter-gst-0.4-0 python-clutter python-mysqldb subversion eyed3 gstreamer0.10-fluendo-mpegdemux jackd`
   # `svn checkout http://gloss-mc.googlecode.com/svn/trunk/ gloss-mc`
   # `cd gloss-mc`
   # `python gloss.py`
-
-
 
 
 

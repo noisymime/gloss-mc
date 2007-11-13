@@ -3,7 +3,7 @@ import clutter
 #import gobject
 import pygtk
 import gtk
-import thread
+import threading
 from SplashScr import SplashScr
 from Menu import Menu
 from MenuMgr import MenuMgr
@@ -34,8 +34,10 @@ class MainApp:
         #Display a loading / splash screen
         self.splashScreen = SplashScr(self.stage)
         self.splashScreen.display()
+        #self.timer = threading.Timer(1, self.loadGloss)
+        #self.timer.start()
     
-    def loadGloss(self, arg):
+    def loadGloss(self):
 
 
         self.menuMgr = MenuMgr(self.stage)
@@ -124,7 +126,7 @@ def main (args):
     app = MainApp()
     #thread.start_new_thread(app.run, (None,))
     #thread.start_new_thread(app.loadGloss, (None,))
-    app.loadGloss(None)
+    app.loadGloss()
     app.run()
 
     

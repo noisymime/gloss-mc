@@ -52,12 +52,12 @@ class VideoPlayer():
         left = clutter.keysyms.Left
         right= clutter.keysyms.Right
         if (event.keyval == up) or (event.keyval == down) or (event.keyval == left) or (event.keyval == right):
-            self.cover_viewer.on_cursor_press_event(event)
+            self.cover_viewer.on_key_press_event(event)
         
         if event.keyval == clutter.keysyms.Return:
             vid = self.cover_viewer.get_current_video()
             uri = "file://" + str(vid.filename)
-            self.videoController.play_video(uri)
+            self.videoController.play_video(uri, self)
             self.is_playing = True
             
         if event.keyval == clutter.keysyms.Escape:
@@ -108,6 +108,11 @@ class VideoPlayer():
         self.backdrop.hide()
         #self.stage.remove(self.overlay)
         
+    def stop_video(self):
+        if not self.is_playing:
+            return
+        
+        self.is_playing = False
         
     def pause(self):
         pass
@@ -225,8 +230,8 @@ class coverViewer(clutter.Group):
         self.num_covers = self.num_covers +1
         
     def select_item(self, incomingItem, outgoingItem):
-        self.current_video_details.set_video(self.videoLibrary[incomingItem])
-        self.timeline = clutter.Timeline(20,80)
+        self.timeline = clutter.Timeline(10,35)
+        self.current_video_details.set_video(self.videoLibrary[incomingItem], self.timeline)
         
         #Check if the cover is currently not visible
         rolling = False
@@ -240,7 +245,7 @@ class coverViewer(clutter.Group):
         outgoingTexture = self.textureLibrary[outgoingItem]
         incomingTexture = self.textureLibrary[incomingItem]
         
-        alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
+        alpha = clutter.Alpha(self.timeline, clutter.smoothstep_inc_func)# clutter.ramp_inc_func)
         self.behaviourNew_scale = clutter.BehaviourScale(alpha, 1, self.scaleFactor, clutter.GRAVITY_CENTER)
         self.behaviourNew_z = clutter.BehaviourDepth(alpha, 1, 2)
         #If we're performing a roll (See above) then the incoming opacity should start at 0 rather than the normal inactive opacity
@@ -265,8 +270,9 @@ class coverViewer(clutter.Group):
         self.timeline.start()
         
     def select_first(self):
-        self.current_video_details.set_video(self.videoLibrary[0])
         self.timeline = clutter.Timeline(20,80)
+        self.current_video_details.set_video(self.videoLibrary[0], self.timeline)
+
     
         incomingItem = 0
         incomingTexture = self.textureLibrary[incomingItem]
@@ -296,6 +302,10 @@ class coverViewer(clutter.Group):
             max_outgoing = min_outgoing + self.num_columns
             min_incoming = (self.max_visible_rows-1) * self.num_columns
             max_incoming = min_incoming + self.num_columns
+            
+            #Quick check to make sure that max_incoming isn't greater than the max number of images (This occurs when the final row is incomplete)
+            if max_incoming > self.num_covers:
+                max_incoming = min_incoming + (self.num_covers % self.num_columns)
         else:
             new_y = self.covers_group.get_y() + self.cover_size
             self.max_visible_rows = self.max_visible_rows - 1
@@ -305,7 +315,11 @@ class coverViewer(clutter.Group):
             min_incoming = (self.min_visible_rows) * self.num_columns
             max_incoming = min_incoming + self.num_columns
             min_outgoing = (self.max_visible_rows) * self.num_columns
-            max_outgoing = min_outgoing + self.num_columns            
+            max_outgoing = min_outgoing + self.num_columns   
+            
+            #Quick check to make sure that max_outgoing isn't greater than the max number of images (This occurs when the final row is incomplete)
+            if max_outgoing > self.num_covers:
+                max_outgoing = min_outgoing + (self.num_covers % self.num_columns)         
         
         
         knots = (\
@@ -328,24 +342,21 @@ class coverViewer(clutter.Group):
     def get_current_video(self):
         return self.videoLibrary[self.currentSelection]
         
-    def on_cursor_press_event(self, event):
+    def on_key_press_event(self, event):
         newItem = None
         if event.keyval == clutter.keysyms.Left:
             #Make sure we're not already on the first cover
             if not self.currentSelection == 0:
-                newItem = self.currentSelection - 1
-                
-        if event.keyval == clutter.keysyms.Right:
+                newItem = self.currentSelection - 1      
+        elif event.keyval == clutter.keysyms.Right:
             #This check makes sure that we're not on the last cover already
-            if not self.currentSelection == (self.get_n_children()-1):
+            if not self.currentSelection == (self.num_covers-1):
                 newItem = self.currentSelection + 1
-                
-        if event.keyval == clutter.keysyms.Down:
+        elif event.keyval == clutter.keysyms.Down:
             #Check if we're already on the bottom row
             if not (self.currentSelection > (len(self.textureLibrary)-1 - self.num_columns)):
                 newItem = self.currentSelection + self.num_columns
-        
-        if event.keyval == clutter.keysyms.Up:
+        elif event.keyval == clutter.keysyms.Up:
             #Check if we're already on the top row
             if not (self.currentSelection < self.num_columns):
                 newItem = self.currentSelection - self.num_columns
@@ -408,7 +419,11 @@ class video_details_group(clutter.Group):
         
         self.show_all()
 
-    def set_video(self, video):
+    def set_video_bare(self,video):
+        self.timeline = clutter.Timeline(10,45)
+        self.set_video(video, self.timeline)
+
+    def set_video(self, video, timeline):
         self.video = video
         
         self.title.set_text(video.title)

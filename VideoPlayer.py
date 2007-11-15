@@ -12,7 +12,7 @@ class VideoPlayer():
 
     def __init__(self, stage, dbMgr):
         self.stage = stage
-        self.cover_viewer = coverViewer(self.stage, 600, 600)
+        self.cover_viewer = coverViewer(self.stage, 800, 600)
         self.videoController = VideoController(stage)
         self.is_playing = False
         
@@ -55,10 +55,7 @@ class VideoPlayer():
             self.cover_viewer.on_key_press_event(event)
         
         if event.keyval == clutter.keysyms.Return:
-            vid = self.cover_viewer.get_current_video()
-            uri = "file://" + str(vid.filename)
-            self.videoController.play_video(uri, self)
-            self.is_playing = True
+            self.play_video()
             
         if event.keyval == clutter.keysyms.Escape:
             return True
@@ -85,7 +82,8 @@ class VideoPlayer():
         self.cover_viewer.show()
         self.stage.add(self.cover_viewer)
         cover_x = self.stage.get_width() - self.cover_viewer.get_width()
-        self.cover_viewer.set_position(cover_x, 40)
+        #self.cover_viewer.set_position(cover_x, 40)
+        self.cover_viewer.set_position(50, 40)
         self.cover_viewer.toggle_details() #Turns the details group on
         self.cover_viewer.select_first()
         self.begin_behaviour.apply(self.cover_viewer)
@@ -107,6 +105,14 @@ class VideoPlayer():
         self.stage.remove(self.cover_viewer)
         self.backdrop.hide()
         #self.stage.remove(self.overlay)
+    
+    def play_video(self):
+        vid = self.cover_viewer.get_current_video()
+        uri = "file://" + str(vid.filename)
+        self.videoController.play_video(uri, self)
+        self.is_playing = True
+        
+        self.stage.remove(self.cover_viewer)
         
     def stop_video(self):
         if not self.is_playing:
@@ -208,6 +214,7 @@ class coverViewer(clutter.Group):
         
         tempTexture.set_position( (self.num_covers * self.cover_size), 0)
         tempTexture.set_depth(1)
+        
         self.textureLibrary.append(tempTexture)
 
         #x = (self.cover_gap + self.cover_size) * (self.num_covers/self.num_rows)
@@ -224,8 +231,9 @@ class coverViewer(clutter.Group):
         #If we're past the maximum rows, make the pics invistible
         if self.num_covers > (self.num_columns * self.num_visible_rows)-1:
             tempTexture.set_opacity(0)
+        else:
+            self.covers_group.add(tempTexture)
         
-        self.covers_group.add(tempTexture)
         tempTexture.show()
         self.num_covers = self.num_covers +1
         
@@ -321,6 +329,11 @@ class coverViewer(clutter.Group):
             if max_outgoing > self.num_covers:
                 max_outgoing = min_outgoing + (self.num_covers % self.num_columns)         
         
+        #Need to add the new row to the group
+        self.addIncomingRow(min_incoming, max_incoming)
+        #And set the outgoing row to remove after the timeline finishes
+        self.timeline.connect('completed', self.removeOutgoingRow, min_outgoing, max_outgoing)
+        
         
         knots = (\
                 (self.covers_group.get_x(), self.covers_group.get_y()),\
@@ -338,6 +351,27 @@ class coverViewer(clutter.Group):
             self.behaviour_outgoing.apply(self.textureLibrary[i])
         for i in range(min_incoming, max_incoming):
             self.behaviour_incoming.apply(self.textureLibrary[i])
+            
+    def removeOutgoingRow(self, timeline, min, max):
+        for i in range(min, max):
+            self.covers_group.remove(self.textureLibrary[i])
+            
+    def addIncomingRow(self, min, max):
+        for i in range(min, max):
+            self.covers_group.add(self.textureLibrary[i])
+            
+            xy_ratio = float(self.textureLibrary[i].get_width()) / self.textureLibrary[i].get_height()
+            width = int(self.cover_size * xy_ratio)
+            
+            x = (i % self.num_columns) * self.cover_size + ( (i % self.num_columns) * self.cover_gap)
+            y = (self.cover_gap + self.cover_size) * (i/self.num_columns)
+        
+            #Center the cover
+            if width < self.cover_size:
+                x = x + (self.cover_size - width)/2
+        
+            self.textureLibrary[i].set_position(x, y)
+            self.textureLibrary[i].show()
     
     def get_current_video(self):
         return self.videoLibrary[self.currentSelection]

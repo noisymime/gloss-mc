@@ -5,7 +5,7 @@ import os
 import clutter
 
 from clutter import cluttergst
-from myth.MythBackendConn import MythBackendConnection
+from modules.myth_tv_player.MythBackendConn import MythBackendConnection
 from Menu import Menu
 from VideoController import VideoController
 

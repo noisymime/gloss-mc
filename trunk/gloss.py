@@ -4,15 +4,29 @@ import clutter
 import pygtk
 import gtk
 import gobject
+import os.path
 #import threading
 from SplashScr import SplashScr
+
+#Import all the modules
+mod_dir = "modules"
+module_list = os.listdir(mod_dir)
+
+modules = []
+for fs_object in module_list:
+    path = mod_dir + "/" + fs_object
+    if os.path.isdir(path) and (not fs_object[0] == "."):
+        tmp_dir = mod_dir+"/"+fs_object+"/"+fs_object
+        print "Found Module: " + fs_object
+        modules.append(__import__(tmp_dir))
+        
 from Menu import Menu
 from MenuMgr import MenuMgr
-from Slideshow import Slideshow
-from VideoPlayer import VideoPlayer
-from MusicPlayer import MusicPlayer
-from TVPlayer import TVPlayer
-from DvdPlayer import DvdPlayer
+#from Slideshow import Slideshow
+#from VideoPlayer import VideoPlayer
+#from MusicPlayer import MusicPlayer
+#from TVPlayer import TVPlayer
+#from DvdPlayer import DvdPlayer
 
 from myth.MythMySQL import mythDB
 
@@ -20,6 +34,7 @@ from myth.MythMySQL import mythDB
 class MainApp:
     def __init__ (self):
         gtk.gdk.threads_init()
+        clutter.threads_init()
     
         self.stage = clutter.stage_get_default()
         self.stage.set_color(clutter.color_parse('Black'))
@@ -35,9 +50,8 @@ class MainApp:
         #Display a loading / splash screen
         self.splashScreen = SplashScr(self.stage)
         self.splashScreen.display()
-        #self.timer = threading.Timer(1, self.loadGloss)
-        #self.timer.start()
         gobject.timeout_add(500, self.loadGloss)
+        #clutter.threads_add_timeout(500,self.loadGloss())
     
     def loadGloss(self):
 
@@ -80,20 +94,20 @@ class MainApp:
         
         #Update splash status msg
         self.splashScreen.set_msg("Loading gallery")
-        self.mySlideshow = Slideshow(self.menuMgr, self.dbMgr)
+        self.mySlideshow = modules[0].Slideshow(self.menuMgr, self.dbMgr)
        
         #Update splash status msg
         self.splashScreen.set_msg("Loading videos")
-        self.vidPlayer = VideoPlayer(self.stage, self.dbMgr)
+        self.vidPlayer = modules[2].VideoPlayer(self.stage, self.dbMgr)
         #Update splash status msg
         self.splashScreen.set_msg("Setting up TV player")
-        self.tvPlayer = TVPlayer(self.stage, self.dbMgr)
+        self.tvPlayer = modules[1].TVPlayer(self.stage, self.dbMgr)
         #Update splash status msg
         self.splashScreen.set_msg("Setting up DVD player")
-        self.dvdPlayer = DvdPlayer(self.stage)
+        self.dvdPlayer = modules[3].DvdPlayer(self.stage)
         #Update splash status msg
         self.splashScreen.set_msg("Setting up Music player")
-        self.musicPlayer = MusicPlayer(self.stage)
+        self.musicPlayer = modules[4].MusicPlayer(self.stage)
         
         menu1.getItem(0).setAction(self.tvPlayer)
         #menu1.getItem(1).setAction(self.mySlideshow)
@@ -128,8 +142,6 @@ class MainApp:
 
 def main (args):
     app = MainApp()
-    #thread.start_new_thread(app.run, (None,))
-    #thread.start_new_thread(app.loadGloss, (None,))
     #app.loadGloss()
     app.run()
 

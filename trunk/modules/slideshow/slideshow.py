@@ -1,5 +1,6 @@
 import clutter
 from clutter import cluttergst
+#__import__("../../Menu", "Menu")
 from Menu import Menu
 import time
 import os.path

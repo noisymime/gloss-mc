@@ -2,15 +2,19 @@ import clutter
 from clutter import cluttergst
 from VideoController import VideoController
 
-class DvdPlayer:
+class Module:
+    title = "DVD"
+    menu_image = "dvd.png"
 
-    def __init__(self, Stage):
-        self.stage = Stage
+    def __init__(self, MenuMgr, dbMgr):
+        self.stage = MenuMgr.get_stage()
         self.paused = False
         self.isPlaying = False
         self.overlay = None
         
-        
+    #Action to take when menu item is selected
+    def action(self):
+        return self
         
     def on_key_press_event (self, stage, event):
         if self.isPlaying:

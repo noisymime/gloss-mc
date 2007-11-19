@@ -147,6 +147,12 @@ class MenuMgr:
     
     def get_current_menu(self):
         return self.currentMenu
+    
+    def go_up_x_levels(self, num_levels):
+        for i in range(1, num_levels):
+            if len(self.menuHistory)>1:
+                    self.transition_fade_zoom(self.menuHistory.pop(), self.menuHistory[-1])
+                    self.currentMenu = self.menuHistory[-1]
         
 class MenuSelector(clutter.Texture):
     x_offset = -50

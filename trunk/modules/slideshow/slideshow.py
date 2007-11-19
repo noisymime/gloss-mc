@@ -9,7 +9,10 @@ import gtk
 import random
 #import thread
 
-class Slideshow:
+class Module:
+    title = "Slideshow"
+    menu_image= "gallery.png"
+    
     image_file_types = ["jpg", "gif", "jpeg", "png", "bmp"]
     sound_file_types = ["mp3", "wav", "ogg"] #possibly more supported by default?
     imageDuration = 7 # In seconds
@@ -27,6 +30,9 @@ class Slideshow:
         
         #Load the base image directory. This is pulled from the myth db's settings table
         self.baseDir = dbMgr.get_setting('GalleryDir')
+        
+    def action(self):
+        return self.generateMenu()
         
     def on_key_press_event (self, stage, event):
         #print event.hardware_keycode
@@ -90,6 +96,10 @@ class Slideshow:
     def begin(self, MenuMgr):
         self.stage = self.MenuMgr.get_stage()
         
+        #Check for an empty baseDir, this means there are no slideshows or no db connection. We simply tell the menuMgr to go back a menu level when this occurs
+        if self.baseDir is None:
+            MenuMgr.go_up_x_levels(1)
+            return
         #self.MenuMgr.get_selector_bar().set_spinner(True)
         #self.stage.queue_redraw()
         
@@ -326,6 +336,12 @@ class Slideshow:
         
         tempMenu = Menu(self.MenuMgr)
         #print self.baseDir
+        #This occurs when there are not slideshows or we could not connect to the db to establish baseDir
+        if self.baseDir is None:
+            tempItem = tempMenu.addItem("No slideshows available", "")
+            tempItem.setAction(self)
+            return
+        
         file_list = os.listdir(self.baseDir)
         
         for directoryEntry in file_list:
@@ -334,7 +350,7 @@ class Slideshow:
                 if not (len(os.listdir(subdir)) == 0):
                     imgPath = subdir + "/" + os.listdir(subdir)[0]
                     #print imgPath
-                tempItem = tempMenu.addItem(directoryEntry, "/home/josh/.mythtv/MythVideo/0088763.jpg")
+                tempItem = tempMenu.addItem(directoryEntry, "")
                 tempItem.setAction(self)
                 
                 

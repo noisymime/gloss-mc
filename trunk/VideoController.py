@@ -8,6 +8,7 @@ class VideoController:
         self.stage = stage
         self.overlay = None
         self.blackdrop = None
+        
         # Primary video texture & sink definition
         self.video_texture = clutter.cluttergst.VideoTexture()
         self.video_sink = clutter.cluttergst.VideoSink(self.video_texture)
@@ -48,7 +49,9 @@ class VideoController:
         self.isPlaying = True
         
         return self.video_texture
-    
+
+    #This handles any messages that are sent accross the playbin
+    #Currently the only message being checked for it a "codec not found"
     def on_bus_message(self, bus, message):
         t = message.type
         
@@ -69,6 +72,7 @@ class VideoController:
     def stop_video(self):
         if self.video_texture.get_playing():
             self.isPlaying = False
+            self.player.stop_video()
             self.player = None
             self.video_texture.set_playing(False)
             
@@ -77,13 +81,13 @@ class VideoController:
             alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
             self.behaviour = clutter.BehaviourOpacity(alpha, 255,0)
             self.behaviour.apply(self.video_texture)
-            #behaviour.apply(self.blackdrop)
+            self.behaviour.apply(self.blackdrop)
         
             timeline.start()
             
     def end_video_event(self, data):
         self.stage.remove(self.video_texture)
-        # self.stage.remove(self.blackdrop)
+        self.stage.remove(self.blackdrop)
         self.blackdrop = None 
         
     def customBin(self):

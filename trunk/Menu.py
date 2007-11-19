@@ -70,8 +70,8 @@ class Menu:
             menu_x = (self.stage.get_width()-self.itemGroup.get_width())/2
             self.itemGroup.set_position(menu_x, menu_y)
             self.displayPosition = (menu_x, menu_y)
-            print "Original Group size: " + str(self.itemGroup.get_width())
-            print "Starting at : " + str(menu_x) + ":" + str(menu_y)
+            #print "Original Group size: " + str(self.itemGroup.get_width())
+            #print "Starting at : " + str(menu_x) + ":" + str(menu_y)
     
     #The display position is the x, y coords of where the menu is when it is active
     def get_display_position(self):
@@ -299,7 +299,8 @@ class ListItem (clutter.Label):
         label_x = 0 #x #self.stage.get_width() - label_width - 50
         label_y = y #self.stage.get_height() - label_height
         self.set_position(0, y)
-        self.addImage(imagePath, True)
+        if not (imagePath == "" or imagePath is None):
+            self.addImage(imagePath, True)
         
         #Add textures group and hide it
         self.menu.getMenuGroup().add(self.itemTexturesGroup)

@@ -9,14 +9,19 @@ from modules.myth_tv_player.MythBackendConn import MythBackendConnection
 from Menu import Menu
 from VideoController import VideoController
 
-class TVPlayer:
+class Module:
+    title = "TV"
+    menu_image = "dvd.png"
 
-    def __init__(self, stage, dbMgr):
-        self.videoController = VideoController(stage)
-        self.stage = stage
+    def __init__(self, MenuMgr, dbMgr):
+        self.stage = MenuMgr.get_stage()
+        self.videoController = VideoController(self.stage)
         self.dbMgr = dbMgr
         self.isRunning = False
-
+    
+    #Action to take when menu item is selected
+    def action(self):
+        return self
         
     def begin(self, menuMgr):
         self.menuMgr = menuMgr

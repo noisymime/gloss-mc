@@ -3,13 +3,19 @@ import gtk
 import clutter
 import eyeD3
 
-class MusicPlayer():
+class Module():
+    title = "Music"
+    menu_image = "dvd.png"
 
-    def __init__(self, stage):
-        self.stage = stage
+    def __init__(self, MenuMgr, dbMgr):
+        self.stage = MenuMgr.get_stage()
         self.cover_viewer = coverViewer(self.stage) 
         
         self.is_playing = False
+        
+    #Action to take when menu item is selected
+    def action(self):
+        return self
         
     def on_key_press_event (self, stage, event):
         if event.keyval == clutter.keysyms.p:

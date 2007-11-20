@@ -68,7 +68,7 @@ class Module:
         self.myConn.stop() # Stops the backend / frontend streaming
         
     def stop_video(self):
-        self.stop()    
+        self.myConn.stop() 
     
     def on_key_press_event (self, stage, event):
         if self.isRunning:

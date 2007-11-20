@@ -81,13 +81,15 @@ class VideoController:
             alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
             self.behaviour = clutter.BehaviourOpacity(alpha, 255,0)
             self.behaviour.apply(self.video_texture)
-            self.behaviour.apply(self.blackdrop)
+            if not (self.blackdrop is None):
+                self.behaviour.apply(self.blackdrop)
         
             timeline.start()
             
     def end_video_event(self, data):
         self.stage.remove(self.video_texture)
-        self.stage.remove(self.blackdrop)
+        if not (self.blackdrop is None):
+            self.stage.remove(self.blackdrop)
         self.blackdrop = None 
         
     def customBin(self):
@@ -143,11 +145,16 @@ class VideoController:
     def set_fullscreen(self, texture, width, height):
         texture.set_property("sync-size", False)
         texture.set_position(0, 0)
-        xy_ratio = float(height) / float(width)
-        #print "XY Ratio: " + str(xy_ratio)
+        ratio = float(self.stage.get_width()) / float(width)
+        xy_ratio = float(width) / float(height)
+        #print "Width: " + str(width)
+        #print "Height: " + str(height)
+        #print "XY Ratio: " + str(ratio)
         
         width = int(self.stage.get_width())
-        height = int (width * xy_ratio)
+        height = int ((height * ratio))
+        #print "New Width: " + str(width)
+        #print "New Height: " + str(height)
         
         if height < self.stage.get_height():
             #Create a black backdrop that the video can sit on

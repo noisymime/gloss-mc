@@ -169,7 +169,9 @@ class MythBackendConnection(threading.Thread):
         #Create a buffer file
         buffer_file_name = "test.mpg"
         self.buffer_file = open(buffer_file_name,"w")
-        request_size = 32768 
+        request_size = 32768
+        max_request_size = 135000
+        request_size_step = 16384
         
         #Need to create a bit of a buffer so playback will begin
         x=0
@@ -192,6 +194,16 @@ class MythBackendConnection(threading.Thread):
             num_bytes = int(self.receive_reply(cmd_sock))
             data = data_sock.recv(num_bytes)
             self.buffer_file.write(data)
+            
+            #This tries to optimise the request size
+            #print "Received: " + str(num_bytes)
+            if (num_bytes == request_size) and (request_size < max_request_size):
+                request_size = request_size + request_size_step
+                if request_size > max_request_size:
+                    request_size = max_request_size
+            elif (request_size > request_size_step):
+                request_size = request_size - request_size_step
+                
         
         print "Ending playback"
         self.buffer_file.close()

@@ -34,34 +34,13 @@ class Module:
         
         self.isRunning = True
         
-    def begin_playback(self, buffer_file):
+    def begin_playback(self, fd):#buffer_file):
         self.menuMgr.get_selector_bar().set_spinner(False)
-        uri = "file://" + os.getcwd() +"/" + buffer_file
+        #uri = "file://" + os.getcwd() +"/" + buffer_file
+        #f = open(os.getcwd() +"/" + buffer_file, 'r')
+        uri = "fd://" + str(fd)
+        #print uri
         self.videoController.play_video(uri, self)
-        
-        """
-        timeline = clutter.Timeline(15, 25)
-        alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
-        behaviour = clutter.BehaviourOpacity(alpha, 0,255)
-        behaviour.apply(self.video)
-        
-        self.stage.add(self.video)
-        self.video.set_playing(True)
-        timeline.start()
-        #return None
-        """
-        
-    def video_size_change(self, texture, width, height):
-        self.video.set_property("sync-size", False)
-        self.video.set_position(0, 0)
-        xy_ratio = float(width / height)
-        print "XY Ratio: " + str(xy_ratio)
-        
-        width = int(self.stage.get_width())
-        height = int (width / xy_ratio)
-        height = 768
-        
-        self.video.set_size(width, height)
         
     def stop(self):
         self.videoController.stop_video()

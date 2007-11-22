@@ -1,5 +1,6 @@
 import sys, clutter, clutter.cluttergst, gst, pygst, gtk, pygtk, gobject
 import threading
+import os
 
 
 class VideoController:
@@ -35,29 +36,38 @@ class VideoController:
     def play_video(self, uri, player):
         self.player = player
         self.stage.add(self.video_texture)
+        #f = open("/home/josh/eclipse/gloss-mc/test.mpg",'r')
+        #fd = os.dup(f.fileno())
+        #uri = "fd://" + str(fd)
+        #print "New URI: " + uri
         self.video_texture.set_uri(uri)
         self.video_texture.set_position(0, 0)
         self.video_texture.show()
 
         #We need to connect to the message queue on the playbin to watch for any message (ie codec or file not found errors)
+        self.bin = self.video_texture.get_playbin()
         bus = self.video_texture.get_playbin().get_bus()
         bus.add_signal_watch()
         bus.connect('message', self.on_bus_message)
         
         #Now we can start the video
         self.video_texture.set_playing(True)
+        self.bin.set_state(gst.STATE_PAUSED)
         self.isPlaying = True
         
         return self.video_texture
 
     #This handles any messages that are sent accross the playbin
-    #Currently the only message being checked for it a "codec not found"
+    #Currently this is checking two types of msgs:
+    #    1) A "codec not found" warning, at which stage playback is stopped
+    #    2) A Buffering msg. This pauses the video until the buffer is at 100%
     def on_bus_message(self, bus, message):
         t = message.type
-        
+        print "message type: " + str(t)
         if t == gst.MESSAGE_ELEMENT:
             #This occurs when an invalid codec is attempted to be played
             #Need to insert some form of message to the user here
+            #print "Element: " + message.structure.to_string()
             struc = message.structure
             if struc is None:
                 return
@@ -66,8 +76,20 @@ class VideoController:
                 self.isPlaying = False
                 self.video_texture.set_playing(False)
                 self.player.stop_video()
+        if t == gst.MESSAGE_BUFFERING:
+            percent = message.parse_buffering()
+            print "Buffer: " + str(percent)
+            if percent < 100:
+                self.bin.set_state(gst.STATE_PAUSED)
+            else:
+                self.bin.set_state(gst.STATE_PLAYING)
+        if t == gst.MESSAGE_STATE_CHANGED:
+            prev, current, next = message.parse_state_changed()
+            print "State Changed. Previous state: " + str(prev)
+            print "State Changed. Current state: " + str(current)
         elif t == gst.STREAM_ERROR:
-            print "OHH NOES!"
+            #print "OHH NOES!"
+            print "GST Message: " + message.structure.to_string()
     
     def stop_video(self):
         if self.video_texture.get_playing():
@@ -92,9 +114,9 @@ class VideoController:
             self.stage.remove(self.blackdrop)
         self.blackdrop = None 
         
-    def customBin(self):
-        self.src = gst.element_factory_make("filesrc", "src");
-        self.src.set_property("location", "/home/josh/clutter/toys/gloss/test.mpg")
+    def customBin(self, fd):
+        self.src = gst.element_factory_make("fdsrc", "src");
+        self.src.set_property("fd", fd)
         self.demux = gst.element_factory_make("ffdemux_mpegts", "demux")
         self.queue1 = gst.element_factory_make("queue", "queue1")
         self.queue2 = gst.element_factory_make("queue", "queue2")

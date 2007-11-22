@@ -167,24 +167,28 @@ class MythBackendConnection(threading.Thread):
     
     def buffer_live(self, cmd_sock, data_sock, socket_id):
         #Create a buffer file
-        buffer_file_name = "test.mpg"
-        self.buffer_file = open(buffer_file_name,"w")
+        #buffer_file_name = "test.mpg"
+        #self.buffer_file = open(buffer_file_name,"w")
         request_size = 32768
-        max_request_size = 135000
+        #max_request_size = 135000
+        max_request_size = 270000
         request_size_step = 16384
         
         #Need to create a bit of a buffer so playback will begin
+        """
         x=0
         while x<80:
             transfer_cmd = "QUERY_FILETRANSFER "+ str(socket_id) + "[]:[]REQUEST_BLOCK[]:[]"+str(request_size)
             self.send_cmd(cmd_sock, transfer_cmd)
             num_bytes = int(self.receive_reply(cmd_sock))
             data = data_sock.recv(num_bytes)
-            self.buffer_file.write(data)
+            #self.buffer_file.write(data)
             x=x+1
-        self.buffer_file.flush()
-        self.videoPlayer.begin_playback(buffer_file_name)
-        #self.videoPlayer.begin_playback(self.data_sock.fileno())
+        #self.buffer_file.flush()
+        """
+        #self.videoPlayer.begin_playback(buffer_file_name)
+        reader_fd = os.dup(data_sock.fileno())
+        self.videoPlayer.begin_playback(reader_fd)
         
         print "BEGINNING PLAYBACK!"
         self.Playing = True
@@ -192,8 +196,8 @@ class MythBackendConnection(threading.Thread):
             transfer_cmd = "QUERY_FILETRANSFER "+ str(socket_id) + "[]:[]REQUEST_BLOCK[]:[]"+str(request_size)
             self.send_cmd(cmd_sock, transfer_cmd)
             num_bytes = int(self.receive_reply(cmd_sock))
-            data = data_sock.recv(num_bytes)
-            self.buffer_file.write(data)
+            data_sock.recv(num_bytes)
+            #self.buffer_file.write(data)
             
             #This tries to optimise the request size
             #print "Received: " + str(num_bytes)
@@ -201,12 +205,12 @@ class MythBackendConnection(threading.Thread):
                 request_size = request_size + request_size_step
                 if request_size > max_request_size:
                     request_size = max_request_size
-            elif (request_size > request_size_step):
+            elif (request_size > request_size_step) and (num_bytes != request_size):
                 request_size = request_size - request_size_step
                 
         
         print "Ending playback"
-        self.buffer_file.close()
+        #self.buffer_file.close()
         
     def message_socket_mgr(self, msg_socket):
         #Do the protocol version check

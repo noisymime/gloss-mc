@@ -131,7 +131,7 @@ class coverViewer(clutter.Group):
         
         self.timeline.start()
         
-    def select_first(self):
+    def select_first(self):      
         self.timeline = clutter.Timeline(20,80)
         self.current_video_details.set_video(self.videoLibrary[0], self.timeline)
 

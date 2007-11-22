@@ -15,6 +15,7 @@ class Module():
 
     def __init__(self, MenuMgr, dbMgr):
         self.stage = MenuMgr.get_stage()
+        self.MenuMgr = MenuMgr
         self.cover_viewer = coverViewer(self.stage, 800, 600)
         self.videoController = VideoController(self.stage)
         self.is_playing = False
@@ -69,6 +70,11 @@ class Module():
         
         
     def begin(self, MenuMgr):
+        #Check that the library actually contains something
+        if self.cover_viewer.num_covers == 0:
+            self.MenuMgr.display_msg("Error: No videos", "There are no videos available in the library. This maybe caused by an empty library or a failed connection to the server.")
+            self.stop()
+            return
        
         #Create a backdrop for the player. In this case we just use the same background as the menus
         self.backdrop = clutter.CloneTexture(MenuMgr.get_skinMgr().get_Background())
@@ -105,6 +111,8 @@ class Module():
         self.stop_behaviour.apply(self.backdrop)
         timeline_stop.connect('completed', self.destroyPlugin)
         timeline_stop.start()
+        
+        self.MenuMgr.currentPlugin = None
     
     def destroyPlugin(self, data):
         self.stage.remove(self.cover_viewer)

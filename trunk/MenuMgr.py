@@ -3,6 +3,7 @@ from SkinMgr import SkinMgr
 from Spinner import Spinner
 import pygtk
 import gtk
+import pango
 
 class MenuMgr:
 
@@ -11,6 +12,7 @@ class MenuMgr:
         self.menus = []
         self.menuHistory = [] #A list that contains menus in the order that they've been viewed
         self.currentMenu = None
+        self.uiMsg = message(stage)
         
         self.skinMgr = SkinMgr(self.stage)
         background = self.skinMgr.get_Background()
@@ -108,21 +110,30 @@ class MenuMgr:
         self.currentMenu = toMenu
         
     def on_key_press_event (self, stage, event):
-        #Firstly checking whether we are in the process of running a plugin (And that the key isn't escape)
+        #Firstly check whether any messages are currently displayed
+        if self.uiMsg.active:
+            self.uiMsg.on_key_press_event(stage, event)
+            return
+            
+        #Secondly, checking whether we are in the process of running a plugin (And that the key isn't escape)
         if (not self.currentPlugin == None) and (not event.keyval == clutter.keysyms.Escape):
             #If it is, simply pass the event details along to the plugin
             self.currentPlugin.on_key_press_event(stage, event)
             return None
             
-        #print event.hardware_keycode 
+            
+        # If none of these things, the menu needs to do something
         if event.keyval == clutter.keysyms.Up: #Up button pressed
             self.currentMenu.selectPrevious()
         if event.keyval == clutter.keysyms.Down: #Down button pressed
             self.currentMenu.selectNext()
         if event.keyval == clutter.keysyms.q:
             clutter.main_quit()
-        if event.hardware_keycode == 36: #return button pressed
-            #self.aList.set_processing(True)
+        if event.keyval == clutter.keysyms.Return: #return button pressed
+            # Need to decide what action to take
+            # Options are:
+            # 1) Switch to a new menu
+            # 2) Launch a module
             action = self.currentMenu.get_current_item().getAction()
             if action.__class__.__name__ == "Menu": # Check whether we're a pointing to a menu object
                 self.transition_fade_zoom(self.currentMenu, action)
@@ -131,6 +142,7 @@ class MenuMgr:
                 #We have a plugin and need to start it
                 self.currentPlugin = action
                 action.begin( self )
+        # This is tres bodge
         if event.keyval == clutter.keysyms.Escape:
             #If there's a plugin running then end it
             if not self.currentPlugin == None:
@@ -153,6 +165,9 @@ class MenuMgr:
             if len(self.menuHistory)>1:
                     self.transition_fade_zoom(self.menuHistory.pop(), self.menuHistory[-1])
                     self.currentMenu = self.menuHistory[-1]
+                    
+    def display_msg(self, title, msg):
+        self.uiMsg.display_msg(title, msg)
         
 class MenuSelector(clutter.Texture):
     x_offset = -50
@@ -243,3 +258,93 @@ class MenuSelector(clutter.Texture):
     def get_width(self):
         return self.width
         
+class message():
+    font = "Lucida Grande "
+    message_font_size = 30
+    detail_font_size = 22
+    
+    def __init__(self, stage):
+        self.stage = stage
+        self.active = False
+        
+        self.backdrop = clutter.Rectangle()
+        self.backdrop.set_color(clutter.color_parse('Black'))
+        #self.backdrop.set_opacity(240)
+        self.backdrop.set_width(self.stage.get_width())
+        self.backdrop.set_height(self.stage.get_height())
+        
+        self.main_group = clutter.Group()
+        
+        pixbuf = gtk.gdk.pixbuf_new_from_file("ui/splash_box.png")
+        self.box = clutter.Texture()
+        self.box.set_pixbuf(pixbuf)
+        self.box.set_opacity(int(255 * 0.75))
+        self.box.set_height(int(self.stage.get_height()* 0.3))
+        self.main_group.add(self.box)
+
+        self.message = clutter.Label()
+        self.message.set_font_name(self.font + str(self.message_font_size))
+        self.message.set_color(clutter.color_parse('White'))
+        pos_x = int(self.box.get_width() * 0.10)
+        pos_y = int(self.box.get_height() * 0.10)
+        self.message.set_position(pos_x, pos_y)
+        width = int(self.box.get_width() * 0.80) #Width is 80% of the box, giving 10% gap each side
+        self.message.set_width(width)
+        self.message.set_ellipsize(pango.ELLIPSIZE_END)
+        self.message.set_text("")
+        self.main_group.add(self.message)
+        
+        self.detail = clutter.Label()
+        self.detail.set_font_name(self.font + str(self.detail_font_size))
+        self.detail.set_color(clutter.color_parse('White'))
+        pos_x = self.message.get_x()
+        pos_y = self.message.get_y() + self.message.get_height()
+        self.detail.set_position(pos_x, pos_y)
+        height = self.box.get_height() - pos_y
+        self.detail.set_height(height)
+        #self.detail.set_ellipsize(pango.ELLIPSIZE_END)
+        self.main_group.add(self.detail)
+        self.detail.set_line_wrap(True)
+        
+        group_x = (self.stage.get_width()/2) - (self.box.get_width()/2)
+        group_y = (self.stage.get_height()/2) - (self.box.get_height()/2)
+        self.main_group.set_position(group_x, group_y)
+
+    def display_msg(self, title, text):
+        self.active = True
+        
+        self.message.set_text(title)
+        self.detail.set_text(text)
+        width = int(self.box.get_width() * 0.80) #Width is 80% of the box, giving 10% gap each side
+        self.detail.set_width(width)
+        self.message.set_width(width)
+
+
+        self.main_group.set_opacity(0)      
+        self.backdrop.set_opacity(0)
+        self.stage.add(self.backdrop)
+        self.stage.add(self.main_group)
+        self.main_group.show_all()
+        self.backdrop.show()
+        
+        self.timeline = clutter.Timeline(10,30)
+        alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
+        self.behaviour_group = clutter.BehaviourOpacity(alpha, 0, 255)
+        self.behaviour_backdrop = clutter.BehaviourOpacity(alpha, 0, 180)
+        self.behaviour_group.apply(self.main_group)
+        self.behaviour_backdrop.apply(self.backdrop)
+        self.timeline.start()
+        
+    def hide_msg(self):
+        self.active = False
+        
+        self.timeline = clutter.Timeline(10,30)
+        alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
+        self.behaviour_group = clutter.BehaviourOpacity(alpha, 255, 0)
+        self.behaviour_backdrop = clutter.BehaviourOpacity(alpha, 180, 0)
+        self.behaviour_group.apply(self.main_group)
+        self.behaviour_backdrop.apply(self.backdrop)
+        self.timeline.start()
+        
+    def on_key_press_event (self, stage, event):
+        self.hide_msg()

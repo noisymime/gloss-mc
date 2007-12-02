@@ -1,11 +1,11 @@
 import MySQLdb
-import os
+import os, socket
 
 class mythDB():
 
     def __init__(self):
 
-        #self.connected = False
+        self.localHost = socket.gethostname()
         self.read_config()
         
         try:
@@ -60,17 +60,6 @@ class mythDB():
         result = self.cursor.fetchall()
         
         return result
-        
-    def get_gallery_directory(self):
-        if not self.connected:
-            print "Unable to start video, could not establish connection to SQL server"
-            return None
-        
-        sql = "SELECT * FROM settings where value = 'GalleryDir'"
-        
-        self.cursor.execute(sql)
-        # get the resultset as a tuple
-        return self.cursor.fetchall()[1][1]
     
     #Gets an arbitary setting from the settings table
     def get_setting(self, setting_name):
@@ -78,11 +67,17 @@ class mythDB():
             print "Error: Could not establish connection to SQL server. Unable to obtain setting '" + setting_name + "'"
             return None
         
-        sql = "SELECT * FROM settings where value = '" + setting_name + "'"
+        sql = "SELECT * FROM settings where value = '" + setting_name + "' AND hostname = '" + self.localHost + "'"
         
         self.cursor.execute(sql)
+        data = self.cursor.fetchall()
+        if data == ():
+            sql = "SELECT * FROM settings where value = '" + setting_name + "'"
+            self.cursor.execute(sql)
+            data = self.cursor.fetchall()
+            return data[1][1]
         # get the resultset as a tuple
-        return self.cursor.fetchall()[1][1]
+        return data[0][1]
     
     #Gets the backend server details, which, in theory, can be different from the SQL server details and/or default port
     def get_backend_server(self):

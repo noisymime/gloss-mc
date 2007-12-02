@@ -5,6 +5,7 @@ import gst
 import gobject
 import pango
 import clutter
+import os
 from clutter import cluttergst
 from VideoController import VideoController
 from modules.video_player.cover_viewer import coverViewer
@@ -21,6 +22,8 @@ class Module():
         self.is_playing = False
         
         #This block can be moved to begin() but causes a performance hit when loading the module *shrug*
+        self.baseDir = dbMgr.get_setting("VideoStartupDir")
+        self.loadDir(self.baseDir)
         results = dbMgr.get_videos()
         if results == None:
             print "VideoPlayer: No connection to DB or no videos found in DB"
@@ -30,6 +33,22 @@ class Module():
             tempVideo = videoItem()
             tempVideo.importFromMythObject(record)
             self.cover_viewer.add_video(tempVideo)
+            
+    def loadDir(self, dirPath):
+        if not os.path.isdir(dirPath):
+            print "ERROR: Invalid path"
+            return None
+        
+        final_file_list = []
+        new_file_list = os.listdir(dirPath)
+        
+        #Images and Directories
+        for dir_entry in new_file_list:
+            if os.path.isdir(dirPath + "/" + dir_entry) and not ( dir_entry[0] == "."):
+                self.cover_viewer.add_folder(dir_entry)
+                print dir_entry
+            else:
+                final_file_list.append(dir_entry)
             
     #Action to take when menu item is selected
     def action(self):
@@ -102,7 +121,8 @@ class Module():
         timeline_begin.start()
         
     def stop(self):
-           
+        self.MenuMgr.currentPlugin = None
+        
         #Fade everything out
         timeline_stop = clutter.Timeline(10,30)
         alpha = clutter.Alpha(timeline_stop, clutter.ramp_inc_func)
@@ -112,7 +132,7 @@ class Module():
         timeline_stop.connect('completed', self.destroyPlugin)
         timeline_stop.start()
         
-        self.MenuMgr.currentPlugin = None
+        
     
     def destroyPlugin(self, data):
         self.stage.remove(self.cover_viewer)

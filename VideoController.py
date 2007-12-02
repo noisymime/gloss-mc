@@ -36,11 +36,9 @@ class VideoController:
     def play_video(self, uri, player):
         self.player = player
         self.stage.add(self.video_texture)
-        #f = open("/home/josh/eclipse/gloss-mc/test.mpg",'r')
-        #fd = os.dup(f.fileno())
-        #uri = "fd://" + str(fd)
-        #print "New URI: " + uri
         self.video_texture.set_uri(uri)
+        #fd = uri[5:7]
+        #self.customBin(fd)
         self.video_texture.set_position(0, 0)
         self.video_texture.show()
 
@@ -52,8 +50,35 @@ class VideoController:
         
         #Now we can start the video
         self.video_texture.set_playing(True)
-        self.bin.set_state(gst.STATE_PAUSED)
+        #self.bin.set_state(gst.STATE_PAUSED)
+        #self.bin.set_state(gst.STATE_PLAYING)
         self.isPlaying = True
+        
+        src = self.bin.get_by_name("decodebin0")
+        decodebin = self.bin.get_by_name("decodebin0")
+        #source = self.bin.get_by_name("source")
+        demuxer = decodebin.get_by_name("avidemux0")
+        #ypefind = decodebin.get_by_name("typefind")
+        """
+        demuxer.connect("pad-added", self.on_pad_added)
+        #vid = demuxer.get_by_name("video_00")
+        self.queue1 = gst.element_factory_make("queue", "queue1")
+        self.queue1.set_property("max-size-time", 0)
+        self.queue1.set_property("max-size-buffers", 0)
+        
+        self.queue2 = gst.element_factory_make("queue", "queue2")
+        self.bin.add(self.queue1)
+        self.bin.add(self.queue2)    
+        self.queue1.link(decodebin)
+        """
+        for element in self.bin.elements():
+            print "GST Element 1: " + str(element.get_name())      
+        #print "Pads: " + str(decodebin.pads())
+        for pad in decodebin.pads(): #decodebin.elements():
+            print "GST Element: " + str(pad.get_peer().get_parent_element().get_name())
+            #for element in pad.get_internal_links():
+            #    print "GST Element: " + str(element.get_name())      
+            
         
         return self.video_texture
 
@@ -63,7 +88,7 @@ class VideoController:
     #    2) A Buffering msg. This pauses the video until the buffer is at 100%
     def on_bus_message(self, bus, message):
         t = message.type
-        print "message type: " + str(t)
+        #print "message type: " + str(t)
         if t == gst.MESSAGE_ELEMENT:
             #This occurs when an invalid codec is attempted to be played
             #Need to insert some form of message to the user here
@@ -85,8 +110,8 @@ class VideoController:
                 self.bin.set_state(gst.STATE_PLAYING)
         if t == gst.MESSAGE_STATE_CHANGED:
             prev, current, next = message.parse_state_changed()
-            print "State Changed. Previous state: " + str(prev)
-            print "State Changed. Current state: " + str(current)
+            #print "State Changed. Previous state: " + str(prev)
+            #print "State Changed. Current state: " + str(current)
         elif t == gst.STREAM_ERROR:
             #print "OHH NOES!"
             print "GST Message: " + message.structure.to_string()
@@ -115,9 +140,11 @@ class VideoController:
         self.blackdrop = None 
         
     def customBin(self, fd):
+        
         self.src = gst.element_factory_make("fdsrc", "src");
-        self.src.set_property("fd", fd)
+        self.src.set_property("fd", int(fd))
         self.demux = gst.element_factory_make("ffdemux_mpegts", "demux")
+        #self.demux = gst.element_factory_make("decodebin", "demux")
         self.queue1 = gst.element_factory_make("queue", "queue1")
         self.queue2 = gst.element_factory_make("queue", "queue2")
         #self.deinterlace = gst.element_factory_make("ffdeinterlace", "deinterlace")

@@ -5,6 +5,7 @@ import gst
 import gobject
 import pango
 import clutter
+import os
 
 class coverViewer(clutter.Group):
     scaleFactor = 1.4
@@ -15,7 +16,10 @@ class coverViewer(clutter.Group):
         clutter.Group.__init__(self)
         self.stage = stage
         self.videoLibrary = []
+        #self.VidLibrary_byName = []
+        #self.VidLibrary_byGenre = []
         self.textureLibrary = []
+        self.folderLibrary = []
         self.current_video_details = video_details_group(width)
         self.covers_group = clutter.Group()
         self.num_covers = 0
@@ -54,46 +58,49 @@ class coverViewer(clutter.Group):
             self.stage.remove(self.current_video_details)
         
     def add_video(self, video):
+        #Quick snaity check to make sure the cover file exists.
+        # In the future this will change so that the video is still included with a blank image
+        if not os.path.exists(video.getCoverfile()):
+            return
+        
         self.videoLibrary.append(video)
-        imagePath = video.getCoverfile()
-        tempTexture = clutter.Texture()
-        pixbuf = gtk.gdk.pixbuf_new_from_file(imagePath)
-        tempTexture.set_pixbuf(pixbuf)
-        xy_ratio = float(tempTexture.get_width()) / tempTexture.get_height()
+        tempTexture = cover_item(video, None, self.cover_size)
+        self.add_texture_group(tempTexture)
+    
+    def add_folder(self, folder_name):
+        tempTexture = cover_item(None, folder_name, self.cover_size)
+        self.folderLibrary.append(folder_name)
+        self.add_texture_group(tempTexture)
         
-        width = int(self.cover_size * xy_ratio)
-        tempTexture.set_width(width)
-        tempTexture.set_height(self.cover_size)
-        tempTexture.set_opacity(self.inactiveOpacity)
+    def add_texture_group(self, tempGroup):
+        tempGroup.set_opacity(self.inactiveOpacity)
         
-        tempTexture.set_position( (self.num_covers * self.cover_size), 0)
-        tempTexture.set_depth(1)
+        tempGroup.set_position( (self.num_covers * self.cover_size), 0)
+        tempGroup.set_depth(1)
         
-        self.textureLibrary.append(tempTexture)
+        self.textureLibrary.append(tempGroup)
 
-        #x = (self.cover_gap + self.cover_size) * (self.num_covers/self.num_rows)
-        #y = (self.num_covers % self.num_rows) * self.cover_size + ( (self.num_covers % self.num_rows) * self.cover_gap)
         x = (self.num_covers % self.num_columns) * self.cover_size + ( (self.num_covers % self.num_columns) * self.cover_gap)
         y = (self.cover_gap + self.cover_size) * (self.num_covers/self.num_columns)
         
-        #Center the cover
-        if width < self.cover_size:
-            x = x + (self.cover_size - width)/2
-        
-        tempTexture.set_position(x, y)
+        tempGroup.set_position(x, y)
         
         #If we're past the maximum rows, make the pics invistible
         if self.num_covers > (self.num_columns * self.num_visible_rows)-1:
-            tempTexture.set_opacity(0)
+            tempGroup.set_opacity(0)
         else:
-            self.covers_group.add(tempTexture)
+            self.covers_group.add(tempGroup)
         
-        tempTexture.show()
+        tempGroup.show()
         self.num_covers = self.num_covers +1
+            
         
     def select_item(self, incomingItem, outgoingItem):
         self.timeline = clutter.Timeline(10,35)
-        self.current_video_details.set_video(self.videoLibrary[incomingItem], self.timeline)
+        numFolders = len(self.folderLibrary)
+        if incomingItem >= numFolders:
+            incomingItemVideo = incomingItem - numFolders
+            self.current_video_details.set_video(self.videoLibrary[incomingItemVideo], self.timeline)
         
         #Check if the cover is currently not visible
         rolling = False
@@ -205,7 +212,8 @@ class coverViewer(clutter.Group):
             self.behaviour_outgoing.apply(self.textureLibrary[i])
         for i in range(min_incoming, max_incoming):
             self.behaviour_incoming.apply(self.textureLibrary[i])
-            
+    
+    #These next two functions add and remove visible rows when the viewer rolls        
     def removeOutgoingRow(self, timeline, min, max):
         for i in range(min, max):
             self.covers_group.remove(self.textureLibrary[i])
@@ -213,18 +221,6 @@ class coverViewer(clutter.Group):
     def addIncomingRow(self, min, max):
         for i in range(min, max):
             self.covers_group.add(self.textureLibrary[i])
-            
-            #xy_ratio = float(self.textureLibrary[i].get_width()) / self.textureLibrary[i].get_height()
-            #width = int(self.cover_size * xy_ratio)
-            
-            #x = (i % self.num_columns) * self.cover_size + ( (i % self.num_columns) * self.cover_gap)
-            #y = (self.cover_gap + self.cover_size) * (i/self.num_columns)
-        
-            #Center the cover
-            #if width < self.cover_size:
-            #    x = x + (self.cover_size - width)/2
-        
-            #self.textureLibrary[i].set_position(x, y)
             self.textureLibrary[i].show()
     
     def get_current_video(self):
@@ -257,6 +253,71 @@ class coverViewer(clutter.Group):
         if not newItem == None:
             self.select_item(newItem, self.currentSelection)
 
+class cover_item(clutter.Group):
+    font = "Lucida Grande "
+    title_font_size = 30
+    main_font_size = 22
+    plot_font_size = 18
+    
+    def __init__(self, video, folder_name, cover_size):
+        clutter.Group.__init__(self)
+        self.width = cover_size
+        self.height = cover_size
+        
+        #Set whether or not this is a folder or a video cover
+        if not folder_name is None:
+            imagePath = "ui/mv_gallery_folder_sel.png"
+            pixbuf = gtk.gdk.pixbuf_new_from_file(imagePath)
+            self.isFolder = True
+        else:
+            imagePath = video.getCoverfile()
+            pixbuf = gtk.gdk.pixbuf_new_from_file(imagePath)
+            self.isFolder = False
+        
+        self.main_pic = clutter.Texture()
+        self.main_pic.set_pixbuf(pixbuf)
+        self.main_pic.show()
+        (x, y) = (0, 0)
+        if self.main_pic.get_height() > self.main_pic.get_width():
+            xy_ratio = float(self.main_pic.get_width()) / self.main_pic.get_height()
+            self.main_pic.set_height(cover_size)
+            width = int(cover_size * xy_ratio)
+            self.main_pic.set_width(width)
+            x = x + (cover_size - width)/2
+        else:
+            xy_ratio = float(self.main_pic.get_height()) / float(self.main_pic.get_width())
+            self.main_pic.set_width(cover_size)
+            height = int(cover_size * xy_ratio)
+            self.main_pic.set_height(height)
+            y = y + (cover_size - height)/2
+            
+        self.main_pic.set_position(x, y)
+        
+        self.add(self.main_pic)
+        
+        #If this is a folder, we also add a title
+        if not folder_name is None:
+            self.add_label(folder_name)
+        
+    def add_label(self, label):
+        #Adds a label in the centre of the item
+        self.title = clutter.Label()
+        self.title.set_font_name(self.font + str(self.title_font_size))
+        self.title.set_color(clutter.color_parse('White'))
+        self.title.set_text(label)
+        if self.title.get_width() > self.get_width():
+                self.title.set_width(self.get_width())
+        
+        #Add an ellipsis
+        self.title.set_ellipsize(pango.ELLIPSIZE_END)
+        #Centre the label
+        y = (self.height - self.title.get_height())/2
+        x = (self.width - self.title.get_width())/2
+        self.title.set_position(x, y)
+        
+        self.title.show()
+        self.add(self.title)
+        
 class video_details_group(clutter.Group):
     font = "Lucida Grande "
     title_font_size = 30

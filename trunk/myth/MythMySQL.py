@@ -46,21 +46,16 @@ class mythDB():
                 if variables[0] == "DBName":
                     self.db = variables[1].rstrip()
     
-        
-            
-    def get_videos(self):
+    def run_sql(self, sql):
         if not self.connected:
             print "Unable to start video, could not establish connection to SQL server"
             return None
     
-        sql = "SELECT * FROM videometadata WHERE coverfile <> 'No Cover'"
-        
         self.cursor.execute(sql)
         # get the resultset as a tuple
         result = self.cursor.fetchall()
-        
         return result
-    
+            
     #Gets an arbitary setting from the settings table
     def get_setting(self, setting_name):
         if not self.connected:

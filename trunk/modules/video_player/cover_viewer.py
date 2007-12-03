@@ -6,18 +6,17 @@ import gobject
 import pango
 import clutter
 import os
+from modules.video_player.CoverItem import cover_item
 
 class coverViewer(clutter.Group):
     scaleFactor = 1.4
     inactiveOpacity = 150
     
 
-    def __init__(self, stage, width, height):
+    def __init__(self, stage, width, height, rows, columns):
         clutter.Group.__init__(self)
         self.stage = stage
         self.videoLibrary = []
-        #self.VidLibrary_byName = []
-        #self.VidLibrary_byGenre = []
         self.textureLibrary = []
         self.folderLibrary = []
         self.current_video_details = video_details_group(width)
@@ -26,9 +25,9 @@ class coverViewer(clutter.Group):
         
         self.cover_gap = 1
         
-        self.num_visible_rows = 3
-        self.num_columns = 4
-        self.cover_size = int(width / self.num_columns) #200 #A cover will be cover_size * cover_size (X * Y)
+        self.num_visible_rows = rows
+        self.num_columns = columns
+        self.cover_size = int(width / self.num_columns) #A cover will be cover_size * cover_size (X * Y)
         
         #Setup the current min and max viewable rows
         self.min_visible_rows = 0
@@ -140,7 +139,10 @@ class coverViewer(clutter.Group):
         
     def select_first(self):      
         self.timeline = clutter.Timeline(20,80)
-        self.current_video_details.set_video(self.videoLibrary[0], self.timeline)
+        if not len(self.folderLibrary) == 0:
+            pass
+        else:
+            self.current_video_details.set_video(self.videoLibrary[0], self.timeline)
 
     
         incomingItem = 0
@@ -223,8 +225,14 @@ class coverViewer(clutter.Group):
             self.covers_group.add(self.textureLibrary[i])
             self.textureLibrary[i].show()
     
-    def get_current_video(self):
-        return self.videoLibrary[self.currentSelection]
+    def get_current_item(self):
+        return self.textureLibrary[self.currentSelection]
+        #If the current item # is greater than the number of folders, we have a video
+        if self.currentSelection >= len(self.folderLibrary):
+            selection = self.currentSelection - len(self.folderLibrary)
+            return self.videoLibrary[selection]
+        else:
+            return self.folderLibrary[self.currentSelection]
         
     def on_key_press_event(self, event):
         newItem = None
@@ -252,71 +260,6 @@ class coverViewer(clutter.Group):
         #If there is movement, make the scale happen
         if not newItem == None:
             self.select_item(newItem, self.currentSelection)
-
-class cover_item(clutter.Group):
-    font = "Lucida Grande "
-    title_font_size = 30
-    main_font_size = 22
-    plot_font_size = 18
-    
-    def __init__(self, video, folder_name, cover_size):
-        clutter.Group.__init__(self)
-        self.width = cover_size
-        self.height = cover_size
-        
-        #Set whether or not this is a folder or a video cover
-        if not folder_name is None:
-            imagePath = "ui/mv_gallery_folder_sel.png"
-            pixbuf = gtk.gdk.pixbuf_new_from_file(imagePath)
-            self.isFolder = True
-        else:
-            imagePath = video.getCoverfile()
-            pixbuf = gtk.gdk.pixbuf_new_from_file(imagePath)
-            self.isFolder = False
-        
-        self.main_pic = clutter.Texture()
-        self.main_pic.set_pixbuf(pixbuf)
-        self.main_pic.show()
-        (x, y) = (0, 0)
-        if self.main_pic.get_height() > self.main_pic.get_width():
-            xy_ratio = float(self.main_pic.get_width()) / self.main_pic.get_height()
-            self.main_pic.set_height(cover_size)
-            width = int(cover_size * xy_ratio)
-            self.main_pic.set_width(width)
-            x = x + (cover_size - width)/2
-        else:
-            xy_ratio = float(self.main_pic.get_height()) / float(self.main_pic.get_width())
-            self.main_pic.set_width(cover_size)
-            height = int(cover_size * xy_ratio)
-            self.main_pic.set_height(height)
-            y = y + (cover_size - height)/2
-            
-        self.main_pic.set_position(x, y)
-        
-        self.add(self.main_pic)
-        
-        #If this is a folder, we also add a title
-        if not folder_name is None:
-            self.add_label(folder_name)
-        
-    def add_label(self, label):
-        #Adds a label in the centre of the item
-        self.title = clutter.Label()
-        self.title.set_font_name(self.font + str(self.title_font_size))
-        self.title.set_color(clutter.color_parse('White'))
-        self.title.set_text(label)
-        if self.title.get_width() > self.get_width():
-                self.title.set_width(self.get_width())
-        
-        #Add an ellipsis
-        self.title.set_ellipsize(pango.ELLIPSIZE_END)
-        #Centre the label
-        y = (self.height - self.title.get_height())/2
-        x = (self.width - self.title.get_width())/2
-        self.title.set_position(x, y)
-        
-        self.title.show()
-        self.add(self.title)
         
 class video_details_group(clutter.Group):
     font = "Lucida Grande "

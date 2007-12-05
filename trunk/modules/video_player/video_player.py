@@ -14,8 +14,10 @@ from modules.video_player.folder_menu import folderMenu
 class Module():
     title = "Videos"
     menu_image= "videos.png"
-    coverViewerWidth = 800
+    coverViewerWidth = 750
     coverViewerHeight = 600
+    coverViewerPosX = 250
+    coverViewerPosY = 20
     coverViewerRows = 3
     coverViewerColumns = 4
     cover_size = int(coverViewerWidth / coverViewerColumns)
@@ -28,6 +30,9 @@ class Module():
         self.folderLibrary = []
         self.videoController = VideoController(self.stage)
         self.is_playing = False
+        self.controlState = "folder" #Options are "folder", "cover" or "video"
+        self.foldersPosX = (self.coverViewerPosX - self.cover_size) / 2
+        self.foldersPosY = (self.stage.get_height() - self.coverViewerHeight) / 2
         
         #This block can be moved to begin() but causes a performance hit when loading the module *shrug*
         #base_cover_viewer = coverViewer(self.stage, self.coverViewerWidth, self.coverViewerHeight)
@@ -37,11 +42,10 @@ class Module():
         self.cwd = self.baseDir
         self.folder_level = 0
         base_folder_menu = folderMenu(self.stage, self.coverViewerRows, self.cover_size)
+        base_folder_menu.set_position(self.foldersPosX, self.foldersPosY)
         self.folderLibrary.append(base_folder_menu)
         self.load_base_folders(self.baseDir, base_folder_menu)
         self.currentViewer = base_folder_menu.get_current_viewer()
-        self.stage.add(base_folder_menu)
-        base_folder_menu.show()
         #self.loadDir(self.baseDir, base_cover_viewer)
         #results = dbMgr.get_videos()
 
@@ -87,10 +91,9 @@ class Module():
             filename = dirPath + filename
             sql = sql + "\"" + filename + "\", "
         sqlLength = int(len(sql) - 2)
-        print "SQL Length: " + str(sqlLength)
         sql = sql[:sqlLength]
         sql = sql + ")"
-        print sql
+        #print sql
         results = self.dbMgr.run_sql(sql)
         
         #Check for null return
@@ -109,40 +112,57 @@ class Module():
         return self        
             
     def on_key_press_event (self, stage, event):
-        if self.is_playing:
-            if event.keyval == clutter.keysyms.Escape:
-                self.videoController.stop_video()
-                self.is_playing = False
-            else:
-                self.videoController.on_key_press_event(event)
-            
-            return False
-    
-        if event.keyval == clutter.keysyms.p:
-            if self.paused:
-                self.unpause()
-            else:
-                self.pause()
-        if event.keyval == clutter.keysyms.q:
-            clutter.main_quit()
-            
         up = clutter.keysyms.Up
         down = clutter.keysyms.Down
         left = clutter.keysyms.Left
         right= clutter.keysyms.Right
-        if (event.keyval == up) or (event.keyval == down) or (event.keyval == left) or (event.keyval == right):
-            self.currentViewer.on_key_press_event(event)
+        if event.keyval == clutter.keysyms.q:
+            clutter.main_quit()
         
-        if event.keyval == clutter.keysyms.Return:
-            #Find whether the current item is a folder or video
-            item = self.currentViewer.get_current_item()
-            if item.isFolder:
-                self.MenuMgr.display_msg("Msg", "Its a folder")
-            else:
-                self.play_video()
+        #*****************************************************************
+        #"State based input handling
+        if self.controlState == "folder":
+            if event.keyval == clutter.keysyms.Escape:
+                return True
+            elif event.keyval == right:
+                self.controlState = "cover"
+                self.currentViewer = self.folderLibrary[self.folder_level].get_current_viewer()
+                self.currentViewer.select_first()
             
-        if event.keyval == clutter.keysyms.Escape:
-            return True
+            self.folderLibrary[self.folder_level].on_key_press_event(event)
+            
+        #**********************************************************        
+        elif self.controlState == "video":
+            if event.keyval == clutter.keysyms.Escape:
+                self.videoController.stop_video()
+                self.is_playing = False
+                self.controlState = "cover"
+            else:
+                self.videoController.on_key_press_event(event)
+    
+            return False
+    
+            if event.keyval == clutter.keysyms.p:
+                if self.paused:
+                    self.unpause()
+                else:
+                    self.pause()
+        #**********************************************************
+        elif self.controlState == "cover":
+            if (event.keyval == up) or (event.keyval == down) or (event.keyval == left) or (event.keyval == right):
+                self.currentViewer.on_key_press_event(event)
+            
+            if event.keyval == clutter.keysyms.Return:
+                #Find whether the current item is a folder or video
+                item = self.currentViewer.get_current_item()
+                if item.isFolder:
+                    self.MenuMgr.display_msg("Msg", "Its a folder")
+                else:
+                    self.play_video()
+            
+            if event.keyval == clutter.keysyms.Escape:
+                self.currentViewer.select_none()
+                self.controlState = "folder"
         
             
         
@@ -167,21 +187,25 @@ class Module():
         self.begin_behaviour.apply(self.backdrop)
 
         
+        self.stage.add(self.folderLibrary[0])
+        self.folderLibrary[0].show()
+        
         self.currentViewer.set_opacity(0)    
         self.currentViewer.show_all()
         self.currentViewer.show()
         self.stage.add(self.currentViewer)
-        cover_x = self.stage.get_width() - int(self.currentViewer.get_width() * 1.1)
-        self.currentViewer.set_position(cover_x, 40)
+        #cover_x = self.coverViewerPosX #self.stage.get_width() - int(self.coverViewerWidth * 1.1)
+        
+        self.currentViewer.set_position(self.coverViewerPosX, self.coverViewerPosY)
         #self.viewerLibrary[0].set_position(50, 40)
         self.currentViewer.toggle_details() #Turns the details group on
-        self.currentViewer.select_first()
+        #self.currentViewer.select_first()
         self.begin_behaviour.apply(self.currentViewer)
         
         timeline_begin.start()
         
-        self.folder_menu = folderMenu(self.stage, self.currentViewer.num_visible_rows, self.currentViewer.cover_size)
-        self.folder_menu.set_dir_cover_viewer(self.currentViewer)
+        #self.folder_menu = folderMenu(self.stage, self.currentViewer.num_visible_rows, self.currentViewer.cover_size)
+        #self.folder_menu.set_dir_cover_viewer(self.currentViewer)
         
     def stop(self):
         self.MenuMgr.currentPlugin = None
@@ -192,13 +216,13 @@ class Module():
         self.stop_behaviour = clutter.BehaviourOpacity(alpha, 255, 0)
         self.stop_behaviour.apply(self.currentViewer)
         self.stop_behaviour.apply(self.backdrop)
+        self.stop_behaviour.apply(self.folderLibrary[self.folder_level])
         timeline_stop.connect('completed', self.destroyPlugin)
         timeline_stop.start()
         
-        
-    
     def destroyPlugin(self, data):
         self.stage.remove(self.currentViewer)
+        self.stage.remove(self.folderLibrary[self.folder_level])
         self.backdrop.hide()
         #self.stage.remove(self.overlay)
     
@@ -207,6 +231,7 @@ class Module():
         uri = "file://" + str(vid.filename)
         self.videoController.play_video(uri, self)
         self.is_playing = True
+        self.controlState = "video"
         
         self.stage.remove(self.currentViewer)
         

@@ -11,6 +11,10 @@ from modules.video_player.CoverItem import cover_item
 class coverViewer(clutter.Group):
     scaleFactor = 1.4
     inactiveOpacity = 150
+    backgroundImg = "ui/cover_bg_long.png"
+    covers_size_percent = 0.90 #This is the percentage of the total group size that the covers will take
+    detailBox_height = 160 #Needs a percent
+    
     
 
     def __init__(self, stage, width, height, rows, columns):
@@ -19,15 +23,26 @@ class coverViewer(clutter.Group):
         self.videoLibrary = []
         self.textureLibrary = []
         self.folderLibrary = []
-        self.current_video_details = video_details_group(width)
         self.covers_group = clutter.Group()
+        self.covers_width = int(width * self.covers_size_percent)
+        self.covers_height = int(height * self.covers_size_percent)
+        self.current_video_details = video_details_group(self.covers_width)
         self.num_covers = 0
-        
         self.cover_gap = 1
         
         self.num_visible_rows = rows
         self.num_columns = columns
-        self.cover_size = int(width / self.num_columns) #A cover will be cover_size * cover_size (X * Y)
+        self.cover_size = int(self.covers_width / self.num_columns) #A cover will be cover_size * cover_size (X * Y)
+        
+        #Add the background
+        pixbuf = gtk.gdk.pixbuf_new_from_file(self.backgroundImg)
+        self.bgImg = clutter.Texture()
+        self.bgImg.set_pixbuf(pixbuf)
+        bgImg_height = height - ((height - (self.cover_size * rows)) / 2) + self.detailBox_height
+        self.bgImg.set_size(width, bgImg_height)
+        self.bgImg.show()
+        self.add(self.bgImg)
+        
         
         #Setup the current min and max viewable rows
         self.min_visible_rows = 0
@@ -36,6 +51,9 @@ class coverViewer(clutter.Group):
         self.currentSelection = 0
         
         self.add(self.covers_group)
+        covers_x = int(width * (1-self.covers_size_percent)/2)
+        covers_y = int(height * (1-self.covers_size_percent)/2)
+        self.covers_group.set_position(covers_x, covers_y)
         self.covers_group.show()
         
         #self.stage.add(self.current_video_description)
@@ -160,6 +178,26 @@ class coverViewer(clutter.Group):
         self.currentSelection = incomingItem
         self.timeline.start()
         
+    def select_none(self):
+        if self.currentSelection is None:
+            return
+        
+        self.timeline = clutter.Timeline(10,35)
+        alpha = clutter.Alpha(self.timeline, clutter.smoothstep_inc_func)        
+                
+        self.behaviourOld_scale = clutter.BehaviourScale(alpha, self.scaleFactor, 1, clutter.GRAVITY_CENTER)
+        self.behaviourOld_z = clutter.BehaviourDepth(alpha, 2, 1)
+        self.behaviourOld_opacity = clutter.BehaviourOpacity(alpha, 255, self.inactiveOpacity)
+        self.behaviourOldDetails_opacity = clutter.BehaviourOpacity(alpha, 255, 0)
+        
+        current_cover = self.textureLibrary[self.currentSelection]
+        self.behaviourOld_scale.apply(current_cover)
+        self.behaviourOld_z.apply(current_cover)
+        self.behaviourOld_opacity.apply(current_cover)
+        self.behaviourOldDetails_opacity.apply(self.current_video_details)
+        
+        self.timeline.start()
+        
     #This moves the visible row of covers up and down
     # moveUp: True if the covers are to come up, false if they're to go down
     def rollViewer(self, moveUp, timeline):
@@ -228,11 +266,19 @@ class coverViewer(clutter.Group):
     def get_current_item(self):
         return self.textureLibrary[self.currentSelection]
         #If the current item # is greater than the number of folders, we have a video
+        """
         if self.currentSelection >= len(self.folderLibrary):
             selection = self.currentSelection - len(self.folderLibrary)
             return self.videoLibrary[selection]
         else:
             return self.folderLibrary[self.currentSelection]
+        """
+        
+    def get_item_x(self, itemNo):
+        return self.textureLibrary[itemNo]
+    
+    def get_item_library(self):
+        return self.textureLibrary
         
     def on_key_press_event(self, event):
         newItem = None
@@ -266,10 +312,23 @@ class video_details_group(clutter.Group):
     title_font_size = 30
     main_font_size = 22
     plot_font_size = 18
+    backgroundImg = "ui/vid_details_bg.png"
 
     def __init__(self, desired_width):
         clutter.Group.__init__(self)
         self.width = desired_width
+        
+        """
+        self.bgImg = clutter.Texture()
+        pixbuf = gtk.gdk.pixbuf_new_from_file(self.backgroundImg)
+        self.bgImg.set_pixbuf(pixbuf)
+        yx_ratio = float(self.bgImg.get_height()) / float(self.bgImg.get_width())
+        bg_height = int(desired_width * yx_ratio)
+        self.bgImg.set_size(desired_width, bg_height)
+        #self.bgImg.set_opacity(200)
+        self.bgImg.show()
+        self.add(self.bgImg)
+        """
         
         #Add the various labels
         self.title = clutter.Label()

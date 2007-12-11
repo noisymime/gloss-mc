@@ -47,7 +47,8 @@ class folderMenu(clutter.Group):
         self.viewerLibrary.append(cover_viewer)
         
     def get_current_viewer(self):
-        return self.viewerLibrary[self.currentItemNo]
+        if not self.currentItemNo is None:
+            return self.viewerLibrary[self.currentItemNo]
     
     def on_key_press_event (self, event):
         up = clutter.keysyms.Up

@@ -129,7 +129,7 @@ class MenuMgr:
             self.currentMenu.selectNext()
         if event.keyval == clutter.keysyms.q:
             clutter.main_quit()
-        if event.keyval == clutter.keysyms.Return: #return button pressed
+        if event.keyval == clutter.keysyms.Return:
             # Need to decide what action to take
             # Options are:
             # 1) Switch to a new menu
@@ -141,7 +141,10 @@ class MenuMgr:
             else:
                 #We have a plugin and need to start it
                 self.currentPlugin = action
-                action.begin( self )
+                if action is None:
+                    self.display_msg("Error", "Could not start " + self.currentMenu.get_current_item().get_text())
+                else:
+                    action.begin( self )
         # This is tres bodge
         if event.keyval == clutter.keysyms.Escape:
             #If there's a plugin running then end it

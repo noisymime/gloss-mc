@@ -39,6 +39,7 @@ class Module:
         #uri = "file://" + os.getcwd() +"/" + buffer_file
         #f = open(os.getcwd() +"/" + buffer_file, 'r')
         uri = "fd://" + str(fd)
+        #uri = str(fd)
         #print uri
         self.videoController.play_video(uri, self)
         

@@ -342,7 +342,11 @@ class Module:
             tempItem.setAction(self)
             return
         
-        file_list = os.listdir(self.baseDir)
+        try:
+            file_list = os.listdir(self.baseDir)
+        except os.error, (errno, errstr):
+            self.MenuMgr.display_msg("File Error", "Could not load Slideshow directory")
+            return
         
         for directoryEntry in file_list:
             subdir = self.baseDir + "/" + directoryEntry

@@ -167,8 +167,8 @@ class MythBackendConnection(threading.Thread):
     
     def buffer_live(self, cmd_sock, data_sock, socket_id):
         #Create a buffer file
-        #buffer_file_name = "test.mpg"
-        #self.buffer_file = open(buffer_file_name,"w")
+        buffer_file_name = "test.mpg"
+        self.buffer_file = open(buffer_file_name,"w")
         request_size = 32768
         #max_request_size = 135000
         max_request_size = 270000
@@ -182,10 +182,11 @@ class MythBackendConnection(threading.Thread):
             self.send_cmd(cmd_sock, transfer_cmd)
             num_bytes = int(self.receive_reply(cmd_sock))
             data = data_sock.recv(num_bytes)
-            #self.buffer_file.write(data)
+            self.buffer_file.write(data)
             x=x+1
-        #self.buffer_file.flush()
+        self.buffer_file.flush()
         """
+        
         #self.videoPlayer.begin_playback(buffer_file_name)
         reader_fd = os.dup(data_sock.fileno())
         self.videoPlayer.begin_playback(reader_fd)
@@ -198,6 +199,7 @@ class MythBackendConnection(threading.Thread):
             num_bytes = int(self.receive_reply(cmd_sock))
             data_sock.recv(num_bytes)
             #self.buffer_file.write(data)
+            #self.buffer_file.flush()
             
             #This tries to optimise the request size
             #print "Received: " + str(num_bytes)

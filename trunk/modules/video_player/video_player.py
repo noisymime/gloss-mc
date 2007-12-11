@@ -50,7 +50,11 @@ class Module():
         #results = dbMgr.get_videos()
 
     def load_base_folders(self, dirPath, folder_menu):
-        new_file_list = os.listdir(dirPath)
+        try:
+            new_file_list = os.listdir(dirPath)
+        except os.error, (errno, errstr):
+            self.MenuMgr.display_msg("File Error", "Could not load Slideshow directory")
+            return
         
         #Images and Directories
         for dir_entry in new_file_list:
@@ -67,7 +71,7 @@ class Module():
         
         final_file_list = []
         new_file_list = os.listdir(dirPath)
-        
+
         #Images and Directories
         for dir_entry in new_file_list:
             if os.path.isdir(dirPath + "/" + dir_entry) and not ( dir_entry[0] == "."):
@@ -169,7 +173,8 @@ class Module():
         
     def begin(self, MenuMgr):
         #Check that the library actually contains something
-        if self.currentViewer.num_covers == 0:
+        #if len(self.currentViewer.textureLibrary) == 0:
+        if self.currentViewer is None:
             self.MenuMgr.display_msg("Error: No videos", "There are no videos available in the library. This maybe caused by an empty library or a failed connection to the server.")
             self.stop()
             return

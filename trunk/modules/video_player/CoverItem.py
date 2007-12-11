@@ -2,6 +2,7 @@ import pygtk
 import gtk
 import pango
 import clutter
+import os
 
 class cover_item(clutter.Group):
     font = "Lucida Grande "
@@ -21,6 +22,11 @@ class cover_item(clutter.Group):
             self.isFolder = True
         else:
             imagePath = video.getCoverfile()
+            #Check that coverfile exists
+            # In the future this will change so that the video is still included with a blank image
+            if not os.path.exists(imagePath):
+                imagePath = "ui/mv_gallery_folder_sel.png"
+                
             pixbuf = gtk.gdk.pixbuf_new_from_file(imagePath)
             self.isFolder = False
             self.video = video

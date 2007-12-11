@@ -74,12 +74,7 @@ class coverViewer(clutter.Group):
         else:
             self.stage.remove(self.current_video_details)
         
-    def add_video(self, video):
-        #Quick snaity check to make sure the cover file exists.
-        # In the future this will change so that the video is still included with a blank image
-        if not os.path.exists(video.getCoverfile()):
-            return
-        
+    def add_video(self, video):      
         self.videoLibrary.append(video)
         tempTexture = cover_item(video, None, self.cover_size)
         self.add_texture_group(tempTexture)

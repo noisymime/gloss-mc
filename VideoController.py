@@ -16,14 +16,9 @@ class VideoController:
         self.video_texture.connect('size-change', self.set_fullscreen)
         self.video_texture.set_position(0,0)
         
-        self.pipeline = gst.Pipeline()
+
         self.osd = osd(stage)
-        """
-        src = gst.element_factory_make ("videotestsrc")
-        
-        gst.Bin.add (self.pipeline, filesrc, colorspace, deinterlace, video_sink)
-        gst.element_link_many (filesrc, colorspace, deinterlace, video_sink)
-        """
+
         
     def on_key_press_event(self, event):
         if event.keyval == clutter.keysyms.Left:
@@ -34,6 +29,9 @@ class VideoController:
         #self.osd.enter()
     
     def play_video(self, uri, player):
+        #self.customBin(uri)
+        #return
+    
         self.player = player
         self.stage.add(self.video_texture)
         self.video_texture.set_uri(uri)
@@ -44,6 +42,9 @@ class VideoController:
 
         #We need to connect to the message queue on the playbin to watch for any message (ie codec or file not found errors)
         self.bin = self.video_texture.get_playbin()
+        #print "Queue: " + str(self.bin.get_property("queue_size"))
+        #print "Queue: " + str(self.bin.get_property("queue_threshold"))
+        print "Queue: " + str(self.bin.get_property("queue_min_threshold"))
         bus = self.video_texture.get_playbin().get_bus()
         bus.add_signal_watch()
         bus.connect('message', self.on_bus_message)
@@ -54,31 +55,24 @@ class VideoController:
         #self.bin.set_state(gst.STATE_PLAYING)
         self.isPlaying = True
         
-        src = self.bin.get_by_name("decodebin0")
         decodebin = self.bin.get_by_name("decodebin0")
-        #source = self.bin.get_by_name("source")
-        demuxer = decodebin.get_by_name("avidemux0")
+        #for element in decodebin.elements():
+        #    print "GST Element 1: " + str(element.get_name()) 
+        #queue = decodebin.get_by_name("queue0")
+        #print queue.get_name()
         #ypefind = decodebin.get_by_name("typefind")
-        """
-        demuxer.connect("pad-added", self.on_pad_added)
+        
+        decodebin.connect("pad-added", self.on_pad_added)
         #vid = demuxer.get_by_name("video_00")
         self.queue1 = gst.element_factory_make("queue", "queue1")
-        self.queue1.set_property("max-size-time", 0)
+        self.queue1.set_property("max-size-time", 50000)
         self.queue1.set_property("max-size-buffers", 0)
         
-        self.queue2 = gst.element_factory_make("queue", "queue2")
+        #self.queue2 = gst.element_factory_make("queue", "queue2")
         self.bin.add(self.queue1)
-        self.bin.add(self.queue2)    
-        self.queue1.link(decodebin)
-        """
-        for element in self.bin.elements():
-            print "GST Element 1: " + str(element.get_name())      
-        #print "Pads: " + str(decodebin.pads())
-        for pad in decodebin.pads(): #decodebin.elements():
-            print "GST Element: " + str(pad.get_peer().get_parent_element().get_name())
-            #for element in pad.get_internal_links():
-            #    print "GST Element: " + str(element.get_name())      
-            
+        #self.bin.add(self.queue2)
+        #decodebin.link(self.queue1)  
+        #self.queue1.link(decodebin)
         
         return self.video_texture
 
@@ -140,20 +134,27 @@ class VideoController:
         self.blackdrop = None 
         
     def customBin(self, fd):
-        
+        self.pipeline = gst.Pipeline("testPipeline")
+        #self.src = gst.element_factory_make("filesrc", "src")
+        #self.src.set_property("location", "test.mpg")
         self.src = gst.element_factory_make("fdsrc", "src");
         self.src.set_property("fd", int(fd))
         self.demux = gst.element_factory_make("ffdemux_mpegts", "demux")
         #self.demux = gst.element_factory_make("decodebin", "demux")
         self.queue1 = gst.element_factory_make("queue", "queue1")
+        self.queue1.set_property("max-size-time", 500000)
+        self.queue1.set_property("max-size-buffers", 0)
         self.queue2 = gst.element_factory_make("queue", "queue2")
         #self.deinterlace = gst.element_factory_make("ffdeinterlace", "deinterlace")
         self.vdecode = gst.element_factory_make("mpeg2dec", "vdecode")
         self.adecode = gst.element_factory_make("mad", "adecode")
-        #self.vsink = gst.element_factory_make("xvimagesink", "vsink")
-        self.vsink = self.video_sink #cluttergst.VideoSink(self.video_texture)
+        self.vsink = gst.element_factory_make("xvimagesink", "vsink")
+        #self.vsink = self.video_sink #cluttergst.VideoSink(self.video_texture)
         self.asink = gst.element_factory_make("alsasink", "asink")
 
+        bus = self.pipeline.get_bus()
+        bus.add_signal_watch()
+        bus.connect('message', self.on_bus_message)
         
         # add elements to the pipeline
         self.pipeline.add(self.src)
@@ -174,9 +175,12 @@ class VideoController:
         self.demux.connect("pad-added", self.on_pad_added)
         
         # link all elements apart from demux
+        print "linking..."
         gst.element_link_many(self.src, self.demux)
         gst.element_link_many(self.queue1, self.vdecode, self.vsink) #self.deinterlace, self.vsink)
         gst.element_link_many(self.queue2, self.adecode, self.asink)
+
+        self.pipeline.set_state(gst.STATE_PLAYING)
 
     def on_pad_added(self, element, src_pad):
         caps = src_pad.get_caps()

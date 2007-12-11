@@ -7,6 +7,7 @@ import gobject
 import os.path
 #import threading
 from SplashScr import SplashScr
+from themeMgr import ThemeMgr
 
 #Import all the modules
 mod_dir = "modules"
@@ -22,14 +23,11 @@ for fs_object in module_list:
         
 from Menu import Menu
 from MenuMgr import MenuMgr
-#from Slideshow import Slideshow
-#from VideoPlayer import VideoPlayer
-#from MusicPlayer import MusicPlayer
-#from TVPlayer import TVPlayer
-#from DvdPlayer import DvdPlayer
-
 from myth.MythMySQL import mythDB
 
+#Load the theme manager
+themeMgr = ThemeMgr()
+themeMgr.get_texture("dslkjf")
 
 class MainApp:
     def __init__ (self):

@@ -27,7 +27,9 @@ from myth.MythMySQL import mythDB
 
 #Load the theme manager
 themeMgr = ThemeMgr()
-themeMgr.get_texture("dslkjf")
+elem = themeMgr.get_texture("selector_bar")
+print themeMgr.find_child_value(elem.childNodes, "dimensions.width")
+
 
 class MainApp:
     def __init__ (self):

@@ -25,12 +25,6 @@ from Menu import Menu
 from MenuMgr import MenuMgr
 from myth.MythMySQL import mythDB
 
-#Load the theme manager
-themeMgr = ThemeMgr()
-elem = themeMgr.get_texture("selector_bar")
-print themeMgr.find_child_value(elem.childNodes, "dimensions.width")
-
-
 class MainApp:
     def __init__ (self):
         gtk.gdk.threads_init()
@@ -54,7 +48,12 @@ class MainApp:
         #clutter.threads_add_timeout(500,self.loadGloss())
     
     def loadGloss(self):
-
+        #Load the theme manager
+        self.themeMgr = ThemeMgr(self.stage)
+        elem = self.themeMgr.get_texture("selector_bar", None)
+        #print self.themeMgr.find_attribute_value(elem.childNodes, "position", "type")
+        test = "12345"
+        print test[:-1]
 
         self.menuMgr = MenuMgr(self.stage)
 

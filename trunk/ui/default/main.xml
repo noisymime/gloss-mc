@@ -1,11 +1,11 @@
 <texture id="selector_bar">
 	<image>active_bar.png</image>
-	<dimensions type="absolute">
-		<width>400</width>
+	<dimensions type="relativeToStage">
+		<width>40</width>
 		<height>default</height>
 	</dimensions>
 	<position type="relativeToParent">
-		<x>-50</x>
+		<x>50</x>
 		<y>0</y>
 	</position>
 </texture>

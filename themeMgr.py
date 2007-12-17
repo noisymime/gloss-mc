@@ -6,7 +6,8 @@ class ThemeMgr:
 	defaultTheme = "default"
 	currentTheme = "default"
 	
-	def __init__(self):
+	def __init__(self, stage):
+		self.stage = stage
 		self.docs = []
 		self.default_docs = []
 		
@@ -36,20 +37,6 @@ class ThemeMgr:
 			return True
 		else:
 			return False
-			
-	def get_texture(self, name):
-		texture_src = None
-		texture = clutter.Texture()
-
-		element = self.search_docs("texture", name)
-		#Quick check to make sure we found something
-		if element is None:
-			return None
-		
-		return element
-					
-	def setup_actor(self, actor, element):
-		pass
 	
 	#Loops through firstly the current theme files, then the default ones looking for an element of 'element_type' with an ID of 'element_id'
 	def search_docs(self, element_type, element_id):
@@ -83,7 +70,7 @@ class ThemeMgr:
 	#Search through an element to find a value
 	#Specifying the element name in the format 'level1. value' will result in the function looping
 	def find_child_value(self, nodeList, value):
-		print "No Nodes: " + str(len(nodeList))
+		#print "No Nodes: " + str(len(nodeList))
 		#Check whether the value is in the form "xxx.y"
 		values = value.find(".")
 		if not values == -1:
@@ -92,16 +79,102 @@ class ThemeMgr:
 			#print "blah" + tagName
 			for subnode in nodeList:
 				if subnode.nodeType == subnode.ELEMENT_NODE:
-					print "Tag Name: " + subnode.tagName
+					#print "Tag Name: " + subnode.tagName
 					if subnode.tagName == desiredTagName:
 						# call function again to get children
 						return self.find_child_value(subnode.childNodes, value[(values+1):])
 		else:
 			for subnode in nodeList:
-				if subnode.nodeType == subnode.TEXT_NODE:
+				if (subnode.nodeType == subnode.TEXT_NODE) and (not subnode.nextSibling is None):
 					subnode = subnode.nextSibling
 					if subnode.localName == value:
 						valueNode = subnode.childNodes[0]
-						#print subnode.localName + ": " + valueNode.data
 						return valueNode.data
+					
+		#If we get to here, we hath failed
+		return None
+	
+	#Search through an element to find an attribute
+	#This is basically the same as find_child_value except it gets an attribute
+	def find_attribute_value(self, nodeList, tagName, attributeID):
+		#print "No Nodes: " + str(len(nodeList))
+		#Check whether the value is in the form "xxx.y"
+		values = tagName.find(".")
+		if not values == -1:
+			desiredTagName = tagName[:values]
+			#print "test " + value[(values+1):]
+			#print "blah" + tagName
+			for subnode in nodeList:
+				if subnode.nodeType == subnode.ELEMENT_NODE:
+					#print "Tag Name: " + subnode.tagName
+					if subnode.tagName == desiredTagName:
+						# call function again to get children
+						return self.find_attribute_value(subnode.childNodes, tagName[(values+1):])
+		else:
+			for subnode in nodeList:
+				if subnode.localName == tagName:
+					#print "keys: " + str(len(subnode.attributes.values()))
+					if len(subnode.attributes.values()) > 0:
+						return subnode.attributes[attributeID].value
+						
+		#If we get to here, we hath failed
+		return None
+	
+	
+	#*********************************************************************
+	# The methods below all relate to fulfilling requests for actors
+
+	#This is the generic function for setting up an actor. 
+	#It sets up all the 'common' properties:
+	#Eg: size, position, opacity
+	def setup_actor(self, actor, element, parent):
+		#Set the size
+		#First setup the parent
+		relativeTo = str(self.find_attribute_value(element, "dimensions", "type"))
+		if relativeTo == "relativeToStage":
+			parent = self.stage
+		elif not (relativeTo == "relativeToParent"):
+			parent = None
 		
+		width = self.find_child_value(element, "dimensions.width")
+		if (not width == "default") and (not width is None):
+			if width[-1] == "%":
+				#Quick check on parent
+				if parent is None:
+					print "Theme error: type must be specified when using percentage values"
+					return None
+				
+				width = (float(width[:-1]) / 100.0) * parent.get_width()
+				#print "width: " + str(width)
+			actor.set_width( int(width) )
+		height = self.find_child_value(element, "dimensions.height")
+		if (not height == "default") and (not height is None):
+			if height[-1] == "%":
+				height = (float(height[:-1]) / 100.0) * parent.get_height()
+			actor.set_height( int(height) )
+		
+		#Set the position of the actor
+		relativeTo = str(self.find_attribute_value(element, "dimensions", "type"))
+		if relativeTo == "relativeToStage":
+			parent = self.stage
+		elif not (relativeTo == "relativeToParent"):
+			parent = None
+		
+		#now set the opacity
+		opacity = self.find_child_value(element, "opacity")
+		if not opacity is None:
+			opacity = int(opacity)
+			actor.set_opacity(opacity)
+	
+	def get_texture(self, name, parent):
+		texture_src = None
+		texture = clutter.Texture()
+
+		element = self.search_docs("texture", name).childNodes
+		self.setup_actor(texture, element, None)
+		#Quick check to make sure we found something
+		if element is None:
+			return None
+		
+		return element
+					

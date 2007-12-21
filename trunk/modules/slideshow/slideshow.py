@@ -18,8 +18,8 @@ class Module:
     imageDuration = 7 # In seconds
     effect_FPS = 50
 
-    def __init__(self, MenuMgr, dbMgr):
-        self.MenuMgr = MenuMgr
+    def __init__(self, glossMgr, dbMgr):
+        self.glossMgr = glossMgr
         self.currentTexture = clutter.Texture()
         self.currentSong = None
         self.paused = False
@@ -93,8 +93,8 @@ class Module:
         else:
             return False
     
-    def begin(self, MenuMgr):
-        self.stage = self.MenuMgr.get_stage()
+    def begin(self, glossMgr):
+        self.stage = self.glossMgr.get_stage()
         
         #Check for an empty baseDir, this means there are no slideshows or no db connection. We simply tell the menuMgr to go back a menu level when this occurs
         if self.baseDir is None:
@@ -107,7 +107,7 @@ class Module:
         self.textures = [] 
         self.music = []
         #Then load them back up
-        slideName = self.baseDir + "/" + self.MenuMgr.get_current_menu().get_current_item().get_data()
+        slideName = self.baseDir + "/" + self.glossMgr.get_current_menu().get_current_item().get_data()
         self.loadDir(slideName, True)
         #self.MenuMgr.get_selector_bar().set_spinner(False)
         
@@ -334,7 +334,7 @@ class Module:
     #The following generates a menu with an option for each of the slideshows in the base menu
     def generateMenu(self):
         
-        tempMenu = Menu(self.MenuMgr)
+        tempMenu = Menu(self.glossMgr)
         #print self.baseDir
         #This occurs when there are not slideshows or we could not connect to the db to establish baseDir
         if self.baseDir is None:
@@ -345,7 +345,7 @@ class Module:
         try:
             file_list = os.listdir(self.baseDir)
         except os.error, (errno, errstr):
-            self.MenuMgr.display_msg("File Error", "Could not load Slideshow directory")
+            self.glossMgr.display_msg("File Error", "Could not load Slideshow directory")
             return
         
         for directoryEntry in file_list:

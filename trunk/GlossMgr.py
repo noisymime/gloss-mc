@@ -1,11 +1,11 @@
 import clutter
-from SkinMgr import SkinMgr
+from themeMgr import ThemeMgr
 from Spinner import Spinner
 import pygtk
 import gtk
 import pango
 
-class MenuMgr:
+class GlossMgr:
 
     def __init__ (self, stage):
         self.stage = stage
@@ -14,12 +14,15 @@ class MenuMgr:
         self.currentMenu = None
         self.uiMsg = message(stage)
         
-        self.skinMgr = SkinMgr(self.stage)
-        background = self.skinMgr.get_Background()
+        self.themeMgr = ThemeMgr(self.stage)
+        background = self.themeMgr.get_texture("background", None)
+        background.show()
         self.stage.add(background)
         
         self.selector_bar = MenuSelector(self)
-        self.stage.add(self.selector_bar)
+        self.stage.add(self.selector_bar)#Load the theme manager
+        self.themeMgr = ThemeMgr(self.stage)
+        
         self.selector_bar.show_all()
         self.currentPlugin = None
         
@@ -40,8 +43,8 @@ class MenuMgr:
     def get_stage(self):
         return self.stage
         
-    def get_skinMgr(self):
-        return self.skinMgr
+    def get_themeMgr(self):
+        return self.themeMgr
         
     def transition_fade_zoom(self, fromMenu, toMenu):
         oldGroup = fromMenu.getItemGroup()

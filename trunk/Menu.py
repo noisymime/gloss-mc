@@ -8,9 +8,9 @@ from ReflectionTexture import Texture_Reflection
 class Menu:
     item_gap = 10 #Distance between items
     
-    def __init__ (self, menuMgr):
-        self.menuMgr = menuMgr
-        self.stage = self.menuMgr.get_stage()
+    def __init__ (self, glossMgr):
+        self.glossMgr = glossMgr
+        self.stage = self.glossMgr.get_stage()
         self.menuItems = []
         self.selected = 0
         self.displayMin = 0 #The number of menu items that will be shown at a time
@@ -25,7 +25,7 @@ class Menu:
         #self.hasTimeline = False
         self.timeline = clutter.Timeline(15, 75) #This timeline is used on any movements that occur when changing items
         self.timeline_completed=True
-        self.menuMgr.addMenu(self)
+        self.glossMgr.addMenu(self)
         #self.itemGroup.hide_all()
     
     def addItem(self, itemLabel, imagePath):
@@ -61,8 +61,8 @@ class Menu:
         return self.menuItems[index]
     def getStage(self):
         return self.stage
-    def getMenuMgr(self):
-        return self.menuMgr
+    def getGlossMgr(self):
+        return self.glossMgr
         
     def setMenuPositionByName(self, location):
         if location == "center":
@@ -138,7 +138,7 @@ class Menu:
                 self.rollMenu( self.menuItems[self.selected], self.menuItems[self.selected-self.displaySize], self.timeline)
             else:
                 #move the selection bar
-                self.menuMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
+                self.glossMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
         
             self.timeline.start()
             self.moveQueue = 0
@@ -192,7 +192,7 @@ class Menu:
                 self.rollMenu( self.menuItems[self.selected], self.menuItems[self.selected+self.displaySize], self.timeline)
             else:
                 #move the selection bar
-                self.menuMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
+                self.glossMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
 
             self.timeline.start()
             self.moveQueue = 0
@@ -219,7 +219,7 @@ class Menu:
                 self.menuItems[i].scaleLabel(2, self.timeline)
         
         if moveBar:    
-            self.menuMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
+            self.glossMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
         
         self.timeline.start()
         
@@ -227,7 +227,7 @@ class Menu:
     # The distance the menu moves is the distance (in pixels) between the incoming item and the selector bar
     def rollMenu(self, incomingMenuItem, outgoingMenuItem, timeline):    
         (group_x, group_y) = self.itemGroup.get_abs_position()
-        (bar_x, bar_y) = incomingMenuItem.get_menu().getMenuMgr().get_selector_bar().get_abs_position()
+        (bar_x, bar_y) = self.glossMgr.get_selector_bar().get_abs_position() # incomingMenuItem.get_menu().getMenuMgr().
         (incoming_x, incoming_y) = incomingMenuItem.get_abs_position()
         
         #print self.itemGroup.get_abs_position()
@@ -276,9 +276,10 @@ class ListItem (clutter.Label):
 
     def __init__ (self, menu, itemLabel, y, imagePath):
         clutter.Label.__init__ (self)
+        glossMgr = menu.getGlossMgr()
         self.itemTexturesGroup = clutter.Group()
-        font = menu.getMenuMgr().get_skinMgr().get_menu_font()
-        self.stage = menu.getMenuMgr().get_stage()
+        font = glossMgr.get_themeMgr().get_font("menu_item")
+        self.stage = glossMgr.get_stage()
         self.set_font_name(font)
         self.set_text(itemLabel)
         self.color = clutter.Color(0xff, 0xff, 0xff, 0xdd)
@@ -287,10 +288,10 @@ class ListItem (clutter.Label):
         self.menu = menu
         self.data = itemLabel #By default the items data is simply its label
         #The width is the length of the selector bar minus its offset
-        width = menu.getMenuMgr().get_selector_bar().get_width() + menu.getMenuMgr().get_selector_bar().get_x_offset()
+        width = glossMgr.get_selector_bar().get_width() + glossMgr.get_selector_bar().get_x_offset()
         self.set_width(width)
         #Pango ellipses seem to be having problems, disabling for now
-        #self.set_ellipsize(pango.ELLIPSIZE_END)
+        self.set_ellipsize(pango.ELLIPSIZE_END)
         #Text is actually scaled down in 'regular' position so that it doesn't get jaggies when zoomed in
         self.set_scale(self.zoomLevel, self.zoomLevel)
         self.currentZoom = 0        

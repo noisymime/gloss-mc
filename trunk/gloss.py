@@ -22,7 +22,7 @@ for fs_object in module_list:
         modules.append(__import__(tmp_dir))
         
 from Menu import Menu
-from MenuMgr import MenuMgr
+from GlossMgr import GlossMgr
 from myth.MythMySQL import mythDB
 
 class MainApp:
@@ -48,18 +48,12 @@ class MainApp:
         #clutter.threads_add_timeout(500,self.loadGloss())
     
     def loadGloss(self):
-        #Load the theme manager
-        self.themeMgr = ThemeMgr(self.stage)
-        elem = self.themeMgr.get_texture("selector_bar", None)
-        #print self.themeMgr.find_attribute_value(elem.childNodes, "position", "type")
-        test = "12345"
-        print test[:-1]
-
-        self.menuMgr = MenuMgr(self.stage)
+        
+        self.glossMgr = GlossMgr(self.stage)
 
         #Update splash status msg
         self.splashScreen.set_msg("Creating menus")
-        MainMenu = Menu(self.menuMgr)
+        MainMenu = Menu(self.glossMgr)
         #menu1.addItem("nothing", "ui/dvd.png")
         #menu1.addItem("nothing", "ui/dvd.png")
         #menu1.addItem("nothing", "ui/dvd.png")
@@ -79,13 +73,13 @@ class MainApp:
             title =  mods.Module.title
             image_uri = "ui/"+mods.Module.menu_image
             self.splashScreen.set_msg("Loading "+title)
-            tempMod = mods.Module(self.menuMgr, self.dbMgr)
+            tempMod = mods.Module(self.glossMgr, self.dbMgr)
             temp_menu_item = MainMenu.addItem(title, image_uri)
             
             temp_menu_item.setAction(tempMod.action())
         
         self.splashScreen.remove()
-        self.stage.connect('key-press-event', self.menuMgr.on_key_press_event)
+        self.stage.connect('key-press-event', self.glossMgr.on_key_press_event)
         MainMenu.display()
         MainMenu.selectFirst(True)
         

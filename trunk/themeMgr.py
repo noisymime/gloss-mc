@@ -1,5 +1,7 @@
 import os
 import clutter
+import pygtk
+import gtk
 from xml.dom import minidom
 
 class ThemeMgr:
@@ -126,7 +128,7 @@ class ThemeMgr:
 
 	#This is the generic function for setting up an actor. 
 	#It sets up all the 'common' properties:
-	#Eg: size, position, opacity
+	#Currently: size, position, opacity
 	def setup_actor(self, actor, element, parent):
 		#Set the size
 		#First setup the parent
@@ -146,19 +148,65 @@ class ThemeMgr:
 				
 				width = (float(width[:-1]) / 100.0) * parent.get_width()
 				#print "width: " + str(width)
-			actor.set_width( int(width) )
+				width = int(width)
 		height = self.find_child_value(element, "dimensions.height")
 		if (not height == "default") and (not height is None):
 			if height[-1] == "%":
 				height = (float(height[:-1]) / 100.0) * parent.get_height()
-			actor.set_height( int(height) )
+				height = int(height)
+		
+		actor.set_size(width, height)
 		
 		#Set the position of the actor
-		relativeTo = str(self.find_attribute_value(element, "dimensions", "type"))
+		(x,y) = (0,0)
+		#Get the parent
+		relativeTo = str(self.find_attribute_value(element, "position", "type"))
 		if relativeTo == "relativeToStage":
 			parent = self.stage
 		elif not (relativeTo == "relativeToParent"):
 			parent = None
+			
+		#set the x coord
+		x = self.find_child_value(element, "position.x")
+		if (not x == "default") and (not x is None):
+			if x[-1] == "%":
+				#Quick check on parent
+				if parent is None:
+					print "Theme error: type must be specified when using percentage values"
+					return None
+				
+				x = (float(x[:-1]) / 100.0) * parent.get_width()
+				#print "width: " + str(width)
+			elif x == "center":
+				#Quick check on parent
+				if parent is None:
+					print "Theme error: type must be specified when using 'center' values"
+					return None
+				x = (parent.get_width() - actor.get_width)/2
+		else:
+			x = 0
+				
+		#set the y coord
+		y = self.find_child_value(element, "position.y")
+		if (not y == "default") and (not y is None):
+			if y[-1] == "%":
+				#Quick check on parent
+				if parent is None:
+					print "Theme error: type must be specified when using percentage values"
+					return None
+				
+				y = (float(y[:-1]) / 100.0) * parent.get_height()
+				#print "width: " + str(width)
+			elif y == "center":
+				#Quick check on parent
+				if parent is None:
+					print "Theme error: type must be specified when using 'center' values"
+					return None
+				y = (parent.get_height() - actor.get_height)/2
+		else:
+			y = 0
+		
+		actor.set_position(int(x), int(y))
 		
 		#now set the opacity
 		opacity = self.find_child_value(element, "opacity")
@@ -171,10 +219,20 @@ class ThemeMgr:
 		texture = clutter.Texture()
 
 		element = self.search_docs("texture", name).childNodes
-		self.setup_actor(texture, element, None)
 		#Quick check to make sure we found something
 		if element is None:
 			return None
 		
-		return element
-					
+		#Setup the pixbuf
+		src = self.find_child_value(element, "image")
+		src = "ui/" + self.currentTheme + "/" + src
+		pixbuf = gtk.gdk.pixbuf_new_from_file(src)
+		texture.set_pixbuf(pixbuf)
+		
+		#Setup general actor properties
+		self.setup_actor(texture, element, None)
+		
+		return texture
+	
+	def get_font(self, name):
+		return 'Tahoma 40'

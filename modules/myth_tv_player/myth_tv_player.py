@@ -13,8 +13,8 @@ class Module:
     title = "TV"
     menu_image = "dvd.png"
 
-    def __init__(self, MenuMgr, dbMgr):
-        self.stage = MenuMgr.get_stage()
+    def __init__(self, glossMgr, dbMgr):
+        self.stage = glossMgr.get_stage()
         self.videoController = VideoController(self.stage)
         self.dbMgr = dbMgr
         self.isRunning = False

@@ -6,8 +6,8 @@ class Module:
     title = "DVD"
     menu_image = "dvd.png"
 
-    def __init__(self, MenuMgr, dbMgr):
-        self.stage = MenuMgr.get_stage()
+    def __init__(self, glossMgr, dbMgr):
+        self.stage = glossMgr.get_stage()
         self.paused = False
         self.isPlaying = False
         self.overlay = None
@@ -31,10 +31,10 @@ class Module:
             return True
 
         
-    def begin(self, MenuMgr):
+    def begin(self, glossMgr):
         uri = "dvd://1"
         self.videoController = VideoController(self.stage)
-        self.video = self.videoController.play_video(uri)
+        self.video = self.videoController.play_video(uri, self)
         self.isPlaying = True
         
     def stop(self):

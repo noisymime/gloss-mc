@@ -59,7 +59,10 @@ class coverViewer(clutter.Group):
         #self.stage.add(self.current_video_description)
         self.current_video_details.show()
         self.current_video_details.show_all()
-        
+    
+    #Loads the various UI elements using the theme mgr
+    def load_theme(self):
+        pass
             
     #Turns the description group off and on
     def toggle_details(self):

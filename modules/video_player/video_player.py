@@ -22,9 +22,9 @@ class Module():
     coverViewerColumns = 4
     cover_size = int(coverViewerWidth / coverViewerColumns)
 
-    def __init__(self, MenuMgr, dbMgr):
-        self.stage = MenuMgr.get_stage()
-        self.MenuMgr = MenuMgr
+    def __init__(self, glossMgr, dbMgr):
+        self.stage = glossMgr.get_stage()
+        self.glossMgr = glossMgr
         self.dbMgr = dbMgr
         self.viewerLibrary = []
         self.folderLibrary = []
@@ -76,7 +76,7 @@ class Module():
         for dir_entry in new_file_list:
             if os.path.isdir(dirPath + "/" + dir_entry) and not ( dir_entry[0] == "."):
                 cover_viewer.add_folder(dir_entry)
-                print dir_entry
+                #print dir_entry
             else:
                 final_file_list.append(dir_entry)
                 
@@ -171,7 +171,7 @@ class Module():
             
         
         
-    def begin(self, MenuMgr):
+    def begin(self, glossMgr):
         #Check that the library actually contains something
         #if len(self.currentViewer.textureLibrary) == 0:
         if self.currentViewer is None:
@@ -180,7 +180,7 @@ class Module():
             return
        
         #Create a backdrop for the player. In this case we just use the same background as the menus
-        self.backdrop = clutter.CloneTexture(MenuMgr.get_skinMgr().get_Background())
+        self.backdrop = glossMgr.get_themeMgr().get_texture("background", None) #clutter.CloneTexture(glossMgr.get_skinMgr().get_Background())
         self.backdrop.set_size(self.stage.get_width(), self.stage.get_height())
         self.backdrop.set_opacity(0)
         self.backdrop.show()
@@ -213,7 +213,7 @@ class Module():
         #self.folder_menu.set_dir_cover_viewer(self.currentViewer)
         
     def stop(self):
-        self.MenuMgr.currentPlugin = None
+        self.glossMgr.currentPlugin = None
         
         #Fade everything out
         timeline_stop = clutter.Timeline(10,30)

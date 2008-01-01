@@ -4,6 +4,7 @@ from Spinner import Spinner
 import pygtk
 import gtk
 import pango
+import copy
 
 class GlossMgr:
 
@@ -34,7 +35,8 @@ class GlossMgr:
             self.currentMenu = newMenu
             self.menuHistory.append(newMenu)
             self.currentMenu.getItemGroup().show_all()
-            self.currentMenu.getMenuGroup().show_all()
+            self.currentMenu.show_all()
+            self.currentMenu.show()
             self.selector_bar.set_menu(self.currentMenu)
         
     def get_selector_bar(self):
@@ -193,18 +195,29 @@ class MenuSelector(clutter.Texture):
         
 
     def selectItem(self, selectee, timeline):
-        (x, y) = selectee.get_abs_position()
         
+        #This whole clone label thing is a HORRIBLE hack but is there to compensate for the movement caused by scaling using GRAVITY_WEST
+        #Essentially a clone of the selectee is made and scaled to its final position to retrieve the final abs_position coords
+        cloneLabel = clutter.Label()
+        cloneLabel.set_text(selectee.get_text())
+        cloneLabel.set_font_name(selectee.get_font_name())
+        (scale_x, scale_y) = selectee.get_scale()
+        cloneLabel.set_scale_with_gravity(scale_x, scale_y, clutter.GRAVITY_WEST)
+        selectee.get_parent().add(cloneLabel)
+        cloneLabel.set_position(selectee.get_x(), selectee.get_y())
+        
+        #Now that all the cloning is done, find out what the scale is to become and set it on the clone
+        scale = selectee.currentZoom
+        cloneLabel.set_scale_with_gravity(scale, scale, clutter.GRAVITY_WEST)
+        
+        #Now get the end position of the clone
+        (x, y) = cloneLabel.get_abs_position()
+        
+        #Do some minor adjustments for centering etc
         x = x + self.x_offset
-       
-        #Check if we're going up or down
-        if y > self.get_y():     
-            #Going down
-            y = int(y - selectee.get_menu().get_item_gap()/2)
-        else:
-            #Going up
-            y = int(y - selectee.get_menu().get_item_gap()/2)
-            
+        y = y - int( (self.get_height()-selectee.get_height())/2 )
+
+        #Move the bar
         self.move_to(x, y, timeline)
         
     def move_to(self, x, y, timeline):  

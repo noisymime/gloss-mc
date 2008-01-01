@@ -5,13 +5,14 @@ import pango
 import time
 from ReflectionTexture import Texture_Reflection
 
-class Menu:
+class Menu(clutter.Group):
     item_gap = 10 #Distance between items
     font = ""
     zoomLevel = 0.5
     opacityStep = 120
     
     def __init__ (self, glossMgr):
+        clutter.Group.__init__(self)
         self.glossMgr = glossMgr
         self.stage = self.glossMgr.get_stage()
         self.glossMgr.themeMgr.setup_menu("main", self)
@@ -23,14 +24,15 @@ class Menu:
         self.displaySize = self.displayMax - self.displayMin
         self.displayPosition = (0, 0)
         self.itemGroup = clutter.Group()
-        self.menuGroup = clutter.Group()
+        #self.menuGroup = clutter.Group()
         self.stage.add(self.itemGroup)
-        self.stage.add(self.menuGroup)
+        #self.stage.add(self.menuGroup)
         #self.hasTimeline = False
         self.timeline = clutter.Timeline(15, 75) #This timeline is used on any movements that occur when changing items
         self.timeline_completed=True
         self.glossMgr.addMenu(self)
         #self.itemGroup.hide_all()
+        self.stage.add(self)
     
     def addItem(self, itemLabel, imagePath):
         if len(self.menuItems) == 0:
@@ -127,7 +129,7 @@ class Menu:
             for i in range(len(self.menuItems)):
                 if i == self.selected:
                     self.menuItems[i].scaleLabel(0, self.timeline)
-                elif (i == self.selected-1) and (i >= self.displayMin+1):
+                elif (i == self.selected-1) and (i >= self.displayMin):
                     self.menuItems[i].scaleLabel(1, self.timeline)
                 elif (i == self.selected+1) and (i <= self.displayMax-1):
                     self.menuItems[i].scaleLabel(1, self.timeline)
@@ -171,22 +173,16 @@ class Menu:
             
             #This horrible loop does all the scaling
             #This includes, the selected item and the ones on either side of it
-            for i in range(len(self.menuItems)-1):
+            for i in range(len(self.menuItems)):
                 #print str(i)
                 if i == self.selected:
                     self.menuItems[i].scaleLabel(0, self.timeline)
-                elif (i == self.selected-1) and (i >= self.displayMin+1):
+                elif (i == self.selected-1) and (i >= self.displayMin):
                     self.menuItems[i].scaleLabel(1, self.timeline)
                 elif (i == self.selected+1) and (i <= self.displayMax-1):
                     self.menuItems[i].scaleLabel(1, self.timeline)
                 else:
                     self.menuItems[i].scaleLabel(2, self.timeline)
-                    
-            #This is a hack but it seems to fix a wierd bug (If rmeoving this, remove the -1 from the for loop above
-            if (self.selected == (len(self.menuItems)-2) ):
-                self.menuItems[len(self.menuItems)-1].scaleLabel(1, self.timeline)
-            if (self.selected == (len(self.menuItems)-3) ):
-                self.menuItems[len(self.menuItems)-1].scaleLabel(2, self.timeline)
             
             #Check we're at the top of the viewable list
             if self.selected < (self.displayMin):
@@ -281,6 +277,7 @@ class ListItem (clutter.Label):
     def __init__ (self, menu, itemLabel, y, imagePath):
         clutter.Label.__init__ (self)
         glossMgr = menu.getGlossMgr()
+        self.menu = menu
         self.stage = glossMgr.get_stage()
         
         self.itemTexturesGroup = clutter.Group()
@@ -290,12 +287,11 @@ class ListItem (clutter.Label):
         self.color = clutter.Color(0xff, 0xff, 0xff, 0xdd)
         self.set_color(self.color)
         self.currentOpacity = 255
-        self.menu = menu
         self.data = itemLabel #By default the items data is simply its label
         #The width is the length of the selector bar minus its offset
         width = glossMgr.get_selector_bar().get_width() + glossMgr.get_selector_bar().get_x_offset()
         self.set_width(width)
-        #Pango ellipses seem to be having problems, disabling for now
+
         self.set_ellipsize(pango.ELLIPSIZE_END)
         #Text is actually scaled down in 'regular' position so that it doesn't get jaggies when zoomed in
         self.set_scale(self.zoomLevel, self.zoomLevel)
@@ -308,9 +304,9 @@ class ListItem (clutter.Label):
         if not (imagePath == "" or imagePath is None):
             self.addImage(imagePath, True)
         
-        #Add textures group and hide it
-        self.menu.getMenuGroup().add(self.itemTexturesGroup)
-        self.itemTexturesGroup.hide_all()
+        #Add textures group and mark whether or not the textures are currently on the stage
+        self.itemTexturesGroup.show_all()
+        self.onStage = False
         
     def scaleLabel(self, level, timeline):
        
@@ -320,19 +316,27 @@ class ListItem (clutter.Label):
         if level==0:
             zoomTo = self.menu.zoomStep0 #self.zoomLevel * 1.5
             opacityTo = self.menu.opacityStep0
-            self.itemTexturesGroup.show_all()
+            self.menu.add(self.itemTexturesGroup)
+            self.onStage = True
+            #self.itemTexturesGroup.show_all()
         if level==1:
             zoomTo = self.zoomLevel * self.menu.zoomStep1
             opacityTo = self.menu.opacityStep1
-            self.itemTexturesGroup.hide_all()
+            if self.onStage: 
+                self.menu.remove(self.itemTexturesGroup)
+                self.onStage = False
+            #self.itemTexturesGroup.hide_all()
         if level==2:
             zoomTo = self.zoomLevel * self.menu.zoomStep2
             opacityTo = self.menu.opacityStep2
-            self.itemTexturesGroup.hide_all()
+            if self.onStage:
+                self.menu.remove(self.itemTexturesGroup)
+                self.onStage = False
+            #self.itemTexturesGroup.hide_all()
             
         if zoomTo == self.currentZoom:
             return None
-        
+    
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
         self.behaviour1 = clutter.BehaviourScale(alpha, self.currentZoom, zoomTo, clutter.GRAVITY_WEST)
         self.behaviour2 = clutter.BehaviourOpacity(alpha, self.currentOpacity, opacityTo)

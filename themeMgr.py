@@ -214,9 +214,10 @@ class ThemeMgr:
 			opacity = int(opacity)
 			actor.set_opacity(opacity)
 	
-	def get_texture(self, name, parent):
+	def get_texture(self, name, parent, texture):
 		texture_src = None
-		texture = clutter.Texture()
+		if texture is None:
+			texture = clutter.Texture()
 
 		element = self.search_docs("texture", name).childNodes
 		#Quick check to make sure we found something
@@ -234,5 +235,53 @@ class ThemeMgr:
 		
 		return texture
 	
-	def get_font(self, name):
-		return 'Tahoma 40'
+	def get_font(self, name, element):
+		if element is None:
+			element = self.search_docs("font", name).childNodes
+		#Quick check to make sure we found something
+		if element is None:
+			return None
+		
+
+		face = self.find_child_value(element, "face")
+		res = str(self.stage.get_width()) + "x" + str(self.stage.get_height())
+		
+		size = None
+		defSize = None
+		#Loop through all the different sizes until we find the right one (or else use the default)
+		for node in element:
+			if node.nodeType == node.ELEMENT_NODE:
+				if node.tagName == "size":
+					if node.attributes["id"].value == res:
+						size = node.childNodes[0].data
+					elif node.attributes["id"].value == "default":
+						defSize = node.childNodes[0].data
+		if size is None:
+			size = defSize
+		
+		fontString = str(face) + " " + str(size)
+		return fontString
+	
+	def setup_menu(self, name, menu):
+		element = self.search_docs("menu", name).childNodes
+		#Quick check to make sure we found something
+		if element is None:
+			return None
+		
+		menu.item_gap = int(self.find_child_value(element, "item_gap"))
+		menu.displayMax = int(self.find_child_value(element, "num_visible_elements"))
+		
+		#Grab the font
+		for node in element:
+			if node.nodeType == node.ELEMENT_NODE:
+				if node.tagName == "font":
+					fontString = self.get_font("main", node.childNodes) #print node.tagName
+		menu.font = fontString
+		
+		#Set the selection effect steps
+		menu.zoomStep0 = float(self.find_child_value(element, "scale_step0"))
+		menu.zoomStep1 = float(self.find_child_value(element, "scale_step1"))
+		menu.zoomStep2 = float(self.find_child_value(element, "scale_step2"))
+		menu.opacityStep0 = int(self.find_child_value(element, "opacity_step0"))
+		menu.opacityStep1 = int(self.find_child_value(element, "opacity_step1"))
+		menu.opacityStep2 = int(self.find_child_value(element, "opacity_step2"))

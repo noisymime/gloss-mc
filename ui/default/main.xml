@@ -1,4 +1,36 @@
 <gloss-theme>
+	<menu id="main">
+
+		<font id="main">
+			<face>Tahoma</face>
+			<size id="default">40</size>
+			<size id="1024x768">40</size>
+			<size id="800x600">30</size>
+		</font>
+
+		<item_gap>10</item_gap>
+		<num_visible_elements>6</num_visible_elements>
+		
+		<!-- These are the opacity and scale values for the 3 possible steps in the menu
+		     Make all the values the same if you do not want these effects -->
+		<opacity_step0>255</opacity_step0>
+		<opacity_step1>135</opacity_step1>
+		<opacity_step2>50</opacity_step2>
+		<scale_step0>1</scale_step0>
+		<scale_step1>0.85</scale_step1>
+		<scale_step2>0.75</scale_step2>
+
+	</menu>
+		
+
+
+	<font id="main">
+		<face>Tahoma</face>
+		<size id="default">40</size>
+		<size id="1024x768">40</size>
+		<size id="800x600">30</size>
+	</font>
+
 	<texture id="background">
 		<image>background.png</image>
 		<dimensions type="relativeToStage">

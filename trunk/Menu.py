@@ -7,14 +7,18 @@ from ReflectionTexture import Texture_Reflection
 
 class Menu:
     item_gap = 10 #Distance between items
+    font = ""
+    zoomLevel = 0.5
+    opacityStep = 120
     
     def __init__ (self, glossMgr):
         self.glossMgr = glossMgr
         self.stage = self.glossMgr.get_stage()
+        self.glossMgr.themeMgr.setup_menu("main", self)
+        
         self.menuItems = []
         self.selected = 0
         self.displayMin = 0 #The number of menu items that will be shown at a time
-        self.displayMax = 6
         self.moveQueue = 0
         self.displaySize = self.displayMax - self.displayMin
         self.displayPosition = (0, 0)
@@ -277,9 +281,10 @@ class ListItem (clutter.Label):
     def __init__ (self, menu, itemLabel, y, imagePath):
         clutter.Label.__init__ (self)
         glossMgr = menu.getGlossMgr()
-        self.itemTexturesGroup = clutter.Group()
-        font = glossMgr.get_themeMgr().get_font("menu_item")
         self.stage = glossMgr.get_stage()
+        
+        self.itemTexturesGroup = clutter.Group()
+        font = menu.font #glossMgr.get_themeMgr().get_font("menu_item")
         self.set_font_name(font)
         self.set_text(itemLabel)
         self.color = clutter.Color(0xff, 0xff, 0xff, 0xdd)
@@ -313,16 +318,16 @@ class ListItem (clutter.Label):
         zoomTo=0
         opacityTo = 255
         if level==0:
-            zoomTo = 1 #self.zoomLevel * 1.5
-            opacityTo = 255
+            zoomTo = self.menu.zoomStep0 #self.zoomLevel * 1.5
+            opacityTo = self.menu.opacityStep0
             self.itemTexturesGroup.show_all()
         if level==1:
-            zoomTo = self.zoomLevel * 1.2
-            opacityTo = 255 - self.opacityStep
+            zoomTo = self.zoomLevel * self.menu.zoomStep1
+            opacityTo = self.menu.opacityStep1
             self.itemTexturesGroup.hide_all()
         if level==2:
-            zoomTo = self.zoomLevel
-            opacityTo = 255 - 2*self.opacityStep
+            zoomTo = self.zoomLevel * self.menu.zoomStep2
+            opacityTo = self.menu.opacityStep2
             self.itemTexturesGroup.hide_all()
             
         if zoomTo == self.currentZoom:

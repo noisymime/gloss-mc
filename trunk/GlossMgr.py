@@ -15,7 +15,7 @@ class GlossMgr:
         self.uiMsg = message(stage)
         
         self.themeMgr = ThemeMgr(self.stage)
-        background = self.themeMgr.get_texture("background", None)
+        background = self.themeMgr.get_texture("background", None, None)
         background.show()
         self.stage.add(background)
         

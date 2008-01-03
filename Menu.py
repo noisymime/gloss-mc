@@ -6,7 +6,6 @@ import time
 from ReflectionTexture import Texture_Reflection
 
 class Menu(clutter.Group):
-    item_gap = 10 #Distance between items
     font = ""
     zoomLevel = 0.5
     opacityStep = 120
@@ -15,6 +14,7 @@ class Menu(clutter.Group):
         clutter.Group.__init__(self)
         self.glossMgr = glossMgr
         self.stage = self.glossMgr.get_stage()
+        self.itemGroup = clutter.Group()
         self.glossMgr.themeMgr.setup_menu("main", self)
         
         self.menuItems = []
@@ -23,33 +23,35 @@ class Menu(clutter.Group):
         self.moveQueue = 0
         self.displaySize = self.displayMax - self.displayMin
         self.displayPosition = (0, 0)
-        self.itemGroup = clutter.Group()
-        #self.menuGroup = clutter.Group()
+        
         self.stage.add(self.itemGroup)
-        #self.stage.add(self.menuGroup)
-        #self.hasTimeline = False
         self.timeline = clutter.Timeline(15, 75) #This timeline is used on any movements that occur when changing items
         self.timeline_completed=True
         self.glossMgr.addMenu(self)
-        #self.itemGroup.hide_all()
         self.stage.add(self)
     
     def addItem(self, itemLabel, imagePath):
         if len(self.menuItems) == 0:
-            label_height = 0
+            tempLabel = clutter.Label()
+            tempLabel.set_font_name(self.font)
+            tempLabel.set_text("S")
+            #tempLabel.set_scale_with_gravity(self.zoomStep0, self.zoomStep0, clutter.GRAVITY_WEST)
+            self.label_height = tempLabel.get_height()
+            #self.label_height = self.label_height * self.zoomStep1
             label_width = 0
-        else:
-            (label_width, label_height) = self.menuItems[0].get_size()
-            
-        label_y = label_height * len(self.menuItems)+self.item_gap
+        #else:
+        #    (label_width, label_height) = self.menuItems[0].get_size()
+        
+        label_y = len(self.menuItems) * (self.label_height + self.item_gap)
+        print "Label height: " + str(self.label_height)
         
         newItem = ListItem(self, itemLabel, label_y, imagePath)
         self.menuItems.append(newItem)
         self.itemGroup.add(newItem)
         
-        group_x = self.itemGroup.get_x()
-        group_y = self.itemGroup.get_y() - (label_height)
-        self.itemGroup.set_position(group_x, group_y) 
+        #group_x = self.itemGroup.get_x()
+        #group_y = self.itemGroup.get_y() - (self.label_height)
+        #self.itemGroup.set_position(group_x, group_y) 
         
         return newItem
         
@@ -71,26 +73,23 @@ class Menu(clutter.Group):
         return self.glossMgr
         
     def setMenuPositionByName(self, location):
+        return None
         if location == "center":
             menu_y = (self.stage.get_height()-self.itemGroup.get_height())/2
             menu_x = (self.stage.get_width()-self.itemGroup.get_width())/2
             self.itemGroup.set_position(menu_x, menu_y)
-            self.displayPosition = (menu_x, menu_y)
             #print "Original Group size: " + str(self.itemGroup.get_width())
             #print "Starting at : " + str(menu_x) + ":" + str(menu_y)
     
     #The display position is the x, y coords of where the menu is when it is active
     def get_display_position(self):
-        return self.displayPosition
+        return (self.itemGroup.get_x(), self.itemGroup.get_y())
         
     def setMenuPosition(self, x, y):
         self.itemGroup.set_position(x,y)
         
     def getItemGroup(self):
         return self.itemGroup
-        
-    def getMenuGroup(self):
-        return self.menuGroup
         
     def setListFont(self, newFont):
         currentY= 0 #self.itemGroup.get_y()
@@ -228,26 +227,28 @@ class Menu(clutter.Group):
     def rollMenu(self, incomingMenuItem, outgoingMenuItem, timeline):    
         (group_x, group_y) = self.itemGroup.get_abs_position()
         (bar_x, bar_y) = self.glossMgr.get_selector_bar().get_abs_position() # incomingMenuItem.get_menu().getMenuMgr().
-        (incoming_x, incoming_y) = incomingMenuItem.get_abs_position()
+        (incoming_x, incoming_y) = self.glossMgr.get_selector_bar().get_true_abs_position(incomingMenuItem) #incomingMenuItem.get_abs_position()
         
         #print self.itemGroup.get_abs_position()
         #print "Starting group position: " + self.itemGroup.get_abs_position()
         
         if incoming_y > bar_y:  
             #Then the incoming item is below the selector bar
-            gap = (incoming_y - bar_y - (self.item_gap/2)) * -1
+            height_diff = int(self.glossMgr.get_selector_bar().get_height() - self.glossMgr.get_selector_bar().get_height())
+            print "height diff: " + str(height_diff)
+            gap = (incoming_y - bar_y) * -1 #- (self.item_gap/2)) * -1
             #gap = -65
             self.displayMin = self.displayMin+1
             self.displayMax = self.displayMax+1
         else:
             #Then the incoming item is above the selector bar
-            gap = bar_y - incoming_y + (self.item_gap/2)
+            gap = bar_y - incoming_y# + (self.item_gap/2)
             #gap = 65
             self.displayMin = self.displayMin-1
             self.displayMax = self.displayMax-1
         
         #print "Gap: " + str(gap)
-        new_y = (group_y+gap)
+        new_y = (group_y + gap)
         knots = (\
             (group_x, group_y),\
             (group_x, new_y )\
@@ -320,21 +321,21 @@ class ListItem (clutter.Label):
             self.onStage = True
             #self.itemTexturesGroup.show_all()
         if level==1:
-            zoomTo = self.zoomLevel * self.menu.zoomStep1
+            zoomTo = self.menu.zoomStep1
             opacityTo = self.menu.opacityStep1
             if self.onStage: 
                 self.menu.remove(self.itemTexturesGroup)
                 self.onStage = False
             #self.itemTexturesGroup.hide_all()
         if level==2:
-            zoomTo = self.zoomLevel * self.menu.zoomStep2
+            zoomTo = self.menu.zoomStep2
             opacityTo = self.menu.opacityStep2
             if self.onStage:
                 self.menu.remove(self.itemTexturesGroup)
                 self.onStage = False
             #self.itemTexturesGroup.hide_all()
             
-        if zoomTo == self.currentZoom:
+        if (zoomTo == self.currentZoom) and (opacityTo == self.currentOpacity):
             return None
     
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
@@ -342,9 +343,13 @@ class ListItem (clutter.Label):
         self.behaviour2 = clutter.BehaviourOpacity(alpha, self.currentOpacity, opacityTo)
         self.behaviour1.apply(self)
         self.behaviour2.apply(self)
-
+        
+        #timeline.connect('completed', self.scale_end_event, zoomTo, opacityTo)
         self.currentZoom = zoomTo
         self.currentOpacity = opacityTo
+
+    def scale_end_event(self, data, zoomTo, opacityTo):
+        pass
         
     def get_zoom_level(self):
         return self.zoomLevel

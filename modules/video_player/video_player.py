@@ -180,7 +180,7 @@ class Module():
             return
        
         #Create a backdrop for the player. In this case we just use the same background as the menus
-        self.backdrop = glossMgr.get_themeMgr().get_texture("background", None) #clutter.CloneTexture(glossMgr.get_skinMgr().get_Background())
+        self.backdrop = glossMgr.get_themeMgr().get_texture("background", None, None) #clutter.CloneTexture(glossMgr.get_skinMgr().get_Background())
         self.backdrop.set_size(self.stage.get_width(), self.stage.get_height())
         self.backdrop.set_opacity(0)
         self.backdrop.show()

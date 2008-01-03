@@ -129,6 +129,14 @@ class ThemeMgr:
 	#This is the generic function for setting up an actor. 
 	#It sets up all the 'common' properties:
 	#Currently: size, position, opacity
+	def get_value(self, type, name, property):
+		element = self.search_docs(type, name).childNodes
+		#Quick check to make sure we found something
+		if element is None:
+			return None
+		
+		return self.find_child_value(element, property)
+	
 	def setup_actor(self, actor, element, parent):
 		#Set the size
 		#First setup the parent
@@ -148,14 +156,15 @@ class ThemeMgr:
 				
 				width = (float(width[:-1]) / 100.0) * parent.get_width()
 				#print "width: " + str(width)
-				width = int(width)
+			width = int(width)
 		height = self.find_child_value(element, "dimensions.height")
 		if (not height == "default") and (not height is None):
 			if height[-1] == "%":
 				height = (float(height[:-1]) / 100.0) * parent.get_height()
-				height = int(height)
+			height = int(height)
 		
-		actor.set_size(width, height)
+		if (not width is None) and (not width == "default"): actor.set_width(width)
+		if (not height is None) and (not height == "default"): actor.set_height(height)
 		
 		#Set the position of the actor
 		(x,y) = (0,0)
@@ -285,3 +294,6 @@ class ThemeMgr:
 		menu.opacityStep0 = int(self.find_child_value(element, "opacity_step0"))
 		menu.opacityStep1 = int(self.find_child_value(element, "opacity_step1"))
 		menu.opacityStep2 = int(self.find_child_value(element, "opacity_step2"))
+		
+		#Finally set general actor properties (position etc)
+		self.setup_actor(menu.getItemGroup(), element, self.stage)

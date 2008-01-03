@@ -52,24 +52,24 @@ class VideoController:
         #Now we can start the video
         self.video_texture.set_playing(True)
         #self.bin.set_state(gst.STATE_PAUSED)
-        #self.bin.set_state(gst.STATE_PLAYING)
+        self.bin.set_state(gst.STATE_PLAYING)
         self.isPlaying = True
         
-        decodebin = self.bin.get_by_name("decodebin0")
+        #decodebin = self.bin.get_by_name("decodebin0")
         #for element in decodebin.elements():
         #    print "GST Element 1: " + str(element.get_name()) 
         #queue = decodebin.get_by_name("queue0")
         #print queue.get_name()
         #ypefind = decodebin.get_by_name("typefind")
         
-        decodebin.connect("pad-added", self.on_pad_added)
+        #decodebin.connect("pad-added", self.on_pad_added)
         #vid = demuxer.get_by_name("video_00")
-        self.queue1 = gst.element_factory_make("queue", "queue1")
-        self.queue1.set_property("max-size-time", 50000)
-        self.queue1.set_property("max-size-buffers", 0)
+        #self.queue1 = gst.element_factory_make("queue", "queue1")
+        #self.queue1.set_property("max-size-time", 50000)
+        #self.queue1.set_property("max-size-buffers", 0)
         
         #self.queue2 = gst.element_factory_make("queue", "queue2")
-        self.bin.add(self.queue1)
+        #self.bin.add(self.queue1)
         #self.bin.add(self.queue2)
         #decodebin.link(self.queue1)  
         #self.queue1.link(decodebin)

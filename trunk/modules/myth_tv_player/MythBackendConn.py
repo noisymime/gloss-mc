@@ -174,22 +174,9 @@ class MythBackendConnection(threading.Thread):
         max_request_size = 270000
         request_size_step = 16384
         
-        #Need to create a bit of a buffer so playback will begin
-        """
-        x=0
-        while x<80:
-            transfer_cmd = "QUERY_FILETRANSFER "+ str(socket_id) + "[]:[]REQUEST_BLOCK[]:[]"+str(request_size)
-            self.send_cmd(cmd_sock, transfer_cmd)
-            num_bytes = int(self.receive_reply(cmd_sock))
-            data = data_sock.recv(num_bytes)
-            self.buffer_file.write(data)
-            x=x+1
-        self.buffer_file.flush()
-        """
-        
-        #self.videoPlayer.begin_playback(buffer_file_name)
-        reader_fd = os.dup(data_sock.fileno())
-        self.videoPlayer.begin_playback(reader_fd)
+        #Data is sent through a pipe to GStreamer
+        (pipe_rfd, pipe_wfd) = os.pipe()
+        self.videoPlayer.begin_playback(pipe_rfd)
         
         print "BEGINNING PLAYBACK!"
         self.Playing = True
@@ -197,12 +184,11 @@ class MythBackendConnection(threading.Thread):
             transfer_cmd = "QUERY_FILETRANSFER "+ str(socket_id) + "[]:[]REQUEST_BLOCK[]:[]"+str(request_size)
             self.send_cmd(cmd_sock, transfer_cmd)
             num_bytes = int(self.receive_reply(cmd_sock))
-            data_sock.recv(num_bytes)
-            #self.buffer_file.write(data)
-            #self.buffer_file.flush()
+            data = data_sock.recv(num_bytes)
+            os.write(pipe_wfd, data)
+
             
             #This tries to optimise the request size
-            #print "Received: " + str(num_bytes)
             if (num_bytes == request_size) and (request_size < max_request_size):
                 request_size = request_size + request_size_step
                 if request_size > max_request_size:
@@ -212,7 +198,8 @@ class MythBackendConnection(threading.Thread):
                 
         
         print "Ending playback"
-        #self.buffer_file.close()
+        os.close(pipe_wfd)
+        os.close(pipe_rfd)
         
     def message_socket_mgr(self, msg_socket):
         #Do the protocol version check

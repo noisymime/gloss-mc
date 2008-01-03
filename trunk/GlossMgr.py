@@ -50,9 +50,9 @@ class GlossMgr:
         
     def transition_fade_zoom(self, fromMenu, toMenu):
         oldGroup = fromMenu.getItemGroup()
-        oldMenuGroup = fromMenu.getMenuGroup()
+        oldMenuGroup = fromMenu #.getMenuGroup()
         newGroup = toMenu.getItemGroup()
-        newMenuGroup = toMenu.getMenuGroup()
+        newMenuGroup = toMenu #.getMenuGroup()
         
         oldGroup.set_opacity(255)
         
@@ -179,23 +179,16 @@ class GlossMgr:
         
 class MenuSelector(clutter.Texture):
     x_offset = -50
-    width = 400
 
-    def __init__ (self, menuMgr):
+    def __init__ (self, glossMgr):
         clutter.Texture.__init__ (self)
-        self.menuMgr = menuMgr
-        pixbuf = gtk.gdk.pixbuf_new_from_file("ui/active_bar.png")
-        self.set_pixbuf(pixbuf)
-        self.set_width(self.width)
-        
-        #pixbuf = gtk.gdk.pixbuf_new_from_file("ui/spinner1.gif")
-        #self.spinner = clutter.Texture()
-        #self.spinner.set_pixbuf(pixbuf)
-        #self.spinner.hide()
-        
-
-    def selectItem(self, selectee, timeline):
-        
+        self.glossMgr = glossMgr
+        glossMgr.themeMgr.get_texture("selector_bar", glossMgr.stage, self)
+        self.set_position(0, self.get_y())
+        self.x_offset = int(glossMgr.themeMgr.get_value("texture", "selector_bar", "position.x"))
+    
+    #This is a utility function that gets the coordinates of an that has been scaled
+    def get_true_abs_position(self, selectee):
         #This whole clone label thing is a HORRIBLE hack but is there to compensate for the movement caused by scaling using GRAVITY_WEST
         #Essentially a clone of the selectee is made and scaled to its final position to retrieve the final abs_position coords
         cloneLabel = clutter.Label()
@@ -204,14 +197,20 @@ class MenuSelector(clutter.Texture):
         (scale_x, scale_y) = selectee.get_scale()
         cloneLabel.set_scale_with_gravity(scale_x, scale_y, clutter.GRAVITY_WEST)
         selectee.get_parent().add(cloneLabel)
+        
         cloneLabel.set_position(selectee.get_x(), selectee.get_y())
         
         #Now that all the cloning is done, find out what the scale is to become and set it on the clone
         scale = selectee.currentZoom
         cloneLabel.set_scale_with_gravity(scale, scale, clutter.GRAVITY_WEST)
         
+        return cloneLabel.get_abs_position()
+
+    def selectItem(self, selectee, timeline):
+                
+        
         #Now get the end position of the clone
-        (x, y) = cloneLabel.get_abs_position()
+        (x, y) = self.get_true_abs_position(selectee)
         
         #Do some minor adjustments for centering etc
         x = x + self.x_offset
@@ -274,8 +273,6 @@ class MenuSelector(clutter.Texture):
         
     def get_x_offset(self):
         return self.x_offset
-    def get_width(self):
-        return self.width
         
 class message():
     font = "Lucida Grande "

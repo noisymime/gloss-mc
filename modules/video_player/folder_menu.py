@@ -82,35 +82,37 @@ class folderMenu(clutter.Group):
         
         if direction > 0:
             rotation_direction = clutter.ROTATE_CCW
-            self.behaviour_rotate_incoming = clutter.BehaviourRotate(alpha, clutter.X_AXIS, rotation_direction, 90, 0)
-            self.behaviour_rotate_outgoing = clutter.BehaviourRotate(alpha, clutter.X_AXIS, rotation_direction, 0, 270)
+            self.behaviour_rotate_incoming = clutter.BehaviourRotate(axis=clutter.X_AXIS, direction=rotation_direction, angle_start=90, angle_end=0, alpha=alpha)
+            self.behaviour_rotate_outgoing = clutter.BehaviourRotate(axis=clutter.X_AXIS, direction=rotation_direction, angle_start=0, angle_end=270, alpha=alpha)
         else:
             rotation_direction = clutter.ROTATE_CW
-            self.behaviour_rotate_incoming = clutter.BehaviourRotate(alpha, clutter.X_AXIS, rotation_direction, 270, 0)
-            self.behaviour_rotate_outgoing = clutter.BehaviourRotate(alpha, clutter.X_AXIS, rotation_direction, 0, 90)
+            self.behaviour_rotate_incoming = clutter.BehaviourRotate(axis=clutter.X_AXIS, direction=rotation_direction, angle_start=270, angle_end=0, alpha=alpha)
+            self.behaviour_rotate_outgoing = clutter.BehaviourRotate(axis=clutter.X_AXIS, direction=rotation_direction, angle_start=0, angle_end=90, alpha=alpha)
         
         #Need to set the axis of rotation for the covers
         self.behaviour_rotate_outgoing.set_center(0, self.item_size/2, 0)
         self.behaviour_rotate_incoming.set_center(0, self.item_size/2, 0)
         
-        self.behaviour_opacity_incoming = clutter.BehaviourOpacity(alpha, 0, new_viewer.inactiveOpacity)
+        self.behaviour_opacity_incoming = clutter.BehaviourOpacity(opacity_start=0, opacity_end=new_viewer.inactiveOpacity, alpha=alpha)
         
         #Apply the outgong behaviour
         current_viewer = self.viewerLibrary[self.currentItemNo]
         timeline.connect('completed', self.completeSwitch, current_viewer)
-        self.behaviour_opacity_outgoing = clutter.BehaviourOpacity(alpha, current_viewer.inactiveOpacity, 0)
+        self.behaviour_opacity_outgoing = clutter.BehaviourOpacity(opacity_start=current_viewer.inactiveOpacity, opacity_end=0, alpha=alpha)
         
         self.behaviour_opacity_outgoing.apply(current_viewer)
         for cover in current_viewer.get_item_library():
+            #cover.set_depth(cover.get_height())
             self.behaviour_rotate_outgoing.apply(cover)
 
             
         #Apply the incoming behaviour
         new_viewer.set_opacity(0)
-        self.behaviour_opacity_incomingViewer = clutter.BehaviourOpacity(alpha, 0, 255)
+        self.behaviour_opacity_incomingViewer = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
         self.behaviour_opacity_incomingViewer.apply(new_viewer)
         for cover in new_viewer.get_item_library():
             cover.set_opacity(0)
+            #cover.set_depth(int(cover.get_height()/2))
             self.behaviour_rotate_incoming.apply(cover)
             self.behaviour_opacity_incoming.apply(cover)
         

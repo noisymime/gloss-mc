@@ -15,10 +15,21 @@ class GlossMgr:
         self.currentMenu = None
         self.uiMsg = message(stage)
         
+        #Setup the menu transition
+        self.transition = "slide"
+        transition_path = "transitions/menus/" + self.transition
+        self.transition = __import__(transition_path).Transition(self)
+        
         self.themeMgr = ThemeMgr(self.stage)
         background = self.themeMgr.get_texture("background", None, None)
+        #background.set_depth(-500)
+        #background.set_scale(1, 1)
+        background.set_width(stage.get_width())
+        background.set_height(stage.get_height())
         background.show()
         self.stage.add(background)
+        print "Perspective: " + str(stage.get_perspective())
+        #stage.set_perspective(60.0, 1.0, 0.1, 1)
         
         self.selector_bar = MenuSelector(self)
         self.stage.add(self.selector_bar)#Load the theme manager
@@ -47,73 +58,7 @@ class GlossMgr:
         
     def get_themeMgr(self):
         return self.themeMgr
-        
-    def transition_fade_zoom(self, fromMenu, toMenu):
-        oldGroup = fromMenu.getItemGroup()
-        oldMenuGroup = fromMenu #.getMenuGroup()
-        newGroup = toMenu.getItemGroup()
-        newMenuGroup = toMenu #.getMenuGroup()
-        
-        oldGroup.set_opacity(255)
-        
-        self.timeline = clutter.Timeline(25, 50)
-        self.alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
-        #self.exit_behaviour_scale = clutter.BehaviourScale(self.alpha, 1, 0.5, clutter.GRAVITY_CENTER)
-        self.exit_behaviour_opacity = clutter.BehaviourOpacity(self.alpha, 150, 0)
-        
-        #Setup some knots
-        knots_exiting = (\
-                (oldGroup.get_x(), oldGroup.get_y()),\
-                #(-oldGroup.get_x(), int(fromMenu.getStage().get_height()/2))
-                (-oldGroup.get_x(), oldGroup.get_y())\
-                )
-        self.exit_behaviour_path = clutter.BehaviourPath(self.alpha, knots_exiting)
-        
-        #self.exit_behaviour_scale.apply(oldGroup)
-        self.exit_behaviour_opacity.apply(oldGroup)
-        self.exit_behaviour_opacity.apply(oldMenuGroup)
-        self.exit_behaviour_path.apply(oldGroup)
-        
-        
-        ##################################################################
-        #Start incoming menu
-        #self.exit_behaviour_scale = clutter.BehaviourScale(self.alpha, 1, 0.5, clutter.GRAVITY_CENTER)
-        self.entrance_behaviour_opacity = clutter.BehaviourOpacity(self.alpha, 0, 255)
-        
-        #Setup some knots
-        start_y = int(self.stage.get_height()/2 - newGroup.get_height()/2)
-        start_x = int(self.stage.get_width())
-        newGroup.set_position(start_x, start_y)
-        #end_x = int(self.stage.get_width() - newGroup.get_width())/2
-        (end_x, end_y) = toMenu.get_display_position()
-        end_x = oldGroup.get_x() #int(end_x)
-        end_y = oldGroup.get_y() #int(end_y)
-        knots_entering = (\
-                (newGroup.get_x(), newGroup.get_y()),\
-                #(-oldGroup.get_x(), int(fromMenu.getStage().get_height()/2))
-                (end_x, end_y) \
-                #toMenu.get_display_position()
-                )
-
-        self.entrance_behaviour_path = clutter.BehaviourPath(self.alpha, knots_entering)
-        
-        self.entrance_behaviour_opacity.apply(newGroup)
-        self.entrance_behaviour_opacity.apply(newMenuGroup)
-        self.entrance_behaviour_path.apply(newGroup)
-        #newGroup.show_all()
-        #newMenuGroup.show_all()
-        toMenu.display()
-        
-        #Finally, move the selector bar
-        self.selector_bar.selectItem(fromMenu.getItem(0), self.timeline)
-        #(to_x, to_y) = toMenu.get_display_position() #fromMenu.getItem(0).get_abs_position()
-        #self.selector_bar.move_to(int(to_x), int(to_y), self.timeline)
-        toMenu.selectFirst(False)
-        
-        #self.timeline.connect('completed', self.on_transition_complete)
-        self.timeline.start()
-        self.currentMenu = toMenu
-        
+                
     def on_key_press_event (self, stage, event):
         #Firstly check whether any messages are currently displayed
         if self.uiMsg.active:
@@ -141,7 +86,7 @@ class GlossMgr:
             # 2) Launch a module
             action = self.currentMenu.get_current_item().getAction()
             if action.__class__.__name__ == "Menu": # Check whether we're a pointing to a menu object
-                self.transition_fade_zoom(self.currentMenu, action)
+                self.transition.do_transition(self.currentMenu, action)
                 self.menuHistory.append(action)
             else:
                 #We have a plugin and need to start it
@@ -161,7 +106,7 @@ class GlossMgr:
             #If there's no plugin running, go back one in the menu list (Providing we're not already at the first item.
             else:
                 if len(self.menuHistory)>1:
-                    self.transition_fade_zoom(self.menuHistory.pop(), self.menuHistory[-1])
+                    self.transition.do_transition(self.menuHistory.pop(), self.menuHistory[-1])
                     self.currentMenu = self.menuHistory[-1]
         #print event.hardware_keycode
     
@@ -195,14 +140,15 @@ class MenuSelector(clutter.Texture):
         cloneLabel.set_text(selectee.get_text())
         cloneLabel.set_font_name(selectee.get_font_name())
         (scale_x, scale_y) = selectee.get_scale()
-        cloneLabel.set_scale_with_gravity(scale_x, scale_y, clutter.GRAVITY_WEST)
+        cloneLabel.set_anchor_point_from_gravity(clutter.GRAVITY_WEST)
+        cloneLabel.set_scale(scale_x, scale_y)
         selectee.get_parent().add(cloneLabel)
         
         cloneLabel.set_position(selectee.get_x(), selectee.get_y())
         
         #Now that all the cloning is done, find out what the scale is to become and set it on the clone
         scale = selectee.currentZoom
-        cloneLabel.set_scale_with_gravity(scale, scale, clutter.GRAVITY_WEST)
+        cloneLabel.set_scale(scale, scale)
         
         return cloneLabel.get_abs_position()
 
@@ -255,11 +201,11 @@ class MenuSelector(clutter.Texture):
             
             self.spinner.set_opacity(0)
             self.spinner.show()
-            self.menuMgr.get_stage().add(self.spinner)
-            self.behaviour = clutter.BehaviourOpacity(self.alpha, 0,255)
+            self.glossMgr.get_stage().add(self.spinner)
+            self.behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=self.alpha)
             self.spinner.start()
         else:
-            self.behaviour = clutter.BehaviourOpacity(self.alpha, 255,0)
+            self.behaviour = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=self.alpha)
             self.timeline.connect('completed', self.spinner_end_event)
             #self.menuMgr.get_stage().remove(self.spinner)
             #self.spinner = None
@@ -268,7 +214,7 @@ class MenuSelector(clutter.Texture):
         self.timeline.start()
         
     def spinner_end_event(self, data):
-        self.menuMgr.get_stage().remove(self.spinner)
+        self.glossMgr.get_stage().remove(self.spinner)
         self.spinner = None
         
     def get_x_offset(self):

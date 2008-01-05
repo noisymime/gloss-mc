@@ -124,7 +124,7 @@ class Module:
         self.backdrop.show()
         timeline_backdrop = clutter.Timeline(10,30)
         alpha = clutter.Alpha(timeline_backdrop, clutter.ramp_inc_func)
-        self.backdrop_behaviour = clutter.BehaviourOpacity(alpha, 0, 255)
+        self.backdrop_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
         self.backdrop_behaviour.apply(self.backdrop)
         timeline_backdrop.start()
         
@@ -179,7 +179,8 @@ class Module:
                
         #Zooming stuff
         rand_zoom = random.uniform(1,1.3) # Zoom somewhere between 1 and 1.3 times
-        self.behaviour1 = clutter.BehaviourScale(self.alpha, 1, rand_zoom, clutter.GRAVITY_CENTER)
+        self.behaviour1 = clutter.BehaviourScale(scale_start=1, scale_end=rand_zoom, alpha=self.alpha)
+        self.behaviour1.set_property("scale-gravity", clutter.GRAVITY_CENTER) #As at Clutter r1807 you cannot set the gravity on the line above. 
         
         #panning stuff
         x_pos = self.currentTexture.get_x() + random.randint(-100, 100)
@@ -206,8 +207,8 @@ class Module:
         self.alpha_dissolve = clutter.Alpha(self.timeline_dissolve, clutter.ramp_inc_func)
     
         #Setup the dissolve to the next image
-        self.behaviour3 = clutter.BehaviourOpacity(self.alpha_dissolve, 255, 0)
-        self.behaviour4 = clutter.BehaviourOpacity(self.alpha_dissolve, 0, 255)
+        self.behaviour3 = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=self.alpha_dissolve)
+        self.behaviour4 = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=self.alpha_dissolve)
         
         self.behaviour3.apply(self.currentTexture)
         self.behaviour4.apply(self.nextTexture)

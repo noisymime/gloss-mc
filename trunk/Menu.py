@@ -207,6 +207,10 @@ class Menu(clutter.Group):
         if self.timeline.is_playing:
             "ERROR: Timeline should NOT be playing here!"
             
+        #Empty out things on the menu first (if any)
+        for group in self.get_children():
+            self.remove(group)
+            
         self.timeline = clutter.Timeline(1, 75)
         self.selected = 0
         for i in range(0,len(self.menuItems)):
@@ -339,8 +343,9 @@ class ListItem (clutter.Label):
             return None
     
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
-        self.behaviour1 = clutter.BehaviourScale(alpha, self.currentZoom, zoomTo, clutter.GRAVITY_WEST)
-        self.behaviour2 = clutter.BehaviourOpacity(alpha, self.currentOpacity, opacityTo)
+        self.behaviour1 = clutter.BehaviourScale(scale_start=self.currentZoom, scale_end=zoomTo, alpha=alpha) #scale_gravity=clutter.GRAVITY_WEST, 
+        self.behaviour1.set_property("scale-gravity", clutter.GRAVITY_WEST) #As at Clutter r1807 you cannot set the gravity on the line above. 
+        self.behaviour2 = clutter.BehaviourOpacity(opacity_start=self.currentOpacity, opacity_end=opacityTo, alpha=alpha)
         self.behaviour1.apply(self)
         self.behaviour2.apply(self)
         
@@ -360,20 +365,26 @@ class ListItem (clutter.Label):
         pixbuf = gtk.gdk.pixbuf_new_from_file(path)
 
         self.tempTexture.set_pixbuf(pixbuf)
+
+        
+       
+        #Scale the image down by half
+        xy_ratio = self.tempTexture.get_width() / self.tempTexture.get_height()
+        self.tempTexture.set_width(int(self.stage.get_width() * 0.20)) #30% of the stages width
+        self.tempTexture.set_height(self.tempTexture.get_width() * xy_ratio ) #Just makes sure the sizes stay the same
+
+        #Rotate appropriately
+        self.tempTexture.set_depth(self.tempTexture.get_width()/2)
+        self.tempTexture.set_rotation(clutter.Y_AXIS, 45, (self.tempTexture.get_width()/2), 0, 0)
+        self.itemTexturesGroup.add(self.tempTexture)
+        self.tempTexture.hide_all()
+        
+        #Set position
         (abs_x, abs_y) = self.get_abs_position()
 
         x = abs_x# - self.tempTexture.get_width()
         y = (self.menu.getStage().get_height()/2) - (self.tempTexture.get_height()/2)
         self.tempTexture.set_position(x, y)
-        
-        self.tempTexture.rotate_y(45,0,0)    
-        self.itemTexturesGroup.add(self.tempTexture)
-        self.tempTexture.hide_all()
-        
-        #Scale the image down by half
-        xy_ratio = self.tempTexture.get_width() / self.tempTexture.get_height()
-        self.tempTexture.set_width(int(self.stage.get_width() * 0.30)) #30% of the stages width
-        self.tempTexture.set_height(self.tempTexture.get_width() * xy_ratio ) #Just makes sure the sizes stay the same
         
         if useReflection:
             self.reflectionTexture = Texture_Reflection(self.tempTexture)

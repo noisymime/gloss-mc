@@ -188,10 +188,9 @@ class Module():
         #Fade the backdrop in
         timeline_begin = clutter.Timeline(10,40)
         alpha = clutter.Alpha(timeline_begin, clutter.ramp_inc_func)
-        self.begin_behaviour = clutter.BehaviourOpacity(alpha, 0, 255)
+        self.begin_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
         self.begin_behaviour.apply(self.backdrop)
 
-        
         self.stage.add(self.folderLibrary[0])
         self.folderLibrary[0].show()
         
@@ -218,7 +217,7 @@ class Module():
         #Fade everything out
         timeline_stop = clutter.Timeline(10,30)
         alpha = clutter.Alpha(timeline_stop, clutter.ramp_inc_func)
-        self.stop_behaviour = clutter.BehaviourOpacity(alpha, 255, 0)
+        self.stop_behaviour = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=alpha)
         self.stop_behaviour.apply(self.currentViewer)
         self.stop_behaviour.apply(self.backdrop)
         self.stop_behaviour.apply(self.folderLibrary[self.folder_level])
@@ -249,10 +248,10 @@ class Module():
         timeline = clutter.Timeline(15, 25)
         self.currentViewer.set_opacity(0)
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
-        self.behaviour = clutter.BehaviourOpacity(alpha, 0,255)
+        self.behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
         self.behaviour.apply(self.currentViewer)
         
-        self.stage.add(self.currentViewer)
+        self.stage.add()
         self.currentViewer.show()
         timeline.start()
         

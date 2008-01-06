@@ -30,7 +30,7 @@ class Menu(clutter.Group):
         self.glossMgr.addMenu(self)
         self.stage.add(self)
     
-    def addItem(self, itemLabel, imagePath):
+    def addItem(self, itemLabel):
         if len(self.menuItems) == 0:
             tempLabel = clutter.Label()
             tempLabel.set_font_name(self.font)
@@ -45,7 +45,7 @@ class Menu(clutter.Group):
         label_y = len(self.menuItems) * (self.label_height + self.item_gap)
         print "Label height: " + str(self.label_height)
         
-        newItem = ListItem(self, itemLabel, label_y, imagePath)
+        newItem = ListItem(self, itemLabel, label_y)
         self.menuItems.append(newItem)
         self.itemGroup.add(newItem)
         
@@ -279,14 +279,18 @@ class ListItem (clutter.Label):
     zoomLevel = 0.5
     opacityStep = 120
 
-    def __init__ (self, menu, itemLabel, y, imagePath):
+    def __init__ (self, menu, itemLabel, y):
         clutter.Label.__init__ (self)
         glossMgr = menu.getGlossMgr()
         self.menu = menu
         self.stage = glossMgr.get_stage()
         
+        #ItemTexturesGroup is what shows any images / reflections associated with the item
         self.itemTexturesGroup = clutter.Group()
-        font = menu.font #glossMgr.get_themeMgr().get_font("menu_item")
+        
+        
+        #setup the label
+        font = menu.font
         self.set_font_name(font)
         self.set_text(itemLabel)
         self.color = clutter.Color(0xff, 0xff, 0xff, 0xdd)
@@ -306,8 +310,6 @@ class ListItem (clutter.Label):
         label_x = 0 #x #self.stage.get_width() - label_width - 50
         label_y = y #self.stage.get_height() - label_height
         self.set_position(0, y)
-        if not (imagePath == "" or imagePath is None):
-            self.addImage(imagePath, True)
         
         #Add textures group and mark whether or not the textures are currently on the stage
         self.itemTexturesGroup.show_all()
@@ -360,33 +362,41 @@ class ListItem (clutter.Label):
         return self.zoomLevel
 
         
-    def addImage(self, path, useReflection):
+    def add_image_from_path(self, path, x, y):
         self.tempTexture = clutter.Texture()
         pixbuf = gtk.gdk.pixbuf_new_from_file(path)
-        self.tempTexture.set_pixbuf(pixbuf)
+        tempTexture.set_pixbuf(pixbuf)
+        
+        self.add_image_from_texture(tempTexture, x, y)
+        
+    def add_image_from_texture(self, texture):
+        if texture is None:
+            print "NO TEXTURE!"
 
         #Scale the image down by half
-        xy_ratio = self.tempTexture.get_width() / self.tempTexture.get_height()
-        self.tempTexture.set_width(int(self.stage.get_width() * 0.20)) #30% of the stages width
-        self.tempTexture.set_height(self.tempTexture.get_width() * xy_ratio ) #Just makes sure the sizes stay the same
+        #xy_ratio = tempTexture.get_width() / self.tempTexture.get_height()
+        #self.tempTexture.set_width(int(self.stage.get_width() * 0.20)) #30% of the stages width
+        #self.tempTexture.set_height(self.tempTexture.get_width() * xy_ratio ) #Just makes sure the sizes stay the same
 
         #Rotate appropriately
-        self.tempTexture.set_depth(self.tempTexture.get_width()/2)
-        self.tempTexture.set_rotation(clutter.Y_AXIS, 45, (self.tempTexture.get_width()/2), 0, 0)
-        self.itemTexturesGroup.add(self.tempTexture)
-        self.tempTexture.hide_all()
+        texture.set_depth(texture.get_width()/2)
+        texture.set_rotation(clutter.Y_AXIS, 45, (texture.get_width()/2), 0, 0)
+        self.itemTexturesGroup.add(texture)
+        #texture.hide() #For some reason this line is occasionally removing the pixbuf from the texture.
+        
         
         #Set position
         (abs_x, abs_y) = self.get_position()
 
-        x = abs_x# - self.tempTexture.get_width()
-        y = (self.menu.getStage().get_height()/2) - (self.tempTexture.get_height()/2)
-        self.tempTexture.set_position(x, y)
+        #x = abs_x# - self.tempTexture.get_width()
+        #y = (self.menu.getStage().get_height()/2) - (self.tempTexture.get_height()/2)
+        #self.tempTexture.set_position(x, y)
         
-        if useReflection:
-            self.reflectionTexture = Texture_Reflection(self.tempTexture)
+        if self.menu.useReflection:
+            self.reflectionTexture = Texture_Reflection(texture)
             self.itemTexturesGroup.add(self.reflectionTexture)
-        self.itemTexturesGroup.hide_all()
+        
+        self.itemTexturesGroup.show_all()
         
     def set_data(self, data):
         self.data = data

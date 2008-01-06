@@ -4,6 +4,11 @@ class Texture_Reflection (clutter.Texture):
 
     def __init__(self, origTexture):
         clutter.Texture.__init__(self)
+        
+        if origTexture.get_pixbuf() is None:
+            print "dsflkj"
+            return None
+        
         self.set_pixbuf(origTexture.get_pixbuf())
         
         

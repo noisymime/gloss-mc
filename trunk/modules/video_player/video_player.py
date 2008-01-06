@@ -11,9 +11,16 @@ from VideoController import VideoController
 from modules.video_player.cover_viewer import coverViewer
 from modules.video_player.folder_menu import folderMenu
 
+#===============================================================================
+#This module displays a basic cover viewer for videos within myth's Mythvideo table
+#It defines the following theme elements:
+#video_menu_image (Texture): The graphic used on the menu to represent this module
+#video_cover_bg_image (Texture): Graphic that serves as the background for the cover viewer grid
+#===============================================================================
+
 class Module():
     title = "Videos"
-    menu_image= "videos.png"
+
     coverViewerWidth = 750
     coverViewerHeight = 600
     coverViewerPosX = 250
@@ -26,9 +33,12 @@ class Module():
         self.stage = glossMgr.get_stage()
         self.glossMgr = glossMgr
         self.dbMgr = dbMgr
+        self.setup_ui()
         self.viewerLibrary = []
         self.folderLibrary = []
         self.videoController = VideoController(self.stage)
+        
+        #Setup initial vars
         self.is_playing = False
         self.controlState = "folder" #Options are "folder", "cover" or "video"
         self.foldersPosX = (self.coverViewerPosX - self.cover_size) / 2
@@ -36,8 +46,6 @@ class Module():
         
         #This block can be moved to begin() but causes a performance hit when loading the module *shrug*
         #base_cover_viewer = coverViewer(self.stage, self.coverViewerWidth, self.coverViewerHeight)
-        #self.viewerLibrary.append(base_cover_viewer)
-        #self.currentViewer = base_cover_viewer
         self.baseDir = dbMgr.get_setting("VideoStartupDir")
         self.cwd = self.baseDir
         self.folder_level = 0
@@ -46,8 +54,9 @@ class Module():
         self.folderLibrary.append(base_folder_menu)
         self.load_base_folders(self.baseDir, base_folder_menu)
         self.currentViewer = base_folder_menu.get_current_viewer()
-        #self.loadDir(self.baseDir, base_cover_viewer)
-        #results = dbMgr.get_videos()
+        
+    def setup_ui(self):
+        self.menu_image = self.glossMgr.themeMgr.get_texture("video_menu_image", None, None)
 
     def load_base_folders(self, dirPath, folder_menu):
         try:

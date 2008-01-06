@@ -11,7 +11,8 @@ import random
 
 class Module:
     title = "Slideshow"
-    menu_image= "gallery.png"
+    
+    menu_image = None
     
     image_file_types = ["jpg", "gif", "jpeg", "png", "bmp"]
     sound_file_types = ["mp3", "wav", "ogg"] #possibly more supported by default?
@@ -20,6 +21,7 @@ class Module:
 
     def __init__(self, glossMgr, dbMgr):
         self.glossMgr = glossMgr
+        self.setup_ui()
         self.currentTexture = clutter.Texture()
         self.currentSong = None
         self.paused = False
@@ -30,6 +32,9 @@ class Module:
         
         #Load the base image directory. This is pulled from the myth db's settings table
         self.baseDir = dbMgr.get_setting('GalleryDir')
+        
+    def setup_ui(self):
+        self.menu_image = self.glossMgr.themeMgr.get_texture("slideshow_menu_image", None, None)
         
     def action(self):
         return self.generateMenu()
@@ -355,7 +360,7 @@ class Module:
                 if not (len(os.listdir(subdir)) == 0):
                     imgPath = subdir + "/" + os.listdir(subdir)[0]
                     #print imgPath
-                tempItem = tempMenu.addItem(directoryEntry, "")
+                tempItem = tempMenu.addItem(directoryEntry)
                 tempItem.setAction(self)
                 
                 

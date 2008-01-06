@@ -11,13 +11,18 @@ from VideoController import VideoController
 
 class Module:
     title = "TV"
-    menu_image = "dvd.png"
 
     def __init__(self, glossMgr, dbMgr):
         self.stage = glossMgr.get_stage()
+        self.glossMgr = glossMgr
+        self.setup_ui()
+        
         self.videoController = VideoController(self.stage)
         self.dbMgr = dbMgr
         self.isRunning = False
+        
+    def setup_ui(self):
+        self.menu_image = self.glossMgr.themeMgr.get_texture("mythtv_menu_image", None, None)
     
     #Action to take when menu item is selected
     def action(self):

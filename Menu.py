@@ -380,7 +380,7 @@ class ListItem (clutter.Label):
         self.tempTexture.hide_all()
         
         #Set position
-        (abs_x, abs_y) = self.get_abs_position()
+        (abs_x, abs_y) = self.get_position()
 
         x = abs_x# - self.tempTexture.get_width()
         y = (self.menu.getStage().get_height()/2) - (self.tempTexture.get_height()/2)

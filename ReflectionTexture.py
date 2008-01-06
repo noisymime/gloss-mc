@@ -6,7 +6,7 @@ class Texture_Reflection (clutter.Texture):
         clutter.Texture.__init__(self)
         self.set_pixbuf(origTexture.get_pixbuf())
         
-        (w, h) = origTexture.get_abs_size()
+        (w, h) = origTexture.get_size()
         self.set_width(w)
         self.set_height(h)
         
@@ -19,12 +19,12 @@ class Texture_Reflection (clutter.Texture):
         #self.set_rotation(clutter.Z_AXIS, ang_z[0], 0, 0, 0)
 
         #Get the location for it               
-        (x, y) = origTexture.get_abs_position()
+        (x, y) = origTexture.get_position()
         print (x, y)
         #self.set_clip(0,self.get_height()/2,self.get_width(), (self.get_height()/2))
         
         #Flip it upside down
-        #self.set_rotation(clutter.X_AXIS, 180, 0, origTexture.get_height(), 0)
+        self.set_rotation(clutter.X_AXIS, 180, 0, origTexture.get_height(), 0)
         #self.rotate_x(180,origTexture.get_height(),0)
         self.set_opacity(50)
 

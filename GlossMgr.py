@@ -182,7 +182,7 @@ class MenuSelector(clutter.Texture):
     def set_spinner(self, state):
         self.timeline = clutter.Timeline(25, 25)
         self.alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
-        self.behaviour = clutter.BehaviourOpacity(self.alpha, 0,255)
+        self.behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=self.alpha)
         if state:
             self.spinner = Spinner()
             
@@ -291,8 +291,8 @@ class message():
         
         self.timeline = clutter.Timeline(10,30)
         alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
-        self.behaviour_group = clutter.BehaviourOpacity(alpha, 0, 255)
-        self.behaviour_backdrop = clutter.BehaviourOpacity(alpha, 0, 180)
+        self.behaviour_group = clutter.BehaviourOpacity(opacty_start=0, opacity_end=255, alpha=alpha)
+        self.behaviour_backdrop = clutter.BehaviourOpacity(opacity_start=0, opacity_end=180, alpha=alpha)
         self.behaviour_group.apply(self.main_group)
         self.behaviour_backdrop.apply(self.backdrop)
         self.timeline.start()
@@ -302,8 +302,8 @@ class message():
         
         self.timeline = clutter.Timeline(10,30)
         alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
-        self.behaviour_group = clutter.BehaviourOpacity(alpha, 255, 0)
-        self.behaviour_backdrop = clutter.BehaviourOpacity(alpha, 180, 0)
+        self.behaviour_group = clutter.BehaviourOpacity(opacty_start=255, opacity_end=0, alpha=alpha)
+        self.behaviour_backdrop = clutter.BehaviourOpacity(opacity_start=180, opacity_end=0, alpha=alpha)
         self.behaviour_group.apply(self.main_group)
         self.behaviour_backdrop.apply(self.backdrop)
         self.timeline.start()

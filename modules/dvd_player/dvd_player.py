@@ -4,13 +4,18 @@ from VideoController import VideoController
 
 class Module:
     title = "DVD"
-    menu_image = "dvd.png"
 
     def __init__(self, glossMgr, dbMgr):
         self.stage = glossMgr.get_stage()
+        self.glossMgr = glossMgr
+        self.setup_ui()
+        
         self.paused = False
         self.isPlaying = False
         self.overlay = None
+        
+    def setup_ui(self):
+        self.menu_image = self.glossMgr.themeMgr.get_texture("dvd_menu_image", None, None)
         
     #Action to take when menu item is selected
     def action(self):

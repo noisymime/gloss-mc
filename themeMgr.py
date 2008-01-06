@@ -279,6 +279,7 @@ class ThemeMgr:
 		
 		menu.item_gap = int(self.find_child_value(element, "item_gap"))
 		menu.displayMax = int(self.find_child_value(element, "num_visible_elements"))
+		menu.useReflection = bool(self.find_child_value(element, "use_image_reflections"))
 		
 		#Grab the font
 		for node in element:

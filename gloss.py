@@ -70,11 +70,13 @@ class MainApp:
         
         #Update splash status msg
         for mods in modules:
-            title =  mods.Module.title
-            image_uri = "ui/"+mods.Module.menu_image
-            self.splashScreen.set_msg("Loading "+title)
+            print "Loading mod..."
             tempMod = mods.Module(self.glossMgr, self.dbMgr)
-            temp_menu_item = MainMenu.addItem(title, image_uri)
+            title =  tempMod.title
+            print title
+            self.splashScreen.set_msg("Loading "+title)
+            temp_menu_item = MainMenu.addItem(title)
+            temp_menu_item.add_image_from_texture(tempMod.menu_image)
             
             temp_menu_item.setAction(tempMod.action())
         

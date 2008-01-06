@@ -5,13 +5,17 @@ import eyeD3
 
 class Module():
     title = "Music"
-    menu_image = "dvd.png"
 
-    def __init__(self, MenuMgr, dbMgr):
-        self.stage = MenuMgr.get_stage()
+    def __init__(self, glossMgr, dbMgr):
+        self.stage = glossMgr.get_stage()
+        self.glossMgr = glossMgr
+        self.setup_ui()
         self.cover_viewer = coverViewer(self.stage) 
         
         self.is_playing = False
+        
+    def setup_ui(self):
+        self.menu_image = self.glossMgr.themeMgr.get_texture("music_menu_image", None, None)
         
     #Action to take when menu item is selected
     def action(self):

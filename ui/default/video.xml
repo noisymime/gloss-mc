@@ -11,14 +11,14 @@
 		</position>
 	</texture>
 
-	<texture id="selector_bar">
-		<image>active_bar.png</image>
+	<texture id="video_menu_image">
+		<image>video_player/videos.png</image>
 		<dimensions type="relativeToStage">
-			<width>40</width>
-			<height>default</height>
+			<width>30%</width>
+			<height>30%</height>
 		</dimensions>
 		<position type="relativeToParent">
-			<x>50</x>
+			<x>0</x>
 			<y>0</y>
 		</position>
 	</texture>

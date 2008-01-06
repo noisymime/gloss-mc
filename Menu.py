@@ -363,11 +363,8 @@ class ListItem (clutter.Label):
     def addImage(self, path, useReflection):
         self.tempTexture = clutter.Texture()
         pixbuf = gtk.gdk.pixbuf_new_from_file(path)
-
         self.tempTexture.set_pixbuf(pixbuf)
 
-        
-       
         #Scale the image down by half
         xy_ratio = self.tempTexture.get_width() / self.tempTexture.get_height()
         self.tempTexture.set_width(int(self.stage.get_width() * 0.20)) #30% of the stages width
@@ -388,7 +385,6 @@ class ListItem (clutter.Label):
         
         if useReflection:
             self.reflectionTexture = Texture_Reflection(self.tempTexture)
-            #self.reflectionTexture.set_position(0, 0)#self.tempTexture.get_height())
             self.itemTexturesGroup.add(self.reflectionTexture)
         self.itemTexturesGroup.hide_all()
         

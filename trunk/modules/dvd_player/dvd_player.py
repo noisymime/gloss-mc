@@ -44,7 +44,7 @@ class Module:
             timeline = clutter.Timeline(15, 25)
             timeline.connect('completed', self.end_video_event)
             alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
-            behaviour = clutter.BehaviourOpacity(alpha, 255,0)
+            behaviour = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=alpha)
             behaviour.apply(self.video)
         
             timeline.start()

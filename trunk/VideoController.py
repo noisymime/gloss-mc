@@ -120,7 +120,7 @@ class VideoController:
             timeline = clutter.Timeline(15, 25)
             timeline.connect('completed', self.end_video_event)
             alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
-            self.behaviour = clutter.BehaviourOpacity(alpha, 255,0)
+            self.behaviour = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=alpha)
             self.behaviour.apply(self.video_texture)
             if not (self.blackdrop is None):
                 self.behaviour.apply(self.blackdrop)

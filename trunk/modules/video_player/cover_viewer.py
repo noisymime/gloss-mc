@@ -40,6 +40,7 @@ class coverViewer(clutter.Group):
         self.bgImg.set_pixbuf(pixbuf)
         bgImg_height = height - ((height - (self.cover_size * rows)) / 2) + self.detailBox_height
         self.bgImg.set_size(width, bgImg_height)
+        #self.bgImg.set_depth(1)
         self.bgImg.show()
         self.add(self.bgImg)
         
@@ -54,6 +55,7 @@ class coverViewer(clutter.Group):
         covers_x = int(width * (1-self.covers_size_percent)/2)
         covers_y = int(height * (1-self.covers_size_percent)/2)
         self.covers_group.set_position(covers_x, covers_y)
+        #self.covers_group.set_depth(1) #self.cover_size)
         self.covers_group.show()
         
         #self.stage.add(self.current_video_description)
@@ -140,7 +142,7 @@ class coverViewer(clutter.Group):
             self.behaviourNew_opacity = clutter.BehaviourOpacity(opacity_start=self.inactiveOpacity, opacity_end=255, alpha=alpha)
         
         self.behaviourOld_scale = clutter.BehaviourScale(scale_start=self.scaleFactor, scale_end=1, alpha=alpha)
-        self.behaviourOld_scale.set_property("scale=gravity", clutter.GRAVITY_CENTER)
+        #self.behaviourOld_scale.set_property("scale=gravity", clutter.GRAVITY_CENTER)
         self.behaviourOld_z = clutter.BehaviourDepth(depth_start=2, depth_end=1, alpha=alpha)
         self.behaviourOld_opacity = clutter.BehaviourOpacity(opacity_start=255, opacity_end=self.inactiveOpacity, alpha=alpha)
         
@@ -150,6 +152,20 @@ class coverViewer(clutter.Group):
         self.behaviourOld_scale.apply(outgoingTexture)
         self.behaviourOld_z.apply(outgoingTexture)
         self.behaviourOld_opacity.apply(outgoingTexture)
+        
+        #Set gravities
+        """
+        (x, y) = incomingTexture.get_position()
+        anchor_x = x + incomingTexture.get_width()/2
+        anchor_y = y + incomingTexture.get_height()/2
+        incomingTexture.set_anchor_point(anchor_x, anchor_y)
+        (x, y) = outgoingTexture.get_position()
+        anchor_x = x + outgoingTexture.get_width()/2
+        anchor_y = y + outgoingTexture.get_height()/2
+        outgoingTexture.set_anchor_point(anchor_x, anchor_y)
+        #incomingTexture.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
+        #outgoingTexture.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
+        """
         
         self.currentSelection = incomingItem
         

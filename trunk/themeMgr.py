@@ -8,8 +8,9 @@ class ThemeMgr:
 	defaultTheme = "default"
 	currentTheme = "default"
 	
-	def __init__(self, stage):
-		self.stage = stage
+	def __init__(self, glossMgr):
+		self.stage = glossMgr.stage
+		self.glossMgr = glossMgr
 		self.docs = []
 		self.default_docs = []
 		
@@ -296,5 +297,14 @@ class ThemeMgr:
 		menu.opacityStep1 = int(self.find_child_value(element, "opacity_step1"))
 		menu.opacityStep2 = int(self.find_child_value(element, "opacity_step2"))
 		
-		#Finally set general actor properties (position etc)
+		#Setup the menu transition
+		image_transition = "fade"
+		transition_path = "transitions/menu_items/" + image_transition
+		try:
+			menu.menu_item_transition = __import__(transition_path).Transition(self.glossMgr)
+		except ImportError:
+			print "Theme Error: No menu_item transition titled '" + str(image_transition) + "'"
+			menu.menu_item_transition = None
+                
+        #Finally set general actor properties (position etc)
 		self.setup_actor(menu.getItemGroup(), element, self.stage)

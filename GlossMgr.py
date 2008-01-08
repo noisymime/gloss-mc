@@ -15,12 +15,13 @@ class GlossMgr:
         self.currentMenu = None
         self.uiMsg = message(stage)
         
+        self.themeMgr = ThemeMgr(self)
+        
         #Setup the menu transition
         self.transition = "slide"
         transition_path = "transitions/menus/" + self.transition
         self.transition = __import__(transition_path).Transition(self)
         
-        self.themeMgr = ThemeMgr(self.stage)
         background = self.themeMgr.get_texture("background", None, None)
         #background.set_depth(-500)
         #background.set_scale(1, 1)
@@ -33,7 +34,7 @@ class GlossMgr:
         
         self.selector_bar = MenuSelector(self)
         self.stage.add(self.selector_bar)#Load the theme manager
-        self.themeMgr = ThemeMgr(self.stage)
+        #self.themeMgr = ThemeMgr(self.stage)
         
         self.selector_bar.show_all()
         self.currentPlugin = None
@@ -78,6 +79,7 @@ class GlossMgr:
         if event.keyval == clutter.keysyms.Down: #Down button pressed
             self.currentMenu.selectNext()
         if event.keyval == clutter.keysyms.q:
+            self.stage.hide_cursor()
             clutter.main_quit()
         if event.keyval == clutter.keysyms.Return:
             # Need to decide what action to take
@@ -94,6 +96,10 @@ class GlossMgr:
                 if action is None:
                     self.display_msg("Error", "Could not start " + self.currentMenu.get_current_item().get_text())
                 else:
+                    #hide any unnecesary actors
+                    self.currentMenu.hide()
+                    
+                    #And begin the plugin
                     action.begin( self )
         # This is tres bodge
         if event.keyval == clutter.keysyms.Escape:
@@ -103,6 +109,7 @@ class GlossMgr:
                 if self.currentPlugin.on_key_press_event(stage, event):
                     self.currentPlugin.stop()
                     self.currentPlugin = None
+                    self.currentMenu.show()
             #If there's no plugin running, go back one in the menu list (Providing we're not already at the first item.
             else:
                 if len(self.menuHistory)>1:

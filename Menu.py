@@ -7,6 +7,7 @@ from ReflectionTexture import Texture_Reflection
 
 class Menu(clutter.Group):
     font = ""
+    menu_item_transition = None
     zoomLevel = 0.5
     opacityStep = 120
     
@@ -134,6 +135,13 @@ class Menu(clutter.Group):
                     self.menuItems[i].scaleLabel(1, self.timeline)
                 else:
                     self.menuItems[i].scaleLabel(2, self.timeline)
+                  
+            #Do the transition of the menu graphic
+            #If there's no transition set (Would have been set in the theme) then the item is simply show
+            if not self.menu_item_transition is None:
+                self.menu_item_transition.forward(self.timeline, self.menuItems[self.selected-1].itemTexturesGroup, self.menuItems[self.selected].itemTexturesGroup)
+            else:
+                self.menuItems[self.selected].itemTexturesGroup.show()
                 
             #Check we're at the bottom of the viewable list
             if self.selected >= (self.displayMax):
@@ -182,6 +190,13 @@ class Menu(clutter.Group):
                     self.menuItems[i].scaleLabel(1, self.timeline)
                 else:
                     self.menuItems[i].scaleLabel(2, self.timeline)
+                    
+            #Do the transition of the menu graphic
+            #If there's no transition set (Would have been set in the theme) then the item is simply show
+            if not self.menu_item_transition is None:
+                self.menu_item_transition.backward(self.timeline, self.menuItems[self.selected+1].itemTexturesGroup, self.menuItems[self.selected].itemTexturesGroup)
+            else:
+                self.menuItems[self.selected].itemTexturesGroup.show()
             
             #Check we're at the top of the viewable list
             if self.selected < (self.displayMin):
@@ -220,6 +235,9 @@ class Menu(clutter.Group):
                 self.menuItems[i].scaleLabel(1, self.timeline)
             else:
                 self.menuItems[i].scaleLabel(2, self.timeline)
+        
+        #Show the current menu item's graphic
+        self.menuItems[self.selected].itemTexturesGroup.show()
         
         if moveBar:    
             self.glossMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
@@ -320,9 +338,11 @@ class ListItem (clutter.Label):
         #Determine the zooming level
         zoomTo=0
         opacityTo = 255
+        
         if level==0:
             zoomTo = self.menu.zoomStep0 #self.zoomLevel * 1.5
             opacityTo = self.menu.opacityStep0
+            self.itemTexturesGroup.hide()
             self.menu.add(self.itemTexturesGroup)
             self.onStage = True
             #self.itemTexturesGroup.show_all()
@@ -330,14 +350,14 @@ class ListItem (clutter.Label):
             zoomTo = self.menu.zoomStep1
             opacityTo = self.menu.opacityStep1
             if self.onStage: 
-                self.menu.remove(self.itemTexturesGroup)
+                #self.menu.remove(self.itemTexturesGroup)
                 self.onStage = False
             #self.itemTexturesGroup.hide_all()
         if level==2:
             zoomTo = self.menu.zoomStep2
             opacityTo = self.menu.opacityStep2
             if self.onStage:
-                self.menu.remove(self.itemTexturesGroup)
+                #self.menu.remove(self.itemTexturesGroup)
                 self.onStage = False
             #self.itemTexturesGroup.hide_all()
             

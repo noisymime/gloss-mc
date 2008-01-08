@@ -102,8 +102,9 @@ class folderMenu(clutter.Group):
         
         self.behaviour_opacity_outgoing.apply(current_viewer)
         for cover in current_viewer.get_item_library():
-            #cover.set_depth(cover.get_height())
+            #cover.set_depth(cover.get_height()/2)
             self.behaviour_rotate_outgoing.apply(cover)
+            #pass
 
             
         #Apply the incoming behaviour

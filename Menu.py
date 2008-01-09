@@ -396,13 +396,12 @@ class ListItem (clutter.Label):
 
         #Set the image to the size in the theme
         if not self.menu.menu_image_height is None:
-            print "changing size: " + str(self.menu.menu_image_width)
             texture.set_size(self.menu.menu_image_width, self.menu.menu_image_height)
         
         #Rotate appropriately
-        texture.set_depth(texture.get_width()/2)
         rotation = self.menu.menu_image_rotation
-        texture.set_rotation(clutter.Y_AXIS, rotation, (texture.get_width()/2), 0, 0)
+        x_rotation = (texture.get_width())
+        texture.set_rotation(clutter.Y_AXIS, rotation, x_rotation, 0, 0)
         self.itemTexturesGroup.add(texture)
         #texture.hide() #For some reason this line is occasionally removing the pixbuf from the texture.
         

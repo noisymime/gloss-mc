@@ -33,3 +33,6 @@ class Transition:
     def on_transition_complete(self, data, oldGroup):
         oldGroup.get_parent().remove(oldGroup)
         pass
+    
+    def set_options(self, options):
+        pass

@@ -44,8 +44,10 @@ class MainApp:
         #Display a loading / splash screen
         self.splashScreen = SplashScr(self.stage)
         self.splashScreen.display()
+        #clutter.threads_enter()
         gobject.timeout_add(500, self.loadGloss)
-        #clutter.threads_add_timeout(500,self.loadGloss())
+        #clutter.threads_leave()
+        #clutter.threads_add_timeout(500, self.loadGloss())
     
     def loadGloss(self):
         
@@ -85,6 +87,7 @@ class MainApp:
         MainMenu.display()
         MainMenu.selectFirst(True)
         
+       
         return False
         #print self.menuMgr.get_selector_bar().get_abs_position()
         #self.menuMgr.get_selector_bar().set_spinner(True)

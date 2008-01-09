@@ -44,7 +44,7 @@ class Menu(clutter.Group):
         #    (label_width, label_height) = self.menuItems[0].get_size()
         
         label_y = len(self.menuItems) * (self.label_height + self.item_gap)
-        print "Label height: " + str(self.label_height)
+        #print "Label height: " + str(self.label_height)
         
         newItem = ListItem(self, itemLabel, label_y)
         self.menuItems.append(newItem)
@@ -305,6 +305,7 @@ class ListItem (clutter.Label):
         
         #ItemTexturesGroup is what shows any images / reflections associated with the item
         self.itemTexturesGroup = clutter.Group()
+        self.itemTexturesGroup.set_position(menu.menu_image_x, menu.menu_image_y)
         
         
         #setup the label
@@ -393,14 +394,15 @@ class ListItem (clutter.Label):
         if texture is None:
             print "NO TEXTURE!"
 
-        #Scale the image down by half
-        #xy_ratio = tempTexture.get_width() / self.tempTexture.get_height()
-        #self.tempTexture.set_width(int(self.stage.get_width() * 0.20)) #30% of the stages width
-        #self.tempTexture.set_height(self.tempTexture.get_width() * xy_ratio ) #Just makes sure the sizes stay the same
-
+        #Set the image to the size in the theme
+        if not self.menu.menu_image_height is None:
+            print "changing size: " + str(self.menu.menu_image_width)
+            texture.set_size(self.menu.menu_image_width, self.menu.menu_image_height)
+        
         #Rotate appropriately
         texture.set_depth(texture.get_width()/2)
-        texture.set_rotation(clutter.Y_AXIS, 45, (texture.get_width()/2), 0, 0)
+        rotation = self.menu.menu_image_rotation
+        texture.set_rotation(clutter.Y_AXIS, rotation, (texture.get_width()/2), 0, 0)
         self.itemTexturesGroup.add(texture)
         #texture.hide() #For some reason this line is occasionally removing the pixbuf from the texture.
         

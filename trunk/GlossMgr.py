@@ -79,7 +79,7 @@ class GlossMgr:
         if event.keyval == clutter.keysyms.Down: #Down button pressed
             self.currentMenu.selectNext()
         if event.keyval == clutter.keysyms.q:
-            self.stage.hide_cursor()
+            self.stage.show_cursor()
             clutter.main_quit()
         if event.keyval == clutter.keysyms.Return:
             # Need to decide what action to take

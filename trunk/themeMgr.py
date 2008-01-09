@@ -123,6 +123,15 @@ class ThemeMgr:
 		#If we get to here, we hath failed
 		return None
 	
+	#Given an element, returns a subset of it based on the tag name of the subset
+	def get_subnode(self, element, tag_name):
+		for node in element:
+			if node.nodeType == node.ELEMENT_NODE:
+				if node.tagName == tag_name:
+					return node.childNodes
+		#Fail!
+		return None
+	
 	
 	#*********************************************************************
 	# The methods below all relate to fulfilling requests for actors
@@ -147,6 +156,30 @@ class ThemeMgr:
 		elif not (relativeTo == "relativeToParent"):
 			parent = None
 		
+		(width, height) = self.get_dimensions(element, parent)
+		if (not width is None) and (not width == "default"): actor.set_width(width)
+		if (not height is None) and (not height == "default"): actor.set_height(height)
+		
+		#Set the position of the actor
+		(x,y) = (0,0)
+		#Get the parent
+		relativeTo = str(self.find_attribute_value(element, "position", "type"))
+		if relativeTo == "relativeToStage":
+			parent = self.stage
+		elif not (relativeTo == "relativeToParent"):
+			parent = None
+			
+		
+		(x, y) = self.get_position(element, parent)
+		actor.set_position(int(x), int(y))
+		
+		#now set the opacity
+		opacity = self.find_child_value(element, "opacity")
+		if not opacity is None:
+			opacity = int(opacity)
+			actor.set_opacity(opacity)
+			
+	def get_dimensions(self, element, parent):
 		width = self.find_child_value(element, "dimensions.width")
 		if (not width == "default") and (not width is None):
 			if width[-1] == "%":
@@ -163,19 +196,11 @@ class ThemeMgr:
 			if height[-1] == "%":
 				height = (float(height[:-1]) / 100.0) * parent.get_height()
 			height = int(height)
-		
-		if (not width is None) and (not width == "default"): actor.set_width(width)
-		if (not height is None) and (not height == "default"): actor.set_height(height)
-		
-		#Set the position of the actor
-		(x,y) = (0,0)
-		#Get the parent
-		relativeTo = str(self.find_attribute_value(element, "position", "type"))
-		if relativeTo == "relativeToStage":
-			parent = self.stage
-		elif not (relativeTo == "relativeToParent"):
-			parent = None
 			
+		return (width, height)
+			
+	#Given an element, returns (x, y) coords for it
+	def get_position(self, element, parent):
 		#set the x coord
 		x = self.find_child_value(element, "position.x")
 		if (not x == "default") and (not x is None):
@@ -215,14 +240,8 @@ class ThemeMgr:
 				y = (parent.get_height() - actor.get_height)/2
 		else:
 			y = 0
-		
-		actor.set_position(int(x), int(y))
-		
-		#now set the opacity
-		opacity = self.find_child_value(element, "opacity")
-		if not opacity is None:
-			opacity = int(opacity)
-			actor.set_opacity(opacity)
+			
+		return (int(x), int(y))
 	
 	def get_texture(self, name, parent, texture):
 		texture_src = None
@@ -280,13 +299,10 @@ class ThemeMgr:
 		
 		menu.item_gap = int(self.find_child_value(element, "item_gap"))
 		menu.displayMax = int(self.find_child_value(element, "num_visible_elements"))
-		menu.useReflection = bool(self.find_child_value(element, "use_image_reflections"))
 		
 		#Grab the font
-		for node in element:
-			if node.nodeType == node.ELEMENT_NODE:
-				if node.tagName == "font":
-					fontString = self.get_font("main", node.childNodes) #print node.tagName
+		font_node = self.get_subnode(element, "font")
+		fontString = self.get_font("main", font_node)
 		menu.font = fontString
 		
 		#Set the selection effect steps
@@ -297,11 +313,32 @@ class ThemeMgr:
 		menu.opacityStep1 = int(self.find_child_value(element, "opacity_step1"))
 		menu.opacityStep2 = int(self.find_child_value(element, "opacity_step2"))
 		
-		#Setup the menu transition
-		image_transition = "fade"
-		transition_path = "transitions/menu_items/" + image_transition
+		#setup the menu_image properties
+		menu.useReflection = bool(self.find_child_value(element, "menu_item_texture.use_image_reflections"))
+		menu.menu_image_rotation = int(self.find_child_value(element, "menu_item_texture.image_y_rotation"))
+		menu_image_node = self.get_subnode(element, "menu_item_texture")
+		if not menu_image_node is None:
+			#Set the position
+			(x, y) = self.get_position(menu_image_node, self.stage)
+			menu.menu_image_x = int(x)
+			menu.menu_image_y = int(y)
+			
+			#Set the size
+			(width, height) = self.get_dimensions(menu_image_node, self.stage)
+			if width is None:
+				menu.menu_image_width = None
+				menu.menu_image_height = None
+			else:
+				menu.menu_image_width = int(width)
+				menu.menu_image_height = int(height)
+		
+		#Setup the menu image transition
+		image_transition = self.find_child_value(element, "menu_item_texture.image_transition.name")
+		transition_options = self.find_child_value(element, "menu_item_texture.image_transition.options")
+		transition_path = "transitions/menu_items/" + str(image_transition)
 		try:
 			menu.menu_item_transition = __import__(transition_path).Transition(self.glossMgr)
+			menu.menu_item_transition.set_options(transition_options)
 		except ImportError:
 			print "Theme Error: No menu_item transition titled '" + str(image_transition) + "'"
 			menu.menu_item_transition = None

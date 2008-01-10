@@ -1,0 +1,25 @@
+<gloss-theme>
+	<texture id="background">
+		<image>background.png</image>
+		<dimensions type="relativeToStage">
+			<width>100%</width>
+			<height>100%</height>
+		</dimensions>
+		<position type="blah">
+			<x>0</x>
+			<y>0</y>
+		</position>
+	</texture>
+
+	<texture id="video_menu_image">
+		<image>video_player/videos.png</image>
+		<dimensions type="relativeToSelf">
+			<width>100%</width>
+			<height>relative</height>
+		</dimensions>
+		<position type="relativeToParent">
+			<x>0</x>
+			<y>0</y>
+		</position>
+	</texture>
+</gloss-theme>

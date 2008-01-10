@@ -13,9 +13,9 @@
 
 	<texture id="video_menu_image">
 		<image>video_player/videos.png</image>
-		<dimensions type="relativeToStage">
-			<width>30%</width>
-			<height>30%</height>
+		<dimensions type="relativeToSelf">
+			<width>100%</width>
+			<height>relative</height>
 		</dimensions>
 		<position type="relativeToParent">
 			<x>0</x>

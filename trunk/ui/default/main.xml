@@ -3,8 +3,8 @@
 
 		<font id="main">
 			<face>Tahoma</face>
-			<size id="default">40</size>
-			<size id="1024x768">40</size>
+			<size id="default">38</size>
+			<size id="1024x768">38</size>
 			<size id="800x600">30</size>
 		</font>
 
@@ -22,21 +22,18 @@
 
 		<!-- The following properties all relate to the image / textures that accompany each menu item -->
 		<menu_item_texture>
-			<use_image_reflections>True</use_image_reflections>
-			<image_y_rotation>45</image_y_rotation>
+			<use_image_reflections>0</use_image_reflections>
+			<image_y_rotation>0</image_y_rotation>
 			<image_transition>
-				<name>fade</name>
+				<name>ring</name>
 				<options>None</options>
 			</image_transition>
 
 			<position type="relativeToStage">
 				<x>5%</x>
-				<y>30%</y>
+				<y>20%</y>
 			</position>
-			<dimensions type="relativeToStage">
-				<width>30%</width>
-				<height>30%</height>
-			</dimensions>
+			
 		</menu_item_texture>
 		
 		<!-- These are the opacity and scale values for the 3 possible steps in the menu

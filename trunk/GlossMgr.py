@@ -23,7 +23,7 @@ class GlossMgr:
         self.transition = __import__(transition_path).Transition(self)
         
         background = self.themeMgr.get_texture("background", None, None)
-        #background.set_depth(-500)
+        background.set_depth(-self.stage.get_width())
         #background.set_scale(1, 1)
         background.set_width(stage.get_width())
         background.set_height(stage.get_height())

@@ -394,26 +394,24 @@ class ListItem (clutter.Label):
         if texture is None:
             print "NO TEXTURE!"
 
+        """
+        Removing as this is currently already handled in individual module files
         #Set the image to the size in the theme
         if not self.menu.menu_image_height is None:
-            texture.set_size(self.menu.menu_image_width, self.menu.menu_image_height)
+            texture.set_height(self.menu.menu_image_height)
+        if not self.menu.menu_image_width is None:            
+            texture.set_width(self.menu.menu_image_width)
+        """
         
         #Rotate appropriately
         rotation = self.menu.menu_image_rotation
         x_rotation = (texture.get_width())
         texture.set_rotation(clutter.Y_AXIS, rotation, x_rotation, 0, 0)
-        self.itemTexturesGroup.add(texture)
-        #texture.hide() #For some reason this line is occasionally removing the pixbuf from the texture.
+        self.itemTexturesGroup.add(texture)        
         
-        
-        #Set position
-        (abs_x, abs_y) = self.get_position()
-
-        #x = abs_x# - self.tempTexture.get_width()
-        #y = (self.menu.getStage().get_height()/2) - (self.tempTexture.get_height()/2)
-        #self.tempTexture.set_position(x, y)
-        
+        #If reflection is turned on in the theme, add a reflection texture
         if self.menu.useReflection:
+            print "reflection!!"
             self.reflectionTexture = Texture_Reflection(texture)
             self.itemTexturesGroup.add(self.reflectionTexture)
         

@@ -1,9 +1,9 @@
 <gloss-theme>
 	<texture id="slideshow_menu_image">
 		<image>slideshow/gallery.png</image>
-		<dimensions type="relativeToStage">
-			<width>30%</width>
-			<height>30%</height>
+		<dimensions type="relativeToSelf">
+			<width>100%</width>
+			<height>relative</height>
 		</dimensions>
 		<position type="relativeToParent">
 			<x>0</x>

@@ -100,6 +100,9 @@ class coverViewer(clutter.Group):
         x = (self.num_covers % self.num_columns) * self.cover_size + ( (self.num_covers % self.num_columns) * self.cover_gap)
         y = (self.cover_gap + self.cover_size) * (self.num_covers/self.num_columns)
         
+        #x = (self.num_covers % self.num_columns) * (self.cover_size * 1.5) + ( (self.num_covers % self.num_columns) * self.cover_gap)
+        #y = (self.cover_gap + (self.cover_size*1.5)) * (self.num_covers/self.num_columns)
+        
         tempGroup.set_position(x, y)
         
         #If we're past the maximum rows, make the pics invistible
@@ -142,9 +145,16 @@ class coverViewer(clutter.Group):
             self.behaviourNew_opacity = clutter.BehaviourOpacity(opacity_start=self.inactiveOpacity, opacity_end=255, alpha=alpha)
         
         self.behaviourOld_scale = clutter.BehaviourScale(scale_start=self.scaleFactor, scale_end=1, alpha=alpha)
-        #self.behaviourOld_scale.set_property("scale=gravity", clutter.GRAVITY_CENTER)
+        self.behaviourOld_scale.set_property("scale=gravity", clutter.GRAVITY_CENTER)
         self.behaviourOld_z = clutter.BehaviourDepth(depth_start=2, depth_end=1, alpha=alpha)
         self.behaviourOld_opacity = clutter.BehaviourOpacity(opacity_start=255, opacity_end=self.inactiveOpacity, alpha=alpha)
+        
+        (x, y) = incomingTexture.get_position()
+        (x, y) = self.covers_group.get_position()
+        anchor_x = 1000#+incomingTexture.get_width()/2
+        anchor_y = 1000#+incomingTexture.get_height()/2
+        #self.covers_group.set_anchor_point(anchor_x, anchor_y)
+        incomingTexture.set_anchor_point(anchor_x, anchor_y)
         
         self.behaviourNew_scale.apply(incomingTexture)
         self.behaviourNew_z.apply(incomingTexture)
@@ -154,18 +164,15 @@ class coverViewer(clutter.Group):
         self.behaviourOld_opacity.apply(outgoingTexture)
         
         #Set gravities
-        """
-        (x, y) = incomingTexture.get_position()
-        anchor_x = x + incomingTexture.get_width()/2
-        anchor_y = y + incomingTexture.get_height()/2
-        incomingTexture.set_anchor_point(anchor_x, anchor_y)
+        
+        
         (x, y) = outgoingTexture.get_position()
-        anchor_x = x + outgoingTexture.get_width()/2
-        anchor_y = y + outgoingTexture.get_height()/2
-        outgoingTexture.set_anchor_point(anchor_x, anchor_y)
+        anchor_x = outgoingTexture.get_width()/2
+        anchor_y = outgoingTexture.get_height()/2
+        #outgoingTexture.set_anchor_point(anchor_x, anchor_y)
         #incomingTexture.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
         #outgoingTexture.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
-        """
+        
         
         self.currentSelection = incomingItem
         

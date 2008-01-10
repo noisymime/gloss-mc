@@ -7,6 +7,7 @@ from xml.dom import minidom
 class ThemeMgr:
 	defaultTheme = "default"
 	currentTheme = "default"
+	#currentTheme = "Pear"
 	
 	def __init__(self, glossMgr):
 		self.stage = glossMgr.stage
@@ -153,12 +154,18 @@ class ThemeMgr:
 		relativeTo = str(self.find_attribute_value(element, "dimensions", "type"))
 		if relativeTo == "relativeToStage":
 			parent = self.stage
-		elif not (relativeTo == "relativeToParent"):
-			parent = None
+		elif relativeTo == "relativeToParent":
+			parent = actor.get_parent()
+		elif relativeTo == "relativeToSelf":
+			parent = actor
 		
 		(width, height) = self.get_dimensions(element, parent)
 		if (not width is None) and (not width == "default"): actor.set_width(width)
-		if (not height is None) and (not height == "default"): actor.set_height(height)
+		if (not height is None) and (not height == "default"): 
+			if height == "relative":
+				xy_ratio = float(actor.get_height()) / float(actor.get_width())
+				height = int(width * xy_ratio)
+			actor.set_height(height)
 		
 		#Set the position of the actor
 		(x,y) = (0,0)
@@ -191,12 +198,18 @@ class ThemeMgr:
 				width = (float(width[:-1]) / 100.0) * parent.get_width()
 				#print "width: " + str(width)
 			width = int(width)
+		else:
+			width = None
 		height = self.find_child_value(element, "dimensions.height")
-		if (not height == "default") and (not height is None):
+		if (not height == "default") and (not height is None) and (not height == "relative"):
 			if height[-1] == "%":
 				height = (float(height[:-1]) / 100.0) * parent.get_height()
 			height = int(height)
-			
+		elif height == "relative":
+			pass
+		else:
+			height = None
+		
 		return (width, height)
 			
 	#Given an element, returns (x, y) coords for it
@@ -314,7 +327,7 @@ class ThemeMgr:
 		menu.opacityStep2 = int(self.find_child_value(element, "opacity_step2"))
 		
 		#setup the menu_image properties
-		menu.useReflection = bool(self.find_child_value(element, "menu_item_texture.use_image_reflections"))
+		menu.useReflection = True == (self.find_child_value(element, "menu_item_texture.use_image_reflections"))
 		menu.menu_image_rotation = int(self.find_child_value(element, "menu_item_texture.image_y_rotation"))
 		menu_image_node = self.get_subnode(element, "menu_item_texture")
 		if not menu_image_node is None:
@@ -323,14 +336,17 @@ class ThemeMgr:
 			menu.menu_image_x = int(x)
 			menu.menu_image_y = int(y)
 			
+			"""
 			#Set the size
 			(width, height) = self.get_dimensions(menu_image_node, self.stage)
 			if width is None:
+				print "no size change"
 				menu.menu_image_width = None
 				menu.menu_image_height = None
 			else:
 				menu.menu_image_width = int(width)
 				menu.menu_image_height = int(height)
+			"""
 		
 		#Setup the menu image transition
 		image_transition = self.find_child_value(element, "menu_item_texture.image_transition.name")

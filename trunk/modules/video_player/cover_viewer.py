@@ -11,7 +11,6 @@ from modules.video_player.CoverItem import cover_item
 class coverViewer(clutter.Group):
     scaleFactor = 1.4
     inactiveOpacity = 150
-    backgroundImg = "ui/cover_bg_long.png"
     covers_size_percent = 0.90 #This is the percentage of the total group size that the covers will take
     detailBox_height = 160 #Needs a percent
     
@@ -34,16 +33,6 @@ class coverViewer(clutter.Group):
         self.num_columns = columns
         self.cover_size = int(self.covers_width / self.num_columns) #A cover will be cover_size * cover_size (X * Y)
         
-        #Add the background
-        pixbuf = gtk.gdk.pixbuf_new_from_file(self.backgroundImg)
-        self.bgImg = clutter.Texture()
-        self.bgImg.set_pixbuf(pixbuf)
-        bgImg_height = height - ((height - (self.cover_size * rows)) / 2) + self.detailBox_height
-        self.bgImg.set_size(width, bgImg_height)
-        #self.bgImg.set_depth(1)
-        self.bgImg.show()
-        self.add(self.bgImg)
-        
         
         #Setup the current min and max viewable rows
         self.min_visible_rows = 0
@@ -54,7 +43,7 @@ class coverViewer(clutter.Group):
         self.add(self.covers_group)
         covers_x = int(width * (1-self.covers_size_percent)/2)
         covers_y = int(height * (1-self.covers_size_percent)/2)
-        self.covers_group.set_position(covers_x, covers_y)
+        #self.covers_group.set_position(covers_x, covers_y)
         #self.covers_group.set_depth(1) #self.cover_size)
         self.covers_group.show()
         
@@ -136,7 +125,7 @@ class coverViewer(clutter.Group):
         
         alpha = clutter.Alpha(self.timeline, clutter.smoothstep_inc_func)# clutter.ramp_inc_func)
         self.behaviourNew_scale = clutter.BehaviourScale(scale_start=1, scale_end=self.scaleFactor, alpha=alpha) #clutter.GRAVITY_CENTER)
-        self.behaviourNew_scale.set_property("scale-gravity", clutter.GRAVITY_CENTER)
+        #self.behaviourNew_scale.set_property("scale-gravity", clutter.GRAVITY_CENTER)
         self.behaviourNew_z = clutter.BehaviourDepth(depth_start=1, depth_end=2, alpha=alpha)
         #If we're performing a roll (See above) then the incoming opacity should start at 0 rather than the normal inactive opacity
         if rolling:
@@ -145,16 +134,16 @@ class coverViewer(clutter.Group):
             self.behaviourNew_opacity = clutter.BehaviourOpacity(opacity_start=self.inactiveOpacity, opacity_end=255, alpha=alpha)
         
         self.behaviourOld_scale = clutter.BehaviourScale(scale_start=self.scaleFactor, scale_end=1, alpha=alpha)
-        self.behaviourOld_scale.set_property("scale=gravity", clutter.GRAVITY_CENTER)
+        #self.behaviourOld_scale.set_property("scale-gravity", clutter.GRAVITY_CENTER)
         self.behaviourOld_z = clutter.BehaviourDepth(depth_start=2, depth_end=1, alpha=alpha)
         self.behaviourOld_opacity = clutter.BehaviourOpacity(opacity_start=255, opacity_end=self.inactiveOpacity, alpha=alpha)
         
         (x, y) = incomingTexture.get_position()
         (x, y) = self.covers_group.get_position()
-        anchor_x = 1000#+incomingTexture.get_width()/2
-        anchor_y = 1000#+incomingTexture.get_height()/2
+        anchor_x = incomingTexture.get_width()/2
+        anchor_y = incomingTexture.get_height()/2
         #self.covers_group.set_anchor_point(anchor_x, anchor_y)
-        incomingTexture.set_anchor_point(anchor_x, anchor_y)
+        #incomingTexture.set_anchor_point(anchor_x, anchor_y)
         
         self.behaviourNew_scale.apply(incomingTexture)
         self.behaviourNew_z.apply(incomingTexture)
@@ -191,7 +180,6 @@ class coverViewer(clutter.Group):
         
         alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
         self.behaviourNew_scale = clutter.BehaviourScale(scale_start=1, scale_end=self.scaleFactor, alpha=alpha)
-        self.behaviourNew_scale.set_property("scale-gravity", clutter.GRAVITY_CENTER)
         self.behaviourNew_z = clutter.BehaviourDepth(depth_start=1, depth_end=2, alpha=alpha)
         self.behaviourNew_opacity = clutter.BehaviourOpacity(opacity_start=self.inactiveOpacity, opacity_end=255, alpha=alpha)
         

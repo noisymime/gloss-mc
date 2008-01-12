@@ -90,8 +90,12 @@ class folderMenu(clutter.Group):
             self.behaviour_rotate_outgoing = clutter.BehaviourRotate(axis=clutter.X_AXIS, direction=rotation_direction, angle_start=0, angle_end=90, alpha=alpha)
         
         #Need to set the axis of rotation for the covers
-        self.behaviour_rotate_outgoing.set_center(0, self.item_size/2, 0)
-        self.behaviour_rotate_incoming.set_center(0, self.item_size/2, 0)
+        #self.behaviour_rotate_outgoing.set_center(0, self.item_size/2, 0)
+        #self.behaviour_rotate_incoming.set_center(0, self.item_size/2, 0)
+        self.behaviour_rotate_outgoing.set_center(0, 0, 0)
+        self.behaviour_rotate_incoming.set_center(0, 0, 0)
+        
+        
         
         self.behaviour_opacity_incoming = clutter.BehaviourOpacity(opacity_start=0, opacity_end=new_viewer.inactiveOpacity, alpha=alpha)
         

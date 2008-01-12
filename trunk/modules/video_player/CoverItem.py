@@ -34,6 +34,8 @@ class cover_item(clutter.Group):
         self.main_pic = clutter.Texture()
         self.main_pic.set_pixbuf(pixbuf)
         
+        
+        
         self.main_pic.show()
         (x, y) = (0, 0)
         if self.main_pic.get_height() > self.main_pic.get_width():
@@ -50,10 +52,11 @@ class cover_item(clutter.Group):
             self.main_pic.set_height(height)
             y = y + (cover_size - height)/2
             #y = y + (cover_size - height)
+            
+        anchor_x = cover_size/2 #self.main_pic.get_width()/2
+        anchor_y = cover_size/2 #self.main_pic.get_height()/2
+        self.set_anchor_point(anchor_x, anchor_y)
 
-        anchor_x = self.main_pic.get_width()/2
-        anchor_y = self.main_pic.get_height()/2
-        #self.main_pic.set_anchor_point(anchor_x, anchor_y)
             
         self.main_pic.set_position(x, y)
         

@@ -209,7 +209,7 @@ class Menu(clutter.Group):
                 self.glossMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
 
             self.timeline.start()
-            self.moveQueue = 0
+            
         
     def completeMove(self, data):
         #print self.itemGroup.get_abs_position()
@@ -411,7 +411,6 @@ class ListItem (clutter.Label):
         
         #If reflection is turned on in the theme, add a reflection texture
         if self.menu.useReflection:
-            print "reflection!!"
             self.reflectionTexture = Texture_Reflection(texture)
             self.itemTexturesGroup.add(self.reflectionTexture)
         

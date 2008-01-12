@@ -7,7 +7,7 @@ from xml.dom import minidom
 class ThemeMgr:
 	defaultTheme = "default"
 	currentTheme = "default"
-	#currentTheme = "Pear"
+	currentTheme = "Pear"
 	
 	def __init__(self, glossMgr):
 		self.stage = glossMgr.stage
@@ -327,7 +327,7 @@ class ThemeMgr:
 		menu.opacityStep2 = int(self.find_child_value(element, "opacity_step2"))
 		
 		#setup the menu_image properties
-		menu.useReflection = True == (self.find_child_value(element, "menu_item_texture.use_image_reflections"))
+		menu.useReflection = "True" == (self.find_child_value(element, "menu_item_texture.use_image_reflections"))
 		menu.menu_image_rotation = int(self.find_child_value(element, "menu_item_texture.image_y_rotation"))
 		menu_image_node = self.get_subnode(element, "menu_item_texture")
 		if not menu_image_node is None:

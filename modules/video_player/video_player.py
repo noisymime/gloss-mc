@@ -23,8 +23,8 @@ class Module():
 
     coverViewerWidth = 750
     coverViewerHeight = 600
-    coverViewerPosX = 250
-    coverViewerPosY = 20
+    coverViewerPosX = 300
+    coverViewerPosY = 50
     coverViewerRows = 3
     coverViewerColumns = 4
     cover_size = int(coverViewerWidth / coverViewerColumns)
@@ -57,6 +57,18 @@ class Module():
         
     def setup_ui(self):
         self.menu_image = self.glossMgr.themeMgr.get_texture("video_menu_image", None, None)
+        
+        #Add the background
+        self.covers_background = self.glossMgr.themeMgr.get_texture("video_covers_background", self.stage, None)
+        #backgroundImg = "ui/cover_bg_long.png"
+        #pixbuf = gtk.gdk.pixbuf_new_from_file(self.backgroundImg)
+        #self.bgImg = clutter.Texture()
+        #self.bgImg.set_pixbuf(pixbuf)
+        #bgImg_height = height - ((height - (self.cover_size * rows)) / 2) + self.detailBox_height
+        #self.bgImg.set_size(width, bgImg_height)
+        #self.bgImg.set_depth(1)
+        #self.bgImg.show()
+        #self.stage.add(self.bgImg)
 
     def load_base_folders(self, dirPath, folder_menu):
         try:
@@ -190,32 +202,44 @@ class Module():
        
         #Create a backdrop for the player. In this case we just use the same background as the menus
         self.backdrop = glossMgr.get_themeMgr().get_texture("background", None, None) #clutter.CloneTexture(glossMgr.get_skinMgr().get_Background())
-        #self.backdrop = clutter.Rectangle()
-        #self.backdrop.set_color(clutter.color_parse('Black'))
         self.backdrop.set_size(self.stage.get_width(), self.stage.get_height())
         self.backdrop.set_opacity(0)
         self.backdrop.show()
         self.stage.add(self.backdrop)
-        #Fade the backdrop in
-        timeline_begin = clutter.Timeline(10,40)
-        alpha = clutter.Alpha(timeline_begin, clutter.ramp_inc_func)
-        self.begin_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
-        self.begin_behaviour.apply(self.backdrop)
-
+        
+        #Add the covers background
+        self.covers_background.set_opacity(0)
+        self.covers_background.show()
+        self.stage.add(self.covers_background)
+        
+        #Add the folders menu
         self.stage.add(self.folderLibrary[0])
         self.folderLibrary[0].show()
         
+        #Add the cover viewer
         self.currentViewer.set_opacity(0)    
         self.currentViewer.show_all()
         self.currentViewer.show()
-        self.stage.add(self.currentViewer)
-        #cover_x = self.coverViewerPosX #self.stage.get_width() - int(self.coverViewerWidth * 1.1)
-        
         self.currentViewer.set_position(self.coverViewerPosX, self.coverViewerPosY)
+        self.stage.add(self.currentViewer)        
+
+        
+        #Fade everything in
+        timeline_begin = clutter.Timeline(10,40)
+        alpha = clutter.Alpha(timeline_begin, clutter.ramp_inc_func)
+        self.begin_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
+        
+        
+        self.begin_behaviour.apply(self.backdrop)
+        self.begin_behaviour.apply(self.covers_background)
+        self.begin_behaviour.apply(self.currentViewer)
+
+        
+        
         #self.viewerLibrary[0].set_position(50, 40)
         self.currentViewer.toggle_details() #Turns the details group on
         #self.currentViewer.select_first()
-        self.begin_behaviour.apply(self.currentViewer)
+        
         
         timeline_begin.start()
         

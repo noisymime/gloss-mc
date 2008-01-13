@@ -4,6 +4,7 @@ import gtk
 import pango
 import time
 from ReflectionTexture import Texture_Reflection
+from InputQueue import InputQueue
 
 class Menu(clutter.Group):
     font = ""
@@ -18,6 +19,11 @@ class Menu(clutter.Group):
         self.itemGroup = clutter.Group()
         self.glossMgr.themeMgr.setup_menu("main", self)
         
+        #Setup input queue controller
+        self.input_queue = InputQueue()
+        self.input_queue.set_action(InputQueue.NORTH, self.selectPrevious)
+        self.input_queue.set_action(InputQueue.SOUTH, self.selectNext)
+        
         self.menuItems = []
         self.selected = 0
         self.displayMin = 0 #The number of menu items that will be shown at a time
@@ -27,6 +33,7 @@ class Menu(clutter.Group):
         
         self.stage.add(self.itemGroup)
         self.timeline = clutter.Timeline(15, 75) #This timeline is used on any movements that occur when changing items
+        self.input_queue.set_timeline(self.timeline)
         self.timeline_completed=True
         self.glossMgr.addMenu(self)
         self.stage.add(self)
@@ -104,17 +111,12 @@ class Menu(clutter.Group):
     
     #Returns the newly selected item
     def selectNext(self):
-        
-        #Initially check whether the last animation is still going           
-        if self.timeline.is_playing():
-            self.moveQueue = self.moveQueue + 1
-            #self.timeline.set_speed(1000) # Nasty hack to make sure the timeline finishes
-            return None
 
         #Check if we're at the last item in the list
         if (self.selected) != (len(self.menuItems)-1):           
             self.timeline = clutter.Timeline (15,85)
-            self.timeline.connect('completed', self.completeMove)
+            self.input_queue.set_timeline(self.timeline)
+            #self.timeline.connect('completed', self.completeMove)
 
             if not self.moveQueue == 0:
                 self.selected = self.selected +1 #+ self.moveQueue
@@ -158,17 +160,12 @@ class Menu(clutter.Group):
         
     #Returns the newly selected item
     def selectPrevious(self):
-         #Initially check whether the last animation is still going
-        if self.timeline.is_playing():
-            self.moveQueue = self.moveQueue - 1
-            #self.timeline.set_speed(1000) # Nasty hack to make sure the timeline finishes
-            return None       
-            
                 
         #Check if we're at the first item in the list
         if (self.selected) != 0:        
             self.timeline = clutter.Timeline (15,85)
-            self.timeline.connect('completed', self.completeMove)
+            self.input_queue.set_timeline(self.timeline)
+            #self.timeline.connect('completed', self.completeMove)
                 
             if not self.moveQueue == 0:
                 self.selected = self.selected -1 #+ self.moveQueue
@@ -209,15 +206,7 @@ class Menu(clutter.Group):
                 self.glossMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
 
             self.timeline.start()
-            
-        
-    def completeMove(self, data):
-        #print self.itemGroup.get_abs_position()
-        if self.moveQueue > 0:
-            self.selectNext()
-        elif self.moveQueue < 0:
-            self.selectPrevious()
-            
+                        
     def selectFirst(self, moveBar):
         if self.timeline.is_playing:
             "ERROR: Timeline should NOT be playing here!"

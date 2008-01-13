@@ -87,9 +87,11 @@ class GlossMgr:
             
         # If none of these things, the menu needs to do something
         if event.keyval == clutter.keysyms.Up: #Up button pressed
-            self.currentMenu.selectPrevious()
+            self.currentMenu.input_queue.input(event)
+            #self.currentMenu.selectPrevious()
         if event.keyval == clutter.keysyms.Down: #Down button pressed
-            self.currentMenu.selectNext()
+            self.currentMenu.input_queue.input(event)
+            #self.currentMenu.selectNext()
         if event.keyval == clutter.keysyms.q:
             self.stage.show_cursor()
             clutter.main_quit()

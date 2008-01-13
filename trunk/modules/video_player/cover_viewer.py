@@ -7,6 +7,7 @@ import pango
 import clutter
 import os
 from modules.video_player.CoverItem import cover_item
+from InputQueue import InputQueue
 
 class coverViewer(clutter.Group):
     scaleFactor = 1.4
@@ -32,6 +33,13 @@ class coverViewer(clutter.Group):
         self.num_visible_rows = rows
         self.num_columns = columns
         self.cover_size = int(self.covers_width / self.num_columns) #A cover will be cover_size * cover_size (X * Y)
+        
+        #Setup input queue controller
+        self.input_queue = InputQueue()
+        self.input_queue.set_action(InputQueue.NORTH, self.move_up)
+        self.input_queue.set_action(InputQueue.SOUTH, self.move_down)
+        self.input_queue.set_action(InputQueue.EAST, self.move_right)
+        self.input_queue.set_action(InputQueue.WEST, self.move_left)
         
         
         #Setup the current min and max viewable rows
@@ -106,6 +114,7 @@ class coverViewer(clutter.Group):
         
     def select_item(self, incomingItem, outgoingItem):
         self.timeline = clutter.Timeline(10,35)
+        self.input_queue.set_timeline(self.timeline)
         numFolders = len(self.folderLibrary)
         if incomingItem >= numFolders:
             incomingItemVideo = incomingItem - numFolders
@@ -169,6 +178,7 @@ class coverViewer(clutter.Group):
         
     def select_first(self):      
         self.timeline = clutter.Timeline(20,80)
+        self.input_queue.set_timeline(self.timeline)
         if not len(self.folderLibrary) == 0:
             pass
         else:
@@ -294,24 +304,30 @@ class coverViewer(clutter.Group):
         return self.textureLibrary
         
     def on_key_press_event(self, event):
-        newItem = None
-        if event.keyval == clutter.keysyms.Left:
-            #Make sure we're not already on the first cover
-            if not self.currentSelection == 0:
-                newItem = self.currentSelection - 1      
-        elif event.keyval == clutter.keysyms.Right:
-            #This check makes sure that we're not on the last cover already
-            if not self.currentSelection == (self.num_covers-1):
-                newItem = self.currentSelection + 1
-        elif event.keyval == clutter.keysyms.Down:
-            #Check if we're already on the bottom row
-            if not (self.currentSelection > (len(self.textureLibrary)-1 - self.num_columns)):
-                newItem = self.currentSelection + self.num_columns
-        elif event.keyval == clutter.keysyms.Up:
-            #Check if we're already on the top row
-            if not (self.currentSelection < self.num_columns):
-                newItem = self.currentSelection - self.num_columns
-        
+        self.input_queue.input(event)
+            
+    #These are the basic movement functions
+    def move_left(self):
+        #Make sure we're not already on the first cover
+        if not self.currentSelection == 0:
+            newItem = self.currentSelection - 1 
+            self.move_common(newItem)
+    def move_right(self):
+        #This check makes sure that we're not on the last cover already
+        if not self.currentSelection == (self.num_covers-1):
+            newItem = self.currentSelection + 1
+            self.move_common(newItem)
+    def move_up(self):
+        #Check if we're already on the top row
+        if not (self.currentSelection < self.num_columns):
+            newItem = self.currentSelection - self.num_columns
+            self.move_common(newItem)
+    def move_down(self):
+        #Check if we're already on the bottom row
+        if not (self.currentSelection > (len(self.textureLibrary)-1 - self.num_columns)):
+            newItem = self.currentSelection + self.num_columns
+            self.move_common(newItem)
+    def move_common(self, newItem):
         #Final sanity check
         if (newItem < 0) and (not newItem == None):
             newItem = self.currentSelection

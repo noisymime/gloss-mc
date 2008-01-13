@@ -175,6 +175,7 @@ class Module:
             self.newFilename = self.textures[self.rand1]
             pixbuf = gtk.gdk.pixbuf_new_from_file(self.newFilename)
             self.nextTexture.set_pixbuf(pixbuf)
+            #self.nextTexture.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
             #Make sure we don't show the same photo twice
             if (self.newFilename == self.currentFilename) and (len(self.textures) > 1):
                 self.nextTexture = None
@@ -185,7 +186,7 @@ class Module:
         #Zooming stuff
         rand_zoom = random.uniform(1,1.3) # Zoom somewhere between 1 and 1.3 times
         self.behaviour1 = clutter.BehaviourScale(scale_start=1, scale_end=rand_zoom, alpha=self.alpha)
-        self.behaviour1.set_property("scale-gravity", clutter.GRAVITY_CENTER) #As at Clutter r1807 you cannot set the gravity on the line above. 
+        #self.behaviour1.set_property("scale-gravity", clutter.GRAVITY_CENTER) #As at Clutter r1807 you cannot set the gravity on the line above. 
         
         #panning stuff
         x_pos = self.currentTexture.get_x() + random.randint(-100, 100)
@@ -221,12 +222,14 @@ class Module:
         #Pick a random spot for the next image
         x_pos = random.randint(0, abs(self.stage.get_width() - self.nextTexture.get_width()) ) #Somewhere between 0 and (stage_width-image_width)
         y_pos = random.randint(0, abs(self.stage.get_height() - self.nextTexture.get_height())  )
-        self.nextTexture.set_position(x_pos, y_pos)
+        #print "pic pos: " + str(x_pos) + ":" + str(y_pos)
+        
         
         self.oldTexture = self.currentTexture
         self.currentTexture = self.nextTexture
         self.currentFilename = self.newFilename
         self.stage.add(self.currentTexture)
+        self.nextTexture.set_position(x_pos, y_pos)
         self.nextTexture.show()
         self.timeline_dissolve.start()
         self.nextImage(self.currentTexture)
@@ -312,7 +315,7 @@ class Module:
         #Fade everything out
         timeline_stop = clutter.Timeline(10,30)
         alpha = clutter.Alpha(timeline_stop, clutter.ramp_inc_func)
-        self.stop_behaviour = clutter.BehaviourOpacity(alpha, 255, 0)
+        self.stop_behaviour = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=alpha)
         self.stop_behaviour.apply(self.currentTexture)
         self.stop_behaviour.apply(self.backdrop)
         self.stop_behaviour.apply(self.overlay)

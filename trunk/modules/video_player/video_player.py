@@ -20,6 +20,7 @@ from modules.video_player.folder_menu import folderMenu
 
 class Module():
     title = "Videos"
+    STATE_FOLDERS, STATE_COVERS, STATE_VIDEO = range(3)
 
     coverViewerWidth = 750
     coverViewerHeight = 600
@@ -40,7 +41,7 @@ class Module():
         
         #Setup initial vars
         self.is_playing = False
-        self.controlState = "folder" #Options are "folder", "cover" or "video"
+        self.controlState = self.STATE_FOLDERS
         self.foldersPosX = (self.coverViewerPosX - self.cover_size) / 2
         self.foldersPosY = (self.stage.get_height() - self.coverViewerHeight) / 2
         
@@ -53,6 +54,7 @@ class Module():
         base_folder_menu.set_position(self.foldersPosX, self.foldersPosY)
         self.folderLibrary.append(base_folder_menu)
         self.load_base_folders(self.baseDir, base_folder_menu)
+        
         self.currentViewer = base_folder_menu.get_current_viewer()
         
     def setup_ui(self):
@@ -146,22 +148,22 @@ class Module():
         
         #*****************************************************************
         #"State based input handling
-        if self.controlState == "folder":
+        if self.controlState == self.STATE_FOLDERS:
             if event.keyval == clutter.keysyms.Escape:
                 return True
             elif event.keyval == right:
-                self.controlState = "cover"
+                self.controlState = self.STATE_COVERS
                 self.currentViewer = self.folderLibrary[self.folder_level].get_current_viewer()
                 self.currentViewer.select_first()
             
             self.folderLibrary[self.folder_level].on_key_press_event(event)
             
         #**********************************************************        
-        elif self.controlState == "video":
+        elif self.controlState == self.STATE_VIDEO:
             if event.keyval == clutter.keysyms.Escape:
                 self.videoController.stop_video()
                 self.is_playing = False
-                self.controlState = "cover"
+                self.controlState = self.STATE_COVERS
             else:
                 self.videoController.on_key_press_event(event)
     
@@ -173,7 +175,7 @@ class Module():
                 else:
                     self.pause()
         #**********************************************************
-        elif self.controlState == "cover":
+        elif self.controlState == self.STATE_COVERS:
             if (event.keyval == up) or (event.keyval == down) or (event.keyval == left) or (event.keyval == right):
                 self.currentViewer.on_key_press_event(event)
             
@@ -187,7 +189,7 @@ class Module():
             
             if event.keyval == clutter.keysyms.Escape:
                 self.currentViewer.select_none()
-                self.controlState = "folder"
+                self.controlState = self.STATE_FOLDERS
         
             
         
@@ -220,8 +222,11 @@ class Module():
         self.currentViewer.set_opacity(0)    
         self.currentViewer.show_all()
         self.currentViewer.show()
+        #self.currentViewer_clip.show()
         self.currentViewer.set_position(self.coverViewerPosX, self.coverViewerPosY)
-        self.stage.add(self.currentViewer)        
+        
+        #self.stage.add(self.currentViewer)
+        self.stage.add(self.currentViewer)
 
         
         #Fade everything in
@@ -270,7 +275,7 @@ class Module():
         uri = "file://" + str(vid.filename)
         self.videoController.play_video(uri, self)
         self.is_playing = True
-        self.controlState = "video"
+        self.controlState = self.STATE_VIDEO
         
         self.stage.remove(self.currentViewer)
         
@@ -286,7 +291,7 @@ class Module():
         self.behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
         self.behaviour.apply(self.currentViewer)
         
-        self.stage.add()
+        self.stage.add(self.currentViewer)
         self.currentViewer.show()
         timeline.start()
         

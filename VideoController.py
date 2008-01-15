@@ -270,7 +270,7 @@ class VideoController:
             return
         
         current_pos = self.video_texture.get_position()
-        new_pos = int(current_pos + amount)
+        new_pos = int(int(current_pos) + int(amount))
         
         if new_pos >= self.video_texture.get_duration():
             new_pos = self.video_texture.get_duration()-1

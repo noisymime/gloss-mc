@@ -23,16 +23,32 @@ class coverViewer(clutter.Group):
         self.videoLibrary = []
         self.textureLibrary = []
         self.folderLibrary = []
+        
         self.covers_group = clutter.Group()
         self.covers_width = int(width * self.covers_size_percent)
         self.covers_height = int(height * self.covers_size_percent)
-        self.current_video_details = video_details_group(self.covers_width)
-        self.num_covers = 0
-        self.cover_gap = 1
         
         self.num_visible_rows = rows
         self.num_columns = columns
         self.cover_size = int(self.covers_width / self.num_columns) #A cover will be cover_size * cover_size (X * Y)
+        
+        
+        #The viewer actually sits within another group that clips its size
+        self.covers_group_clip = clutter.Group()
+        self.covers_group_clip.add(self.covers_group)
+        #Nasty hack to get around centering problem
+        self.covers_group.set_position(int(self.cover_size/2), int(self.cover_size/2))
+        #And setup the clip size and position
+        scale_amount = int(self.cover_size * self.scaleFactor - self.cover_size)
+        clip_width = (self.cover_size*columns) + scale_amount #Width is the cover size by the number of colums, plus the additional amount required for scaling
+        clip_height = (self.cover_size*rows) + scale_amount
+        self.covers_group_clip.set_clip(-(scale_amount/2), -(scale_amount/2), clip_width, clip_height)
+        
+        
+        self.current_video_details = video_details_group(self.covers_width)
+        self.num_covers = 0
+        self.cover_gap = 1
+        
         
         #Setup input queue controller
         self.input_queue = InputQueue()
@@ -48,12 +64,13 @@ class coverViewer(clutter.Group):
         
         self.currentSelection = 0
         
-        self.add(self.covers_group)
+        self.add(self.covers_group_clip)
         covers_x = int(width * (1-self.covers_size_percent)/2)
         covers_y = int(height * (1-self.covers_size_percent)/2)
         #self.covers_group.set_position(covers_x, covers_y)
         #self.covers_group.set_depth(1) #self.cover_size)
         self.covers_group.show()
+        self.covers_group_clip.show()
         
         #self.stage.add(self.current_video_description)
         self.current_video_details.show()
@@ -284,6 +301,7 @@ class coverViewer(clutter.Group):
     def addIncomingRow(self, min, max):
         for i in range(min, max):
             self.covers_group.add(self.textureLibrary[i])
+            self.textureLibrary[i].set_opacity(0)
             self.textureLibrary[i].show()
     
     def get_current_item(self):

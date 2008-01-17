@@ -6,7 +6,7 @@ import gobject
 import pango
 import clutter
 import os
-from modules.video_player.CoverItem import cover_item
+from modules.video_player.elements.CoverItem import cover_item
 from InputQueue import InputQueue
 
 class coverViewer(clutter.Group):
@@ -14,7 +14,7 @@ class coverViewer(clutter.Group):
     inactiveOpacity = 150
     covers_size_percent = 0.90 #This is the percentage of the total group size that the covers will take
     detailBox_height = 160 #Needs a percent
-    
+    update_details = False
     
 
     def __init__(self, stage, width, height, rows, columns):
@@ -45,7 +45,7 @@ class coverViewer(clutter.Group):
         self.covers_group_clip.set_clip(-(scale_amount/2), -(scale_amount/2), clip_width, clip_height)
         
         
-        self.current_video_details = video_details_group(self.covers_width)
+        #self.current_video_details = video_details_group(self.covers_width)
         self.num_covers = 0
         self.cover_gap = 1
         
@@ -73,25 +73,8 @@ class coverViewer(clutter.Group):
         self.covers_group_clip.show()
         
         #self.stage.add(self.current_video_description)
-        self.current_video_details.show()
-        self.current_video_details.show_all()
-    
-    #Loads the various UI elements using the theme mgr
-    def load_theme(self):
-        pass
-            
-    #Turns the description group off and on
-    def toggle_details(self):
-        if self.current_video_details.get_parent() == None:
-            self.add(self.current_video_details)
-            #Set the position of the details group
-            (pos_x, pos_y) = self.get_abs_position()
-            #The next two lines are horribly ugly, but all they do is position the details viewer in the middle of the gap between the bottom of the visible cover viewer and the bottom of the stage
-            viewer_lower_y = int(pos_y + (self.max_visible_rows * self.cover_size))
-            pos_y = viewer_lower_y# + int( (self.stage.get_height() - viewer_lower_y) / 2 - int(self.current_video_details.get_height()/2))
-            self.current_video_details.set_position(20, pos_y)
-        else:
-            self.stage.remove(self.current_video_details)
+        #self.current_video_details.show()
+        #self.current_video_details.show_all()
         
     def add_video(self, video):      
         self.videoLibrary.append(video)
@@ -135,7 +118,6 @@ class coverViewer(clutter.Group):
         numFolders = len(self.folderLibrary)
         if incomingItem >= numFolders:
             incomingItemVideo = incomingItem - numFolders
-            self.current_video_details.set_video(self.videoLibrary[incomingItemVideo], self.timeline)
         
         #Check if the cover is currently not visible
         rolling = False
@@ -151,7 +133,6 @@ class coverViewer(clutter.Group):
         
         alpha = clutter.Alpha(self.timeline, clutter.smoothstep_inc_func)# clutter.ramp_inc_func)
         self.behaviourNew_scale = clutter.BehaviourScale(scale_start=1, scale_end=self.scaleFactor, alpha=alpha) #clutter.GRAVITY_CENTER)
-        #self.behaviourNew_scale.set_property("scale-gravity", clutter.GRAVITY_CENTER)
         self.behaviourNew_z = clutter.BehaviourDepth(depth_start=1, depth_end=2, alpha=alpha)
         #If we're performing a roll (See above) then the incoming opacity should start at 0 rather than the normal inactive opacity
         if rolling:
@@ -160,7 +141,6 @@ class coverViewer(clutter.Group):
             self.behaviourNew_opacity = clutter.BehaviourOpacity(opacity_start=self.inactiveOpacity, opacity_end=255, alpha=alpha)
         
         self.behaviourOld_scale = clutter.BehaviourScale(scale_start=self.scaleFactor, scale_end=1, alpha=alpha)
-        #self.behaviourOld_scale.set_property("scale-gravity", clutter.GRAVITY_CENTER)
         self.behaviourOld_z = clutter.BehaviourDepth(depth_start=2, depth_end=1, alpha=alpha)
         self.behaviourOld_opacity = clutter.BehaviourOpacity(opacity_start=255, opacity_end=self.inactiveOpacity, alpha=alpha)
         
@@ -196,11 +176,12 @@ class coverViewer(clutter.Group):
     def select_first(self):      
         self.timeline = clutter.Timeline(20,80)
         self.input_queue.set_timeline(self.timeline)
+        """
         if not len(self.folderLibrary) == 0:
             pass
         else:
             self.current_video_details.set_video(self.videoLibrary[0], self.timeline)
-
+        """
     
         incomingItem = 0
         incomingTexture = self.textureLibrary[incomingItem]
@@ -225,16 +206,13 @@ class coverViewer(clutter.Group):
         alpha = clutter.Alpha(self.timeline, clutter.smoothstep_inc_func)        
                 
         self.behaviourOld_scale = clutter.BehaviourScale(scale_start=self.scaleFactor, scale_end=1, alpha=alpha)
-        self.behaviourOld_scale.set_property("scale-gravity", clutter.GRAVITY_CENTER)
         self.behaviourOld_z = clutter.BehaviourDepth(depth_start=2, depth_end=1, alpha=alpha)
         self.behaviourOld_opacity = clutter.BehaviourOpacity(opacity_start=255, opacity_end=self.inactiveOpacity, alpha=alpha)
-        self.behaviourOldDetails_opacity = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=alpha)
         
         current_cover = self.textureLibrary[self.currentSelection]
         self.behaviourOld_scale.apply(current_cover)
         self.behaviourOld_z.apply(current_cover)
         self.behaviourOld_opacity.apply(current_cover)
-        self.behaviourOldDetails_opacity.apply(self.current_video_details)
         
         self.timeline.start()
         
@@ -306,23 +284,24 @@ class coverViewer(clutter.Group):
     
     def get_current_item(self):
         return self.textureLibrary[self.currentSelection]
-        #If the current item # is greater than the number of folders, we have a video
-        """
-        if self.currentSelection >= len(self.folderLibrary):
-            selection = self.currentSelection - len(self.folderLibrary)
-            return self.videoLibrary[selection]
-        else:
-            return self.folderLibrary[self.currentSelection]
-        """
+    
+    def get_current_video(self):
+        return self.videoLibrary[self.currentSelection]
         
     def get_item_x(self, itemNo):
         return self.textureLibrary[itemNo]
     
     def get_item_library(self):
         return self.textureLibrary
+    
+    def set_details_update(self, on_off, details):
+        self.update_details = on_off
+        self.details_group = details
         
     def on_key_press_event(self, event):
         self.input_queue.input(event)
+        return self.timeline
+        
             
     #These are the basic movement functions
     def move_left(self):
@@ -353,85 +332,8 @@ class coverViewer(clutter.Group):
         #If there is movement, make the scale happen
         if not newItem == None:
             self.select_item(newItem, self.currentSelection)
+            
+        if self.update_details:
+            self.details_group.set_video_bare(self.videoLibrary[self.currentSelection])
+            self.update_details = False
         
-class video_details_group(clutter.Group):
-    font = "Lucida Grande "
-    title_font_size = 30
-    main_font_size = 22
-    plot_font_size = 18
-    backgroundImg = "ui/vid_details_bg.png"
-
-    def __init__(self, desired_width):
-        clutter.Group.__init__(self)
-        self.width = desired_width
-        
-        """
-        self.bgImg = clutter.Texture()
-        pixbuf = gtk.gdk.pixbuf_new_from_file(self.backgroundImg)
-        self.bgImg.set_pixbuf(pixbuf)
-        yx_ratio = float(self.bgImg.get_height()) / float(self.bgImg.get_width())
-        bg_height = int(desired_width * yx_ratio)
-        self.bgImg.set_size(desired_width, bg_height)
-        #self.bgImg.set_opacity(200)
-        self.bgImg.show()
-        self.add(self.bgImg)
-        """
-        
-        #Add the various labels
-        self.title = clutter.Label()
-        self.title.set_font_name(self.font + str(self.title_font_size))
-        self.title.set_color(clutter.color_parse('White'))
-        self.title.set_text("")
-        self.title.set_ellipsize(pango.ELLIPSIZE_END)
-        self.add(self.title)
-        
-        #Not sure how to get the row height before the text is set :(
-        self.row_gap = self.title.get_height()
-        
-        self.year = clutter.Label()
-        self.year.set_font_name(self.font + str(self.main_font_size))
-        self.year.set_color(clutter.color_parse('White'))
-        self.year.set_text("")
-        self.year.set_opacity(220)
-        self.year.set_ellipsize(pango.ELLIPSIZE_END)
-        self.year.set_position(0, self.row_gap)
-        self.add(self.year)
-        
-        self.director = clutter.Label()
-        self.director.set_font_name(self.font + str(self.main_font_size))
-        self.director.set_color(clutter.color_parse('White'))
-        self.director.set_text("")
-        self.director.set_opacity(220)
-        self.director.set_ellipsize(pango.ELLIPSIZE_END)
-        self.director.set_position(int(self.year.get_width()), self.row_gap)
-        self.add(self.director)
-        
-        self.plot = clutter.Label()
-        self.plot.set_font_name(self.font + str(self.plot_font_size))
-        self.plot.set_color(clutter.color_parse('White'))
-        self.plot.set_text("")
-        self.plot.set_opacity(220)
-        #self.plot.set_ellipsize(pango.ELLIPSIZE_END)
-        self.plot.set_position(0, int(self.row_gap*2))
-        self.add(self.plot)
-        
-        self.show_all()
-
-    def set_video_bare(self,video):
-        self.timeline = clutter.Timeline(10,45)
-        self.set_video(video, self.timeline)
-
-    def set_video(self, video, timeline):
-        self.video = video
-        
-        self.title.set_text(video.title)
-        self.title.set_width(self.width)
-        
-        self.year.set_text("Year: " + str(video.year))
-        
-        self.director.set_text("  Director: " + str(video.director))
-        self.director.set_position(int(self.year.get_width()), self.row_gap)
-        self.director.set_width(int(self.width - self.year.get_width()))
-        
-        self.plot.set_text(video.plot)
-        self.plot.set_width(self.width)

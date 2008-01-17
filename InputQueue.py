@@ -75,3 +75,9 @@ class InputQueue:
         self.queue_south = 0
         self.queue_west = 0
         self.queue_north = 0
+        
+    def is_in_queue(self):
+        if (self.queue_north > 0) or (self.queue_south > 0) or (self.queue_east > 0) or (self.queue_west > 0):
+            return True
+        else:
+            return False

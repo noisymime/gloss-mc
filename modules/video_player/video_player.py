@@ -8,8 +8,10 @@ import clutter
 import os
 from clutter import cluttergst
 from VideoController import VideoController
-from modules.video_player.cover_viewer import coverViewer
-from modules.video_player.folder_menu import folderMenu
+from modules.video_player.elements.cover_viewer import coverViewer
+from modules.video_player.elements.video_details import video_details
+from modules.video_player.elements.folder_menu import folderMenu
+from modules.video_player.video_object import videoItem
 
 #===============================================================================
 #This module displays a basic cover viewer for videos within myth's Mythvideo table
@@ -56,6 +58,7 @@ class Module():
         self.load_base_folders(self.baseDir, base_folder_menu)
         
         self.currentViewer = base_folder_menu.get_current_viewer()
+        self.video_details = video_details(200)
         
     def setup_ui(self):
         self.menu_image = self.glossMgr.themeMgr.get_texture("video_menu_image", None, None)
@@ -177,7 +180,15 @@ class Module():
         #**********************************************************
         elif self.controlState == self.STATE_COVERS:
             if (event.keyval == up) or (event.keyval == down) or (event.keyval == left) or (event.keyval == right):
-                self.currentViewer.on_key_press_event(event)
+                timeline = self.currentViewer.on_key_press_event(event)
+                video = self.currentViewer.get_current_video()
+                #Do a check to see if the input queue is currently processing
+                #
+                if not self.currentViewer.input_queue.is_in_queue():
+                    self.video_details.set_video_bare(video)
+                    self.currentViewer.set_details_update(False, None)
+                else:
+                    self.currentViewer.set_details_update(True, self.video_details)
             
             if event.keyval == clutter.keysyms.Return:
                 #Find whether the current item is a folder or video
@@ -215,18 +226,22 @@ class Module():
         self.stage.add(self.covers_background)
         
         #Add the folders menu
-        self.stage.add(self.folderLibrary[0])
+        self.folderLibrary[0].set_opacity(0)
         self.folderLibrary[0].show()
+        self.stage.add(self.folderLibrary[0])
         
         #Add the cover viewer
         self.currentViewer.set_opacity(0)    
         self.currentViewer.show_all()
         self.currentViewer.show()
-        #self.currentViewer_clip.show()
         self.currentViewer.set_position(self.coverViewerPosX, self.coverViewerPosY)
-        
-        #self.stage.add(self.currentViewer)
         self.stage.add(self.currentViewer)
+        
+        #Add the video details
+        self.video_details.set_opacity(0)
+        self.video_details.show_all()
+        self.video_details.show()
+        self.stage.add(self.video_details)
 
         
         #Fade everything in
@@ -236,13 +251,14 @@ class Module():
         
         
         self.begin_behaviour.apply(self.backdrop)
+        self.begin_behaviour.apply(self.folderLibrary[0])
         self.begin_behaviour.apply(self.covers_background)
         self.begin_behaviour.apply(self.currentViewer)
-
+        self.begin_behaviour.apply(self.video_details)
         
         
         #self.viewerLibrary[0].set_position(50, 40)
-        self.currentViewer.toggle_details() #Turns the details group on
+        #self.currentViewer.toggle_details() #Turns the details group on
         #self.currentViewer.select_first()
         
         
@@ -261,12 +277,16 @@ class Module():
         self.stop_behaviour.apply(self.currentViewer)
         self.stop_behaviour.apply(self.backdrop)
         self.stop_behaviour.apply(self.folderLibrary[self.folder_level])
+        self.stop_behaviour.apply(self.video_details)
+        self.stop_behaviour.apply(self.covers_background)
         timeline_stop.connect('completed', self.destroyPlugin)
         timeline_stop.start()
         
     def destroyPlugin(self, data):
         self.stage.remove(self.currentViewer)
         self.stage.remove(self.folderLibrary[self.folder_level])
+        self.stage.remove(self.video_details)
+        self.stage.remove(self.covers_background)
         self.backdrop.hide()
         #self.stage.remove(self.overlay)
     
@@ -300,32 +320,6 @@ class Module():
         
     def unpause(self):
         pass
-        
-class videoItem():
-    def __init(self):
-        self.mythID = None
-        
-    def importFromMythObject(self, mythObject):
-        self.mythID = mythObject[0]
-        self.title = mythObject[1]
-        self.director = mythObject[2]
-        self.plot = mythObject[3]
-        self.rating = mythObject[4]
-        self.inetRef = mythObject[5]
-        self.year = mythObject[6]
-        self.userRating = mythObject[7]
-        self.length = mythObject[8]
-        self.showLevel = mythObject[9]
-        self.filename = mythObject[10]
-        self.coverfile = mythObject[11]
-        self.childID = mythObject[12]
-        self.browse = mythObject[13]
-        self.playCommand = mythObject[14]
-        self.category = mythObject[15]
-        
-    def getTitle(self):
-        return self.title
-    def getCoverfile(self):
-        return self.coverfile        
+             
         
 

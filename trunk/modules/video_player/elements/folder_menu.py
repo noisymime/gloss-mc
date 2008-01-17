@@ -6,7 +6,8 @@ import gobject
 import pango
 import clutter
 import os
-from modules.video_player.CoverItem import cover_item
+from modules.video_player.elements.CoverItem import cover_item
+from modules.video_player.elements.cover_viewer import coverViewer
 
 class folderMenu(clutter.Group):
     scaleFactor = 1.4
@@ -24,11 +25,16 @@ class folderMenu(clutter.Group):
         pixbuf = gtk.gdk.pixbuf_new_from_file(self.selection_box_src)
         self.selector_box.set_pixbuf(pixbuf)
         self.selector_box.set_size(item_size, item_size)
-        self.add(self.selector_box)
+        #self.add(self.selector_box)
         self.selector_box.show()
         
         self.folderLibrary = []
         self.viewerLibrary = []
+        
+        self.folder_group = coverViewer(self.stage, item_size, (item_size*rows), rows, 1)
+        self.folder_group.scaleFactor = 1
+        self.folder_group.show()
+        self.add(self.folder_group)
         
     def add_base_dir(self, folderName, cover_viewer):
         tempItem = cover_item(None, folderName, self.item_size)
@@ -37,11 +43,13 @@ class folderMenu(clutter.Group):
         y = rows * self.item_size
         tempItem.set_position(x, y)
         tempItem.show()
-        self.add(tempItem)
+        #self.add(tempItem)
+        self.folder_group.add_folder(folderName)
         
         #Check if this is the first folder
         if len(self.folderLibrary) == 0:
             self.currentItemNo = 0
+            self.folder_group.select_first()
         
         self.folderLibrary.append(tempItem)
         self.viewerLibrary.append(cover_viewer)
@@ -64,6 +72,7 @@ class folderMenu(clutter.Group):
             newItemNo = self.currentItemNo + 1
             self.switch_viewer(self.viewerLibrary[newItemNo], 1)
             self.currentItemNo = newItemNo
+            self.folder_group.on_key_press_event(event)
         elif (event.keyval == up):
             #Check if we're already at the end of the line
             if self.currentItemNo == 0:
@@ -72,7 +81,8 @@ class folderMenu(clutter.Group):
             newItemNo = self.currentItemNo - 1
             self.switch_viewer(self.viewerLibrary[newItemNo], -1)
             self.currentItemNo = newItemNo
-    
+            self.folder_group.on_key_press_event(event)
+            
     # This is called when the folder menu changes the currently selected folder. 
     # It causes the coverViewer that's currently on display to roll out and new one come in
     # Direction is negative for up, positive for down

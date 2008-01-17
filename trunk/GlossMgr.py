@@ -44,11 +44,12 @@ class GlossMgr:
         print "Perspective: " + str(stage.get_perspective())
         #stage.set_perspective(60.0, 1.0, 0.1, 1)
         
+        #Setip the selector bar
         self.selector_bar = MenuSelector(self)
-        self.stage.add(self.selector_bar)#Load the theme manager
-        #self.themeMgr = ThemeMgr(self.stage)
+        self.selector_bar.show_all()        
+        self.stage.add(self.selector_bar)
         
-        self.selector_bar.show_all()
+
         self.currentPlugin = None
         
     def addMenu(self, newMenu):
@@ -61,7 +62,15 @@ class GlossMgr:
             self.currentMenu.getItemGroup().show_all()
             self.currentMenu.show_all()
             self.currentMenu.show()
+            
+            #This is a bit hacky, but we set the selector bar size based on the font size
+            tmpLabel = clutter.Label()
+            tmpLabel.set_text("AAA")
+            tmpLabel.set_font_name(self.currentMenu.font)
+            #Selector bar height is 20% larger than the labels
+            self.selector_bar.set_height( int(tmpLabel.get_height()*1.2) )
             self.selector_bar.set_menu(self.currentMenu)
+            tmpLabel = None
         
     def get_selector_bar(self):
         return self.selector_bar

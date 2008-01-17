@@ -33,18 +33,14 @@ class VideoController:
         #return
     
         self.player = player
-        self.stage.add(self.video_texture)
         self.video_texture.set_uri(uri)
-        #fd = uri[5:7]
-        #self.customBin(fd)
-        self.video_texture.set_position(0, 0)
-        self.video_texture.show()
+        
 
         #We need to connect to the message queue on the playbin to watch for any message (ie codec or file not found errors)
         self.bin = self.video_texture.get_playbin()
         #print "Queue: " + str(self.bin.get_property("queue_size"))
         #print "Queue: " + str(self.bin.get_property("queue_threshold"))
-        print "Queue: " + str(self.bin.get_property("queue_min_threshold"))
+        #print "Queue: " + str(self.bin.get_property("queue_min_threshold"))
         bus = self.video_texture.get_playbin().get_bus()
         bus.add_signal_watch()
         bus.connect('message', self.on_bus_message)
@@ -73,6 +69,10 @@ class VideoController:
         #self.bin.add(self.queue2)
         #decodebin.link(self.queue1)  
         #self.queue1.link(decodebin)
+        self.video_texture.set_opacity(255)
+        self.video_texture.set_position(0, 0)
+        self.video_texture.show()
+        self.stage.add(self.video_texture)
         
         return self.video_texture
 

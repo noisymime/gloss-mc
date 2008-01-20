@@ -7,6 +7,8 @@ class Transition:
         self.glossMgr = GlossMgr
     
     def do_transition(self, fromMenu, toMenu):
+            
+            
             oldGroup = fromMenu.getItemGroup()
             oldMenuGroup = fromMenu #.getMenuGroup()
             newGroup = toMenu.getItemGroup()
@@ -65,15 +67,10 @@ class Transition:
             
             
             #Finally, move the selector bar
-            self.glossMgr.selector_bar.selectItem(fromMenu.getItem(0), self.timeline)
-            #(to_x, to_y) = toMenu.get_display_position() #fromMenu.getItem(0).get_abs_position()
-            #self.selector_bar.move_to(int(to_x), int(to_y), self.timeline)
+            (bar_x, bar_y) = self.glossMgr.selector_bar.position_0
+            self.glossMgr.selector_bar.move_to(bar_x, bar_y, self.timeline)
             toMenu.selectFirst(False)
             
-            #self.timeline.connect('completed', self.on_transition_complete, fromMenu)
             self.timeline.start()
 
             self.glossMgr.currentMenu = toMenu
-    
-    def on_transition_complete(self, data):
-        pass

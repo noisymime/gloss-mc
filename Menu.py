@@ -3,6 +3,7 @@ import pygtk
 import gtk
 import pango
 import time
+import math
 from ReflectionTexture import Texture_Reflection
 from InputQueue import InputQueue
 
@@ -245,15 +246,18 @@ class Menu(clutter.Group):
         
         if incoming_y > bar_y:  
             #Then the incoming item is below the selector bar
-            height_diff = int(self.glossMgr.get_selector_bar().get_height() - self.glossMgr.get_selector_bar().get_height())
-            print "height diff: " + str(height_diff)
-            gap = (incoming_y - bar_y) * -1 #- (self.item_gap/2)) * -1
+            height_diff = int(self.glossMgr.get_selector_bar().get_height() - incomingMenuItem.get_height()) #self.glossMgr.get_selector_bar().get_height())
+            #print "height diff: " + str(height_diff)
+            gap = ((incoming_y - bar_y) - math.floor(height_diff/2)) * -1
+            gap = int(gap)
             #gap = -65
             self.displayMin = self.displayMin+1
             self.displayMax = self.displayMax+1
         else:
             #Then the incoming item is above the selector bar
-            gap = bar_y - incoming_y# + (self.item_gap/2)
+            height_diff = int(self.glossMgr.get_selector_bar().get_height() - incomingMenuItem.get_height()) #self.glossMgr.get_selector_bar().get_height())
+            gap = bar_y - incoming_y + math.ceil(height_diff/2)
+            gap = int(gap)
             #gap = 65
             self.displayMin = self.displayMin-1
             self.displayMax = self.displayMax-1
@@ -267,7 +271,7 @@ class Menu(clutter.Group):
                 
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
         self.behaviour1 = clutter.BehaviourPath(alpha, knots)
-        self.behaviour2 = clutter.BehaviourOpacity(alpha, outgoingMenuItem.get_opacity(), 0)
+        self.behaviour2 = clutter.BehaviourOpacity(opacity_start=outgoingMenuItem.get_opacity(), opacity_end=0, alpha=alpha)
         
         #print "Going to: "+ str(new_y)
         #print behaviour1.get_knots()

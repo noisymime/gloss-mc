@@ -24,12 +24,16 @@ class Module():
     title = "Videos"
     STATE_FOLDERS, STATE_COVERS, STATE_VIDEO = range(3)
 
+    #The are just some default values to be used in case of an emergency
     coverViewerWidth = 750
     coverViewerHeight = 600
     coverViewerPosX = 300
     coverViewerPosY = 50
     coverViewerRows = 3
     coverViewerColumns = 4
+    coverDetailsWidth = 750
+    foldersPosX = 50
+    foldersPosX = 50
     cover_size = int(coverViewerWidth / coverViewerColumns)
 
     def __init__(self, glossMgr, dbMgr):
@@ -44,42 +48,62 @@ class Module():
         #Setup initial vars
         self.is_playing = False
         self.controlState = self.STATE_FOLDERS
-        self.foldersPosX = (self.coverViewerPosX - self.cover_size) / 2
-        self.foldersPosY = (self.stage.get_height() - self.coverViewerHeight) / 2
+
         
         #This block can be moved to begin() but causes a performance hit when loading the module *shrug*
-        #base_cover_viewer = coverViewer(self.stage, self.coverViewerWidth, self.coverViewerHeight)
+        #All it does is load the initial folders into the viewers
         self.baseDir = dbMgr.get_setting("VideoStartupDir")
         self.cwd = self.baseDir
         self.folder_level = 0
-        base_folder_menu = folderMenu(self.stage, self.coverViewerRows, self.cover_size)
+        base_folder_menu = folderMenu(self.stage, self.coverViewerRows, self.folders_cover_size)
         base_folder_menu.set_position(self.foldersPosX, self.foldersPosY)
         self.folderLibrary.append(base_folder_menu)
         self.load_base_folders(self.baseDir, base_folder_menu)
         
+        #Set the current viewer
         self.currentViewer = base_folder_menu.get_current_viewer()
-        self.video_details = video_details(200)
+        
+        #Create the details group
+        self.video_details = video_details(self.coverDetailsWidth)
+        self.video_details.set_position(self.coverDetailsPosX, self.coverDetailsPosY)
         
     def setup_ui(self):
         self.menu_image = self.glossMgr.themeMgr.get_texture("video_menu_image", None, None)
         
         #Add the background
         self.covers_background = self.glossMgr.themeMgr.get_texture("video_covers_background", self.stage, None)
-        #backgroundImg = "ui/cover_bg_long.png"
-        #pixbuf = gtk.gdk.pixbuf_new_from_file(self.backgroundImg)
-        #self.bgImg = clutter.Texture()
-        #self.bgImg.set_pixbuf(pixbuf)
-        #bgImg_height = height - ((height - (self.cover_size * rows)) / 2) + self.detailBox_height
-        #self.bgImg.set_size(width, bgImg_height)
-        #self.bgImg.set_depth(1)
-        #self.bgImg.show()
-        #self.stage.add(self.bgImg)
+        
+        #Set the number of rows / cols for the viewer (These come from the MythVideo settings in the backend DB)
+        tmp_rows = self.dbMgr.get_setting("VideoGalleryRowsPerPage")
+        tmp_cols = self.dbMgr.get_setting("VideoGalleryColsPerPage")
+        if not tmp_rows is None: self.coverViewerRows = int(tmp_rows)
+        if not tmp_cols is None: self.coverViewerColumns = int(tmp_cols)
+        
+        #Set the size / position of the cover_viewer
+        element = self.glossMgr.themeMgr.search_docs("video_cover_viewer", "main").childNodes
+        (self.coverViewerWidth, self.coverViewerHeight) = self.glossMgr.themeMgr.get_dimensions(element, self.stage)
+        (self.coverViewerPosX, self.coverViewerPosY) = self.glossMgr.themeMgr.get_position(element, self.stage)
+        
+        #Set the all important cover size
+        self.cover_size = int(self.coverViewerWidth / self.coverViewerColumns)
+        
+        #set the size / position of the details group
+        element = self.glossMgr.themeMgr.search_docs("video_cover_details", "main").childNodes
+        (self.coverDetailsWidth, self.coverDetailsHeight) = self.glossMgr.themeMgr.get_dimensions(element, self.stage)
+        (self.coverDetailsPosX, self.coverDetailsPosY) = self.glossMgr.themeMgr.get_position(element, self.stage)
+        
+        #set the size / position of the folder menu
+        element = self.glossMgr.themeMgr.search_docs("video_folder_menu", "main").childNodes
+        (self.foldersWidth, self.foldersHeight) = self.glossMgr.themeMgr.get_dimensions(element, self.stage)
+        (self.foldersPosX, self.foldersPosY) = self.glossMgr.themeMgr.get_position(element, self.stage)
+        self.folders_cover_size = self.foldersWidth #int(self.foldersWidth / self.coverViewerColumns)
+        
 
     def load_base_folders(self, dirPath, folder_menu):
         try:
             new_file_list = os.listdir(dirPath)
         except os.error, (errno, errstr):
-            self.MenuMgr.display_msg("File Error", "Could not load Slideshow directory")
+            self.glossMgr.display_msg("File Error", "Could not load Slideshow directory")
             return
         
         #Images and Directories
@@ -194,7 +218,7 @@ class Module():
                 #Find whether the current item is a folder or video
                 item = self.currentViewer.get_current_item()
                 if item.isFolder:
-                    self.MenuMgr.display_msg("Msg", "Its a folder")
+                    self.glossMgr.display_msg("Msg", "Its a folder")
                 else:
                     self.play_video()
             

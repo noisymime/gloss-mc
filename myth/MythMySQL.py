@@ -70,9 +70,14 @@ class mythDB():
             sql = "SELECT * FROM settings where value = '" + setting_name + "'"
             self.cursor.execute(sql)
             data = self.cursor.fetchall()
-            return data[1][1]
+            if not data == ():
+                return data[1][1]
+            else:
+                return None
+        
         # get the resultset as a tuple
         return data[0][1]
+        
     
     #Gets the backend server details, which, in theory, can be different from the SQL server details and/or default port
     def get_backend_server(self):

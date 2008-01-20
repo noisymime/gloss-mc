@@ -18,7 +18,7 @@
 		</position>
 
 		<item_gap>0</item_gap>
-		<num_visible_elements>6</num_visible_elements>
+		<num_visible_elements>3</num_visible_elements>
 
 		<!-- The following properties all relate to the image / textures that accompany each menu item -->
 		<menu_item_texture>

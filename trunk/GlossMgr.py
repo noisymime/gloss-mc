@@ -154,6 +154,7 @@ class GlossMgr:
         
 class MenuSelector(clutter.Texture):
     x_offset = -50
+    position_0 = None
 
     def __init__ (self, glossMgr):
         clutter.Texture.__init__ (self)
@@ -187,10 +188,15 @@ class MenuSelector(clutter.Texture):
         
         #Now get the end position of the clone
         (x, y) = self.get_true_abs_position(selectee)
+        #print (x, y)
         
         #Do some minor adjustments for centering etc
         x = x + self.x_offset
         y = y - int( (self.get_height()-selectee.get_height())/2 )
+        
+        #Yet another little hack, but this stores the position of the first element
+        if self.position_0 is None:
+            self.position_0 = (x, y)
 
         #Move the bar
         self.move_to(x, y, timeline)
@@ -321,7 +327,7 @@ class message():
         
         self.timeline = clutter.Timeline(10,30)
         alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
-        self.behaviour_group = clutter.BehaviourOpacity(opacty_start=0, opacity_end=255, alpha=alpha)
+        self.behaviour_group = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
         self.behaviour_backdrop = clutter.BehaviourOpacity(opacity_start=0, opacity_end=180, alpha=alpha)
         self.behaviour_group.apply(self.main_group)
         self.behaviour_backdrop.apply(self.backdrop)
@@ -332,7 +338,7 @@ class message():
         
         self.timeline = clutter.Timeline(10,30)
         alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
-        self.behaviour_group = clutter.BehaviourOpacity(opacty_start=255, opacity_end=0, alpha=alpha)
+        self.behaviour_group = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=alpha)
         self.behaviour_backdrop = clutter.BehaviourOpacity(opacity_start=180, opacity_end=0, alpha=alpha)
         self.behaviour_group.apply(self.main_group)
         self.behaviour_backdrop.apply(self.backdrop)

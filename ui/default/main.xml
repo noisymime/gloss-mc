@@ -64,6 +64,8 @@
 
 	<texture id="selector_bar">
 		<image>active_bar.png</image>
+		<!-- This is a special property of selector bar the sets the height of the bar relative to the menu items its selecting -->
+		<height_percent>100</height_percent>
 		<dimensions type="relativeToStage">
 			<width>40%</width>
 			<height>default</height>

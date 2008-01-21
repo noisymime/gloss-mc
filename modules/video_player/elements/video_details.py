@@ -82,3 +82,15 @@ class video_details(clutter.Group):
         
         self.plot.set_text(video.plot)
         self.plot.set_width(self.width)
+        
+    def set_folder(self, folder_name):
+        self.title.set_text("Folder: " + str(folder_name))
+        self.year.set_text("")
+        self.director.set_text("")
+        self.plot.set_text("")
+    
+    def clear(self):
+        self.title.set_text("")
+        self.year.set_text("")
+        self.director.set_text("")
+        self.plot.set_text("")

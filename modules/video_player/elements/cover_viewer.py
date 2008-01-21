@@ -17,9 +17,10 @@ class coverViewer(clutter.Group):
     update_details = False
     
 
-    def __init__(self, stage, width, height, rows, columns):
+    def __init__(self, glossMgr, width, height, rows, columns):
         clutter.Group.__init__(self)
-        self.stage = stage
+        self.glossMgr = glossMgr
+        self.stage = glossMgr.stage
         self.videoLibrary = []
         self.textureLibrary = []
         self.folderLibrary = []
@@ -72,17 +73,13 @@ class coverViewer(clutter.Group):
         self.covers_group.show()
         self.covers_group_clip.show()
         
-        #self.stage.add(self.current_video_description)
-        #self.current_video_details.show()
-        #self.current_video_details.show_all()
-        
     def add_video(self, video):      
         self.videoLibrary.append(video)
-        tempTexture = cover_item(video, None, self.cover_size)
+        tempTexture = cover_item(self.glossMgr, video, None, self.cover_size)
         self.add_texture_group(tempTexture)
     
     def add_folder(self, folder_name):
-        tempTexture = cover_item(None, folder_name, self.cover_size)
+        tempTexture = cover_item(self.glossMgr, None, folder_name, self.cover_size)
         self.folderLibrary.append(folder_name)
         self.add_texture_group(tempTexture)
         
@@ -188,6 +185,7 @@ class coverViewer(clutter.Group):
         
         alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
         self.behaviourNew_scale = clutter.BehaviourScale(scale_start=1, scale_end=self.scaleFactor, alpha=alpha)
+        #self.behaviourNew_scale = clutter.BehaviourScale(x_scale_start=1, y_scale_start=1, x_scale_end=self.scaleFactor, y_scale_end=self.scaleFactor, alpha=alpha)
         self.behaviourNew_z = clutter.BehaviourDepth(depth_start=1, depth_end=2, alpha=alpha)
         self.behaviourNew_opacity = clutter.BehaviourOpacity(opacity_start=self.inactiveOpacity, opacity_end=255, alpha=alpha)
         
@@ -286,7 +284,10 @@ class coverViewer(clutter.Group):
         return self.textureLibrary[self.currentSelection]
     
     def get_current_video(self):
-        return self.videoLibrary[self.currentSelection]
+        if self.textureLibrary[self.currentSelection].isFolder:
+            return None #self.folderLibrary[(self.currentSelection-len(self.folderLibrary))]
+        else:
+            return self.videoLibrary[(self.currentSelection-len(self.folderLibrary))]
         
     def get_item_x(self, itemNo):
         return self.textureLibrary[itemNo]
@@ -332,8 +333,13 @@ class coverViewer(clutter.Group):
         #If there is movement, make the scale happen
         if not newItem == None:
             self.select_item(newItem, self.currentSelection)
-            
+        
+          
         if self.update_details:
-            self.details_group.set_video_bare(self.videoLibrary[self.currentSelection])
-            self.update_details = False
+            if not self.textureLibrary[self.currentSelection].isFolder:
+                self.details_group.set_video_bare(self.videoLibrary[self.currentSelection])
+                self.update_details = False
+            else:
+                self.details_group.set_folder(self.folderLibrary[(self.currentSelection-len(self.folderLibrary))])
+                #self.details_group.clear()
         

@@ -14,30 +14,33 @@ class folderMenu(clutter.Group):
     inactiveOpacity = 150
     selection_box_src = "ui/vid_folders_select_box.png"
     
-    def __init__(self, stage, rows, item_size):
+    def __init__(self, glossMgr, rows, item_size):
         clutter.Group.__init__(self)
-        self.stage = stage
+        self.glossMgr = glossMgr
+        self.stage = glossMgr.stage
         self.max_rows = rows
         self.item_size = item_size
         self.currentItemNo = None
         
+        """
         self.selector_box = clutter.Texture()
         pixbuf = gtk.gdk.pixbuf_new_from_file(self.selection_box_src)
         self.selector_box.set_pixbuf(pixbuf)
         self.selector_box.set_size(item_size, item_size)
         #self.add(self.selector_box)
         self.selector_box.show()
+        """
         
         self.folderLibrary = []
         self.viewerLibrary = []
         
-        self.folder_group = coverViewer(self.stage, item_size, (item_size*rows), rows, 1)
+        self.folder_group = coverViewer(glossMgr, item_size, (item_size*rows), rows, 1)
         self.folder_group.scaleFactor = 1
         self.folder_group.show()
         self.add(self.folder_group)
         
     def add_base_dir(self, folderName, cover_viewer):
-        tempItem = cover_item(None, folderName, self.item_size)
+        tempItem = cover_item(self.glossMgr, None, folderName, self.item_size)
         rows = len(self.folderLibrary)
         x = 0 #Change this later to center it
         y = rows * self.item_size
@@ -152,7 +155,7 @@ class folderMenu(clutter.Group):
             )
         
         self.behaviour_selectorBox_path = clutter.BehaviourPath(alpha, knots)
-        self.behaviour_selectorBox_path.apply(self.selector_box)
+        #self.behaviour_selectorBox_path.apply(self.selector_box)
         
     def completeSwitch(self, data, old_viewer):
         #self.viewerLibrary[self.currentItemNo].select_first()

@@ -17,7 +17,7 @@ class Module:
         self.glossMgr = glossMgr
         self.setup_ui()
         
-        self.videoController = VideoController(self.stage)
+        self.videoController = VideoController(glossMgr)
         self.dbMgr = dbMgr
         self.isRunning = False
         

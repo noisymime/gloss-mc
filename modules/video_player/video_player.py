@@ -55,13 +55,13 @@ class Module():
         self.baseDir = dbMgr.get_setting("VideoStartupDir")
         self.cwd = self.baseDir
         self.folder_level = 0
-        base_folder_menu = folderMenu(glossMgr, self.coverViewerRows, self.folders_cover_size)
-        base_folder_menu.set_position(self.foldersPosX, self.foldersPosY)
-        self.folderLibrary.append(base_folder_menu)
-        self.load_base_folders(self.baseDir, base_folder_menu)
+        self.base_folder_menu = folderMenu(glossMgr, self.coverViewerRows, self.folders_cover_size)
+        self.base_folder_menu.set_position(self.foldersPosX, self.foldersPosY)
+        self.folderLibrary.append(self.base_folder_menu)
+        self.load_base_folders(self.baseDir, self.base_folder_menu)
         
         #Set the current viewer
-        self.currentViewer = base_folder_menu.get_current_viewer()
+        self.currentViewer = self.base_folder_menu.get_current_viewer()
         
         #Create the details group
         self.video_details = video_details(self.coverDetailsWidth)
@@ -326,6 +326,7 @@ class Module():
         self.controlState = self.STATE_VIDEO
         
         self.stage.remove(self.currentViewer)
+        self.stage.remove(self.base_folder_menu)
         
     def stop_video(self):
         if not self.is_playing:
@@ -335,11 +336,14 @@ class Module():
         
         timeline = clutter.Timeline(15, 25)
         self.currentViewer.set_opacity(0)
+        self.base_folder_menu.set_opacity(0)
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
         self.behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
         self.behaviour.apply(self.currentViewer)
+        self.behaviour.apply(self.base_folder_menu)
         
         self.stage.add(self.currentViewer)
+        self.stage.add(self.base_folder_menu)
         self.currentViewer.show()
         timeline.start()
         

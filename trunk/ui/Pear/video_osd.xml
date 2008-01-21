@@ -1,0 +1,14 @@
+<gloss-theme>
+	<texture id="video_osd_bar">
+		<image>video_osd/osd_bar3.png</image>
+		<dimensions type="relativeToStage">
+			<width>70%</width>
+			<height>5%</height>
+		</dimensions>
+		<position type="relativeToStage">
+			<x>95%</x>
+			<y>0</y>
+		</position>
+	</texture>
+
+</gloss-theme>

@@ -269,7 +269,8 @@ class VideoController:
         if not self.video_texture.get_can_seek():
             return
         
-        current_pos = self.video_texture.get_position()
+        #current_pos = self.video_texture.get_position()
+        current_pos = self.video_texture.get_property("position")
         new_pos = int(int(current_pos) + int(amount))
         
         if new_pos >= self.video_texture.get_duration():
@@ -384,7 +385,7 @@ class osd:
         self.incoming_text_timeline = clutter.Timeline(20, 60)
         alpha = clutter.Alpha(self.incoming_text_timeline, clutter.ramp_inc_func)
         self.behaviour1 = clutter.BehaviourPath(alpha, incoming_label_knots)
-        self.behaviour2 = clutter.BehaviourOpacity(alpha, 0, 120)
+        self.behaviour2 = clutter.BehaviourOpacity(opacity_start=0, opacity_end=120, alpha=alpha)
         
         self.behaviour1.apply(self.shift_label)
         self.behaviour2.apply(self.shift_label)
@@ -417,7 +418,7 @@ class osd:
         self.outgoing_text_timeline.connect('completed', self.removeLabel)
         alpha = clutter.Alpha(self.outgoing_text_timeline, clutter.ramp_inc_func)
         self.behaviour1 = clutter.BehaviourPath(alpha, outgoing_label_knots)
-        self.behaviour2 = clutter.BehaviourOpacity(alpha, self.shift_label.get_opacity() , 0)
+        self.behaviour2 = clutter.BehaviourOpacity(opacity_start=self.shift_label.get_opacity() , opacity_end=0, alpha=alpha)
         
         self.behaviour1.apply(self.shift_label)
         self.behaviour2.apply(self.shift_label)

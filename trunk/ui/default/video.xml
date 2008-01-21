@@ -1,13 +1,13 @@
 <gloss-theme>
 	<texture id="video_covers_background">
-		<image>video_player/cover_bg_long.png</image>
+		<image>video_player/cover_bg_new.png</image>
 		<dimensions type="relativeToStage">
-			<width>80%</width>
+			<width>70%</width>
 			<height>80%</height>
 		</dimensions>
 		<position type="relativeToStage">
-			<x>15%</x>
-			<y>15%</y>
+			<x>24%</x>
+			<y>4%</y>
 		</position>
 	</texture>
 
@@ -24,6 +24,8 @@
 	</texture>
 	
 	<video_cover_viewer id="main">
+		<video_default_src>video_player/video_default.png</video_default_src>
+		<folder_img_src>video_player/mv_gallery_folder_sel.png</folder_img_src>
 		<dimensions type="relativeToStage">
 			<width>60%</width>
 			<height>60%</height>
@@ -55,5 +57,7 @@
 			<y>5%</y>
 		</position>
 	</video_folder_menu>
+	
+	
 	
 </gloss-theme>

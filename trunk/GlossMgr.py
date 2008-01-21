@@ -22,14 +22,16 @@ class GlossMgr:
         transition_path = "transitions/menus/" + self.transition
         self.transition = __import__(transition_path).Transition(self)
         
+        #The background is a bit messy due to the depth issues :(
         background = self.themeMgr.get_texture("background", None, None)
         (width, height) = background.get_abs_size()
         print background.get_abs_size()
-        background.set_anchor_point(0, 0)    
+        #background.set_anchor_point_from_gravity(clutter.GRAVITY_NORTH_WEST)
+        background.set_anchor_point(int(background.get_width()/3), int(background.get_height()/3))    
         #background.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
         background.set_depth(-self.stage.get_width())
         print background.get_abs_size()
-        background.set_anchor_point_from_gravity(clutter.GRAVITY_NORTH_WEST)
+        #
         (width_new, height_new) = background.get_abs_size()
         #width = width * (width / width_new) + width_new
         #height = height * (height / height_new) + height_new
@@ -68,7 +70,7 @@ class GlossMgr:
             tmpLabel.set_text("AAA")
             tmpLabel.set_font_name(self.currentMenu.font)
             #Selector bar height is 20% larger than the labels
-            self.selector_bar.set_height( int(tmpLabel.get_height()*1.2) )
+            self.selector_bar.set_height( int(tmpLabel.get_height()*self.selector_bar.height_percent) )
             self.selector_bar.set_menu(self.currentMenu)
             tmpLabel = None
         
@@ -154,6 +156,7 @@ class GlossMgr:
         
 class MenuSelector(clutter.Texture):
     x_offset = -50
+    height_percent = 1
     position_0 = None
 
     def __init__ (self, glossMgr):
@@ -162,6 +165,7 @@ class MenuSelector(clutter.Texture):
         glossMgr.themeMgr.get_texture("selector_bar", glossMgr.stage, self)
         self.set_position(0, self.get_y())
         self.x_offset = int(glossMgr.themeMgr.get_value("texture", "selector_bar", "position.x"))
+        self.height_percent = float(glossMgr.themeMgr.get_value("texture", "selector_bar", "height_percent")) / float(100)
     
     #This is a utility function that gets the coordinates of an that has been scaled
     def get_true_abs_position(self, selectee):

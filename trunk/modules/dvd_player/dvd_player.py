@@ -38,7 +38,7 @@ class Module:
         
     def begin(self, glossMgr):
         uri = "dvd://1"
-        self.videoController = VideoController(self.stage)
+        self.videoController = VideoController(glossMgr)
         self.video = self.videoController.play_video(uri, self)
         self.isPlaying = True
         

@@ -360,6 +360,10 @@ class ListItem (clutter.Label):
     
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
         self.behaviour1 = clutter.BehaviourScale(scale_start=self.currentZoom, scale_end=zoomTo, alpha=alpha) #scale_gravity=clutter.GRAVITY_WEST, 
+        #self.behaviour1 = clutter.BehaviourScale(x_scale_start=self.currentZoom, y_scale_start=self.currentZoom, x_scale_end=zoomTo, y_scale_end=zoomTo, alpha=alpha) #scale_gravity=clutter.GRAVITY_WEST, 
+        #self.behaviour1 = clutter.BehaviourScale(x_scale_start=1, y_scale_start=1, x_scale_end=1, y_scale_end=1, alpha=alpha) #scale_gravity=clutter.GRAVITY_WEST, 
+        #self.set_scale(zoomTo, zoomTo)
+        self.set_anchor_point_from_gravity(clutter.GRAVITY_WEST)
         self.behaviour1.set_property("scale-gravity", clutter.GRAVITY_WEST) #As at Clutter r1807 you cannot set the gravity on the line above. 
         self.behaviour2 = clutter.BehaviourOpacity(opacity_start=self.currentOpacity, opacity_end=opacityTo, alpha=alpha)
         self.behaviour1.apply(self)

@@ -10,14 +10,15 @@ class cover_item(clutter.Group):
     main_font_size = 22
     plot_font_size = 18
     
-    def __init__(self, video, folder_name, cover_size):
+    def __init__(self, glossMgr, video, folder_name, cover_size):
         clutter.Group.__init__(self)
         self.width = cover_size
         self.height = cover_size
         
         #Set whether or not this is a folder or a video cover
         if not folder_name is None:
-            imagePath = "ui/mv_gallery_folder_sel.png"
+            element = glossMgr.themeMgr.search_docs("video_cover_viewer", "main").childNodes
+            imagePath = "ui/" + glossMgr.themeMgr.currentTheme + "/" + glossMgr.themeMgr.find_child_value(element, "folder_img_src")
             pixbuf = gtk.gdk.pixbuf_new_from_file(imagePath)
             self.isFolder = True
         else:
@@ -25,7 +26,8 @@ class cover_item(clutter.Group):
             #Check that coverfile exists
             # In the future this will change so that the video is still included with a blank image
             if not os.path.exists(imagePath):
-                imagePath = "ui/mv_gallery_folder_sel.png"
+                element = glossMgr.themeMgr.search_docs("video_cover_viewer", "main").childNodes
+                imagePath = "ui/" + glossMgr.themeMgr.currentTheme + "/" + glossMgr.themeMgr.find_child_value(element, "video_default_src")
                 
             pixbuf = gtk.gdk.pixbuf_new_from_file(imagePath)
             self.isFolder = False

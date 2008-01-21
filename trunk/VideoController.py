@@ -5,8 +5,8 @@ import os
 
 class VideoController:
 
-    def __init__(self, stage):
-        self.stage = stage
+    def __init__(self, glossMgr):
+        self.stage = glossMgr.stage
         self.overlay = None
         self.blackdrop = None
         
@@ -17,7 +17,7 @@ class VideoController:
         self.video_texture.set_position(0,0)
         
 
-        self.osd = osd(stage)
+        self.osd = osd(glossMgr)
 
         
     def on_key_press_event(self, event):
@@ -287,18 +287,24 @@ import time
 
 class osd:
 
-    def __init__(self, stage):
-        self.stage = stage
+    def __init__(self, glossMgr):
+        self.glossMgr = glossMgr
+        self.stage = glossMgr.stage
         self.timerRunning = False
+        self.setup_ui()
         
         self.bar_group = clutter.Group()
+        
     
-        self.background = clutter.Texture()
-        self.background.set_pixbuf( gtk.gdk.pixbuf_new_from_file("ui/osd_bar3.png") )
-        self.background.set_opacity(255)
-        self.background.set_width(stage.get_width())
+        #self.background = clutter.Texture()
+        #self.background.set_pixbuf( gtk.gdk.pixbuf_new_from_file("ui/default/osd_bar3.png") )
+        #self.background.set_opacity(255)
+        #self.background.set_width(stage.get_width())
         self.bar_group.add(self.background)
         self.bar_group.show_all()
+        
+    def setup_ui(self):
+        self.background = self.glossMgr.themeMgr.get_texture("video_osd_bar", self.stage, None)
         
     def enter(self):
         self.stage.add(self.bar_group)

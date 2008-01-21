@@ -43,7 +43,7 @@ class Module():
         self.setup_ui()
         self.viewerLibrary = []
         self.folderLibrary = []
-        self.videoController = VideoController(self.stage)
+        self.videoController = VideoController(glossMgr)
         
         #Setup initial vars
         self.is_playing = False
@@ -55,7 +55,7 @@ class Module():
         self.baseDir = dbMgr.get_setting("VideoStartupDir")
         self.cwd = self.baseDir
         self.folder_level = 0
-        base_folder_menu = folderMenu(self.stage, self.coverViewerRows, self.folders_cover_size)
+        base_folder_menu = folderMenu(glossMgr, self.coverViewerRows, self.folders_cover_size)
         base_folder_menu.set_position(self.foldersPosX, self.foldersPosY)
         self.folderLibrary.append(base_folder_menu)
         self.load_base_folders(self.baseDir, base_folder_menu)
@@ -110,7 +110,7 @@ class Module():
         for dir_entry in new_file_list:
             tempPath = dirPath + "/" + dir_entry
             if os.path.isdir(tempPath) and not ( dir_entry[0] == "."):
-                tempViewer = coverViewer(self.stage, self.coverViewerWidth, self.coverViewerHeight, self.coverViewerRows, self.coverViewerColumns)
+                tempViewer = coverViewer(self.glossMgr, self.coverViewerWidth, self.coverViewerHeight, self.coverViewerRows, self.coverViewerColumns)
                 self.loadDir(tempPath, tempViewer)
                 folder_menu.add_base_dir(dir_entry, tempViewer)
             
@@ -209,8 +209,12 @@ class Module():
                 #Do a check to see if the input queue is currently processing
                 #
                 if not self.currentViewer.input_queue.is_in_queue():
-                    self.video_details.set_video_bare(video)
-                    self.currentViewer.set_details_update(False, None)
+                    if not video is None:
+                        self.video_details.set_video_bare(video)
+                        self.currentViewer.set_details_update(False, None)
+                    else:
+                        self.video_details.set_folder(self.currentViewer.folderLibrary[(self.currentViewer.currentSelection-len(self.currentViewer.folderLibrary))])
+                        #self.video_details.clear()
                 else:
                     self.currentViewer.set_details_update(True, self.video_details)
             

@@ -22,7 +22,6 @@ class Module:
     def __init__(self, glossMgr, dbMgr):
         self.glossMgr = glossMgr
         self.setup_ui()
-        self.currentTexture = clutter.Texture()
         self.currentSong = None
         self.paused = False
         self.textures = []
@@ -100,6 +99,7 @@ class Module:
     
     def begin(self, glossMgr):
         self.stage = self.glossMgr.get_stage()
+        self.currentTexture = clutter.Texture()
         
         #Check for an empty baseDir, this means there are no slideshows or no db connection. We simply tell the menuMgr to go back a menu level when this occurs
         if self.baseDir is None:
@@ -140,6 +140,10 @@ class Module:
         self.currentFilename = self.textures[self.rand1]
         pixbuf = gtk.gdk.pixbuf_new_from_file(self.currentFilename)
         self.currentTexture.set_pixbuf(pixbuf)
+        
+        (x_pos, y_pos) = self.get_random_coords(self.currentTexture)
+        self.currentTexture.set_position(x_pos, y_pos)
+        
         self.stage.add(self.currentTexture)
         #Make sure its visible
         self.currentTexture.set_opacity(255)
@@ -185,7 +189,7 @@ class Module:
                
         #Zooming stuff
         rand_zoom = random.uniform(1,1.3) # Zoom somewhere between 1 and 1.3 times
-        self.behaviour1 = clutter.BehaviourScale(scale_start=1, scale_end=rand_zoom, alpha=self.alpha)
+        self.behaviour1 = clutter.BehaviourScale(x_scale_start=1, y_scale_start=1, x_scale_end=rand_zoom, y_scale_end=rand_zoom, alpha=self.alpha)
         #self.behaviour1.set_property("scale-gravity", clutter.GRAVITY_CENTER) #As at Clutter r1807 you cannot set the gravity on the line above. 
         
         #panning stuff
@@ -220,19 +224,28 @@ class Module:
         self.behaviour4.apply(self.nextTexture)
         
         #Pick a random spot for the next image
-        x_pos = random.randint(0, abs(self.stage.get_width() - self.nextTexture.get_width()) ) #Somewhere between 0 and (stage_width-image_width)
-        y_pos = random.randint(0, abs(self.stage.get_height() - self.nextTexture.get_height())  )
+        #x_pos = random.randint(0, abs(self.stage.get_width() - self.nextTexture.get_width()) ) #Somewhere between 0 and (stage_width-image_width)
+        #y_pos = random.randint(0, abs(self.stage.get_height() - self.nextTexture.get_height())  )
+        #Messy stuff because of damned gravity messup in 0.5
+        (x_pos, y_pos) = self.get_random_coords(self.nextTexture)
         #print "pic pos: " + str(x_pos) + ":" + str(y_pos)
         
         
         self.oldTexture = self.currentTexture
         self.currentTexture = self.nextTexture
+        self.currentTexture.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
         self.currentFilename = self.newFilename
         self.stage.add(self.currentTexture)
         self.nextTexture.set_position(x_pos, y_pos)
         self.nextTexture.show()
         self.timeline_dissolve.start()
         self.nextImage(self.currentTexture)
+        
+    def get_random_coords(self, texture):
+        x_pos = random.randint(texture.get_width()/2, abs(self.stage.get_width() - texture.get_width()/2) ) #Somewhere between 0 and (stage_width-image_width)
+        y_pos = random.randint(texture.get_height()/2, abs(self.stage.get_height() - texture.get_height()/2)  )
+        
+        return (x_pos, y_pos)
         
     def dissolve_timeline_end_event(self, data):
         self.stage.remove(self.oldTexture)

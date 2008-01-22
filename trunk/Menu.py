@@ -32,12 +32,10 @@ class Menu(clutter.Group):
         self.displaySize = self.displayMax - self.displayMin
         self.displayPosition = (0, 0)
         
-        self.stage.add(self.itemGroup)
         self.timeline = clutter.Timeline(15, 75) #This timeline is used on any movements that occur when changing items
         self.input_queue.set_timeline(self.timeline)
         self.timeline_completed=True
         self.glossMgr.addMenu(self)
-        self.stage.add(self)
     
     def addItem(self, itemLabel):
         if len(self.menuItems) == 0:
@@ -225,6 +223,7 @@ class Menu(clutter.Group):
                 self.menuItems[i].scaleLabel(1, self.timeline)
             else:
                 self.menuItems[i].scaleLabel(2, self.timeline)
+            
         
         #Show the current menu item's graphic
         self.menuItems[self.selected].itemTexturesGroup.show()
@@ -359,11 +358,9 @@ class ListItem (clutter.Label):
             return None
     
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
-        self.behaviour1 = clutter.BehaviourScale(scale_start=self.currentZoom, scale_end=zoomTo, alpha=alpha) #scale_gravity=clutter.GRAVITY_WEST, 
-        #self.behaviour1 = clutter.BehaviourScale(x_scale_start=self.currentZoom, y_scale_start=self.currentZoom, x_scale_end=zoomTo, y_scale_end=zoomTo, alpha=alpha) #scale_gravity=clutter.GRAVITY_WEST, 
-        #self.behaviour1 = clutter.BehaviourScale(x_scale_start=1, y_scale_start=1, x_scale_end=1, y_scale_end=1, alpha=alpha) #scale_gravity=clutter.GRAVITY_WEST, 
-        #self.set_scale(self.currentZoom, zoomTo)
-        self.set_anchor_point_from_gravity(clutter.GRAVITY_WEST)
+        #self.behaviour1 = clutter.BehaviourScale(scale_start=self.currentZoom, scale_end=zoomTo, alpha=alpha) #scale_gravity=clutter.GRAVITY_WEST, 
+        self.behaviour1 = clutter.BehaviourScale(x_scale_start=self.currentZoom, y_scale_start=self.currentZoom, x_scale_end=zoomTo, y_scale_end=zoomTo, alpha=alpha) #scale_gravity=clutter.GRAVITY_WEST, 
+        #self.set_anchor_point_from_gravity(clutter.GRAVITY_WEST)
         self.behaviour1.set_property("scale-gravity", clutter.GRAVITY_WEST) #As at Clutter r1807 you cannot set the gravity on the line above. 
         self.behaviour2 = clutter.BehaviourOpacity(opacity_start=self.currentOpacity, opacity_end=opacityTo, alpha=alpha)
         self.behaviour1.apply(self)

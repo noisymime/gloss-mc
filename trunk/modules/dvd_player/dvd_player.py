@@ -25,6 +25,9 @@ class Module:
         if self.isPlaying:
             self.videoController.on_key_press_event(event)
             
+            if event.keyval == clutter.keysyms.Escape:
+                self.videoController.stop_video()
+            
         if event.keyval == clutter.keysyms.p:
             if self.paused:
                 self.unpause()
@@ -38,13 +41,14 @@ class Module:
         
     def begin(self, glossMgr):
         uri = "dvd://1"
+        #glossMgr.background.hide()
         self.videoController = VideoController(glossMgr)
         self.video = self.videoController.play_video(uri, self)
         self.isPlaying = True
         
     def stop(self):
         if self.video.get_playing():
-            self.videoController.stop_video()
+            #self.videoController.stop_video()
             
             timeline = clutter.Timeline(15, 25)
             timeline.connect('completed', self.end_video_event)
@@ -53,8 +57,12 @@ class Module:
             behaviour.apply(self.video)
         
             timeline.start()
+            
     def end_video_event(self, data):
         self.stage.remove(self.video) 
+        
+    def stop_video(self):
+        self.stop()
         
     def pause(self):
         self.paused = True

@@ -129,7 +129,8 @@ class coverViewer(clutter.Group):
         incomingTexture = self.textureLibrary[incomingItem]
         
         alpha = clutter.Alpha(self.timeline, clutter.smoothstep_inc_func)# clutter.ramp_inc_func)
-        self.behaviourNew_scale = clutter.BehaviourScale(scale_start=1, scale_end=self.scaleFactor, alpha=alpha) #clutter.GRAVITY_CENTER)
+        self.behaviourNew_scale = clutter.BehaviourScale(x_scale_start=1, y_scale_start=1, x_scale_end=self.scaleFactor, y_scale_end=self.scaleFactor, alpha=alpha) #clutter.GRAVITY_CENTER)
+        self.behaviourNew_scale.set_property("scale-gravity", clutter.GRAVITY_CENTER)
         self.behaviourNew_z = clutter.BehaviourDepth(depth_start=1, depth_end=2, alpha=alpha)
         #If we're performing a roll (See above) then the incoming opacity should start at 0 rather than the normal inactive opacity
         if rolling:
@@ -137,7 +138,7 @@ class coverViewer(clutter.Group):
         else:
             self.behaviourNew_opacity = clutter.BehaviourOpacity(opacity_start=self.inactiveOpacity, opacity_end=255, alpha=alpha)
         
-        self.behaviourOld_scale = clutter.BehaviourScale(scale_start=self.scaleFactor, scale_end=1, alpha=alpha)
+        self.behaviourOld_scale = clutter.BehaviourScale(x_scale_start=self.scaleFactor, y_scale_start=self.scaleFactor, x_scale_end=1, y_scale_end=1, alpha=alpha)
         self.behaviourOld_z = clutter.BehaviourDepth(depth_start=2, depth_end=1, alpha=alpha)
         self.behaviourOld_opacity = clutter.BehaviourOpacity(opacity_start=255, opacity_end=self.inactiveOpacity, alpha=alpha)
         
@@ -184,8 +185,8 @@ class coverViewer(clutter.Group):
         incomingTexture = self.textureLibrary[incomingItem]
         
         alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
-        self.behaviourNew_scale = clutter.BehaviourScale(scale_start=1, scale_end=self.scaleFactor, alpha=alpha)
-        #self.behaviourNew_scale = clutter.BehaviourScale(x_scale_start=1, y_scale_start=1, x_scale_end=self.scaleFactor, y_scale_end=self.scaleFactor, alpha=alpha)
+        #self.behaviourNew_scale = clutter.BehaviourScale(scale_start=1, scale_end=self.scaleFactor, alpha=alpha)
+        self.behaviourNew_scale = clutter.BehaviourScale(x_scale_start=1, y_scale_start=1, x_scale_end=self.scaleFactor, y_scale_end=self.scaleFactor, alpha=alpha)
         self.behaviourNew_z = clutter.BehaviourDepth(depth_start=1, depth_end=2, alpha=alpha)
         self.behaviourNew_opacity = clutter.BehaviourOpacity(opacity_start=self.inactiveOpacity, opacity_end=255, alpha=alpha)
         
@@ -203,7 +204,7 @@ class coverViewer(clutter.Group):
         self.timeline = clutter.Timeline(10,35)
         alpha = clutter.Alpha(self.timeline, clutter.smoothstep_inc_func)        
                 
-        self.behaviourOld_scale = clutter.BehaviourScale(scale_start=self.scaleFactor, scale_end=1, alpha=alpha)
+        self.behaviourOld_scale = clutter.BehaviourScale(x_scale_start=self.scaleFactor, y_scale_start=self.scaleFactor, x_scale_end=1, y_scale_end=1, alpha=alpha)
         self.behaviourOld_z = clutter.BehaviourDepth(depth_start=2, depth_end=1, alpha=alpha)
         self.behaviourOld_opacity = clutter.BehaviourOpacity(opacity_start=255, opacity_end=self.inactiveOpacity, alpha=alpha)
         

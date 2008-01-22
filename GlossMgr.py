@@ -65,6 +65,9 @@ class GlossMgr:
             self.currentMenu.show_all()
             self.currentMenu.show()
             
+            self.stage.add(self.currentMenu)
+            self.stage.add(self.currentMenu.getItemGroup())
+            
             #This is a bit hacky, but we set the selector bar size based on the font size
             tmpLabel = clutter.Label()
             tmpLabel.set_text("AAA")
@@ -123,6 +126,7 @@ class GlossMgr:
                 else:
                     #hide any unnecesary actors
                     self.currentMenu.hide()
+                    #self.stage.remove(self.currentMenu.getItemGroup())
                     
                     #And begin the plugin
                     action.begin( self )

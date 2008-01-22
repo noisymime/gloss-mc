@@ -37,7 +37,6 @@ class cover_item(clutter.Group):
         self.main_pic.set_pixbuf(pixbuf)
         
         
-        
         self.main_pic.show()
         (x, y) = (0, 0)
         if self.main_pic.get_height() > self.main_pic.get_width():
@@ -54,13 +53,20 @@ class cover_item(clutter.Group):
             self.main_pic.set_height(height)
             y = y + (cover_size - height)/2
             #y = y + (cover_size - height)
-            
-        anchor_x = cover_size/2 #self.main_pic.get_width()/2
-        anchor_y = cover_size/2 #self.main_pic.get_height()/2
-        self.set_anchor_point(anchor_x, anchor_y)
+        
 
             
-        self.main_pic.set_position(x, y)
+        #This just seems to keep changing in Clutter so I'll leave it here
+        gap = (cover_size - self.main_pic.get_width())/2
+        anchor_x = (cover_size - gap)/2 #cover_size/2
+        gap = (cover_size - self.main_pic.get_height())/2
+        anchor_y = (cover_size - gap)/2 #cover_size/2 #self.main_pic.get_height()/2
+        self.set_anchor_point(anchor_x, anchor_y)
+        #self.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
+        
+        self.main_pic.set_position(x, y)        
+            
+        
         
         
         

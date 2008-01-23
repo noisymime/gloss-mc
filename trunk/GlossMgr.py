@@ -17,24 +17,22 @@ class GlossMgr:
         
         self.themeMgr = ThemeMgr(self)
         
-        #Setup the menu transition
-        self.transition = "slide"
-        transition_path = "transitions/menus/" + self.transition
-        self.transition = __import__(transition_path).Transition(self)
+        #Set a default menu transition
+        self.set_menu_transition("slide")
         
         #The background is a bit messy due to the depth issues :(
         background = self.themeMgr.get_texture("background", None, None)
         (width, height) = background.get_abs_size()
         print background.get_abs_size()
         #background.set_anchor_point_from_gravity(clutter.GRAVITY_NORTH_WEST)
-        background.set_anchor_point(int(background.get_width()/3), int(background.get_height()/3))    
+        background.set_anchor_point(int(background.get_width()/3.5), int(background.get_height()/3.5))    
         #background.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
         background.set_depth(-self.stage.get_width())
         print background.get_abs_size()
         #
         (width_new, height_new) = background.get_abs_size()
-        #width = width * (width / width_new) + width_new
-        #height = height * (height / height_new) + height_new
+        #width = self.stage.get_width()
+        #height = self.stage.get_height()
         scale_x = float(width)/float(width_new)
         scale_y = float(height)/float(height_new)
         background.set_scale(scale_x, scale_y)
@@ -157,6 +155,11 @@ class GlossMgr:
                     
     def display_msg(self, title, msg):
         self.uiMsg.display_msg(title, msg)
+        
+    def set_menu_transition(self, transition_name):
+        #Setup the menu transition
+        transition_path = "transitions/menus/" + transition_name
+        self.transition = __import__(transition_path).Transition(self)
         
 class MenuSelector(clutter.Texture):
     x_offset = -50

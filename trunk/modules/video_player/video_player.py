@@ -184,6 +184,7 @@ class Module():
                 self.currentViewer.select_first()
             
             self.folderLibrary[self.folder_level].on_key_press_event(event)
+            self.currentViewer = self.folderLibrary[self.folder_level].get_current_viewer()
             
         #**********************************************************        
         elif self.controlState == self.STATE_VIDEO:

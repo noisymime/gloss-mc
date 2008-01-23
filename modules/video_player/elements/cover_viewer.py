@@ -86,7 +86,7 @@ class coverViewer(clutter.Group):
     def add_texture_group(self, tempGroup):
         tempGroup.set_opacity(self.inactiveOpacity)
         
-        tempGroup.set_position( (self.num_covers * self.cover_size), 0)
+        #tempGroup.set_position( (self.num_covers * self.cover_size), 0)
         tempGroup.set_depth(1)
         
         self.textureLibrary.append(tempGroup)

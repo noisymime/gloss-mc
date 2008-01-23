@@ -44,6 +44,12 @@
 		<scale_step0>1</scale_step0>
 		<scale_step1>0.5</scale_step1>
 		<scale_step2>0.4</scale_step2>
+		
+		<!-- Used for transitioning between menus -->
+		<menu_transition>
+				<name>zoom_fade</name>
+				<options>None</options>
+		</menu_transition>
 
 	</menu>
 

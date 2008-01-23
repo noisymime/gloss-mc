@@ -44,34 +44,37 @@ class cover_item(clutter.Group):
             self.main_pic.set_height(cover_size)
             width = int(cover_size * xy_ratio)
             self.main_pic.set_width(width)
-            x = x + (cover_size - width)/2
+            x = (cover_size - width)/2
+            #x = int(cover_size / 2)
             #x = x + (cover_size - width)
         else:
             xy_ratio = float(self.main_pic.get_height()) / float(self.main_pic.get_width())
             self.main_pic.set_width(cover_size)
             height = int(cover_size * xy_ratio)
             self.main_pic.set_height(height)
-            y = y + (cover_size - height)/2
+            y = (cover_size - height)/2
             #y = y + (cover_size - height)
         
 
             
         #This just seems to keep changing in Clutter so I'll leave it here
         gap = (cover_size - self.main_pic.get_width())/2
-        anchor_x = (cover_size - gap)/2 #cover_size/2
+        anchor_x = (cover_size - gap)/2 
+        #anchor_x = cover_size/2
         gap = (cover_size - self.main_pic.get_height())/2
-        anchor_y = (cover_size - gap)/2 #cover_size/2 #self.main_pic.get_height()/2
+        anchor_y = (cover_size - gap)/2 
+        #anchor_y = cover_size/2 #self.main_pic.get_height()/2
         self.set_anchor_point(anchor_x, anchor_y)
         #self.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
         
-        self.main_pic.set_position(x, y)        
+                
             
         
-        
+        self.main_pic.set_position(x, y)        
         
         
         self.add(self.main_pic)
-        
+
         #If this is a folder, we also add a title
         if not folder_name is None:
             self.add_label(folder_name)

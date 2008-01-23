@@ -30,7 +30,7 @@ class ThemeMgr:
 		
 		for file in file_list:
 			conf_file = dir + "/" + file
-			print conf_file
+			#print conf_file
 			docs.append(minidom.parse(conf_file))
 	
 	#Filter function for fiding XML files	
@@ -359,6 +359,11 @@ class ThemeMgr:
 		except ImportError:
 			print "Theme Error: No menu_item transition titled '" + str(image_transition) + "'"
 			menu.menu_item_transition = None
+			
+		#Setup the menu transition
+		menu_transition = self.find_child_value(element, "menu_transition.name")
+		menu_transition_options = self.find_child_value(element, "menu_transition.options")
+		self.glossMgr.set_menu_transition(menu_transition)
                 
         #Finally set general actor properties (position etc)
 		self.setup_actor(menu.getItemGroup(), element, self.stage)

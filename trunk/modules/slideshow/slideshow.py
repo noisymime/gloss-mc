@@ -2,6 +2,7 @@ import clutter
 from clutter import cluttergst
 #__import__("../../Menu", "Menu")
 from Menu import Menu
+from image_preview import image_previewer
 import time
 import os.path
 import pygtk
@@ -112,7 +113,7 @@ class Module:
         self.textures = [] 
         self.music = []
         #Then load them back up
-        slideName = self.baseDir + "/" + self.glossMgr.get_current_menu().get_current_item().get_data()
+        slideName = self.baseDir + "/" + self.menu.get_current_item().get_data() #self.glossMgr.get_current_menu().get_current_item().get_data()
         self.loadDir(slideName, True)
         #self.MenuMgr.get_selector_bar().set_spinner(False)
         
@@ -130,7 +131,9 @@ class Module:
         timeline_backdrop = clutter.Timeline(10,30)
         alpha = clutter.Alpha(timeline_backdrop, clutter.ramp_inc_func)
         self.backdrop_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
+        self.menu_behaviour = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=alpha)
         self.backdrop_behaviour.apply(self.backdrop)
+        self.menu_behaviour.apply(self.menu.getItemGroup())
         timeline_backdrop.start()
         
         
@@ -202,7 +205,7 @@ class Module:
                 (x_pos, y_pos)\
                 )
         self.behaviour2 = clutter.BehaviourPath(self.alpha, knots)
-            
+        
         
         #Start and run the Ken Burns effect
         self.behaviour1.apply(self.currentTexture)
@@ -329,9 +332,11 @@ class Module:
         timeline_stop = clutter.Timeline(10,30)
         alpha = clutter.Alpha(timeline_stop, clutter.ramp_inc_func)
         self.stop_behaviour = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=alpha)
+        self.menu_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
         self.stop_behaviour.apply(self.currentTexture)
         self.stop_behaviour.apply(self.backdrop)
         self.stop_behaviour.apply(self.overlay)
+        self.menu_behaviour.apply(self.menu.getItemGroup())
         timeline_stop.connect('completed', self.destroySlideshow)
         timeline_stop.start()
         
@@ -357,6 +362,7 @@ class Module:
     def generateMenu(self):
         
         tempMenu = Menu(self.glossMgr)
+        self.menu = tempMenu
         #print self.baseDir
         #This occurs when there are not slideshows or we could not connect to the db to establish baseDir
         if self.baseDir is None:
@@ -373,12 +379,22 @@ class Module:
         for directoryEntry in file_list:
             subdir = self.baseDir + "/" + directoryEntry
             if os.path.isdir(subdir):
-                if not (len(os.listdir(subdir)) == 0):
-                    imgPath = subdir + "/" + os.listdir(subdir)[0]
-                    #print imgPath
-                tempItem = tempMenu.addItem(directoryEntry)
-                tempItem.setAction(self)
                 
+                tempItem = tempMenu.addItem(directoryEntry)
+                
+                #Start experimental schtuff
+                img_list = os.listdir(subdir)
+                img_list = filter(self.filterImageFile, img_list)
+                img_previewer = image_previewer(self.glossMgr.stage)
+                for img in img_list:
+                    imgPath = subdir + "/" + img #os.listdir(subdir)[0]
+                    img_previewer.add_texture(imgPath)
+                    #print imgPath
+                #new_file_list = os.listdir(dirPath)
+                #tempItem.itemTexturesGroup = img_previewer
+                img_previewer.set_position(tempItem.menu.menu_image_x, tempItem.menu.menu_image_y)
+                
+                tempItem.setAction(self)
                 
         return tempMenu
         

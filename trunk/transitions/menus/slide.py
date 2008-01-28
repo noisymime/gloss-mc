@@ -42,7 +42,7 @@ class Transition:
         self.entrance_behaviour_opacity = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=self.alpha)
         
         #Setup some knots
-        start_y = int(self.stage.get_height()/2 - newGroup.get_height()/2)
+        start_y = oldGroup.get_y()#int(self.stage.get_height()/2 - newGroup.get_height()/2)
         start_x = int(self.stage.get_width())
         newGroup.set_position(start_x, start_y)
         #end_x = int(self.stage.get_width() - newGroup.get_width())/2

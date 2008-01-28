@@ -2,12 +2,12 @@
 	<texture id="video_covers_background">
 		<image>video_player/cover_bg_long.png</image>
 		<dimensions type="relativeToStage">
-			<width>80%</width>
-			<height>80%</height>
+			<width>70%</width>
+			<height>90%</height>
 		</dimensions>
 		<position type="relativeToStage">
-			<x>15%</x>
-			<y>15%</y>
+			<x>25%</x>
+			<y>4%</y>
 		</position>
 	</texture>
 
@@ -43,7 +43,7 @@
 		</dimensions>
 		<position type="relativeToStage">
 			<x>30%</x>
-			<y>70%</y>
+			<y>65%</y>
 		</position>
 	</video_cover_details>
 	

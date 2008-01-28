@@ -31,8 +31,8 @@ class Transition:
         self.old_behaviour_opacity.apply(oldGroup)
 
     def on_transition_complete(self, data, oldGroup):
-        oldGroup.get_parent().remove(oldGroup)
-        pass
+        if not oldGroup.get_parent is None:
+            oldGroup.get_parent().remove(oldGroup)
     
     def set_options(self, options):
         pass

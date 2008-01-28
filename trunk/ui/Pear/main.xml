@@ -3,9 +3,10 @@
 
 		<font id="main">
 			<face>Tahoma</face>
-			<size id="default">38</size>
+			<size id="default">30</size>
 			<size id="1024x768">38</size>
 			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
 		</font>
 
 		<dimensions type="relativeToStage">
@@ -18,7 +19,7 @@
 		</position>
 
 		<item_gap>0</item_gap>
-		<num_visible_elements>3</num_visible_elements>
+		<num_visible_elements>4</num_visible_elements>
 
 		<!-- The following properties all relate to the image / textures that accompany each menu item -->
 		<menu_item_texture>

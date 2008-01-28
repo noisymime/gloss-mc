@@ -3,9 +3,10 @@
 
 		<font id="main">
 			<face>Tahoma</face>
-			<size id="default">40</size>
+			<size id="default">30</size>
 			<size id="1024x768">40</size>
 			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
 		</font>
 
 		<dimensions type="relativeToStage">

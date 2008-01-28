@@ -136,7 +136,8 @@ class Menu(clutter.Group):
                     self.menuItems[i].scaleLabel(1, self.timeline)
                 else:
                     self.menuItems[i].scaleLabel(2, self.timeline)
-                  
+            
+            #print self.menuItems[self.selected].data + " " + str(self.menuItems[self.selected].itemTexturesGroup.scale_start)
             #Do the transition of the menu graphic
             #If there's no transition set (Would have been set in the theme) then the item is simply show
             if not self.menu_item_transition is None:

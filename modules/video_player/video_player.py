@@ -62,6 +62,7 @@ class Module():
         
         #Set the current viewer
         self.currentViewer = self.base_folder_menu.get_current_viewer()
+        #self.currentViewer.set_depth(self.currentViewer.cover_size)
         
         #Create the details group
         self.video_details = video_details(self.coverDetailsWidth)

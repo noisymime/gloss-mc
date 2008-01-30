@@ -7,7 +7,7 @@ from xml.dom import minidom
 class ThemeMgr:
 	defaultTheme = "default"
 	currentTheme = "default"
-	currentTheme = "Pear"
+	#currentTheme = "Pear"
 	
 	def __init__(self, glossMgr):
 		self.stage = glossMgr.stage
@@ -304,66 +304,3 @@ class ThemeMgr:
 		
 		fontString = str(face) + " " + str(size)
 		return fontString
-	
-	def setup_menu(self, name, menu):
-		element = self.search_docs("menu", name).childNodes
-		#Quick check to make sure we found something
-		if element is None:
-			return None
-		
-		menu.item_gap = int(self.find_child_value(element, "item_gap"))
-		menu.displayMax = int(self.find_child_value(element, "num_visible_elements"))
-		
-		#Grab the font
-		font_node = self.get_subnode(element, "font")
-		fontString = self.get_font("main", font_node)
-		menu.font = fontString
-		
-		#Set the selection effect steps
-		menu.zoomStep0 = float(self.find_child_value(element, "scale_step0"))
-		menu.zoomStep1 = float(self.find_child_value(element, "scale_step1"))
-		menu.zoomStep2 = float(self.find_child_value(element, "scale_step2"))
-		menu.opacityStep0 = int(self.find_child_value(element, "opacity_step0"))
-		menu.opacityStep1 = int(self.find_child_value(element, "opacity_step1"))
-		menu.opacityStep2 = int(self.find_child_value(element, "opacity_step2"))
-		
-		#setup the menu_image properties
-		menu.useReflection = "True" == (self.find_child_value(element, "menu_item_texture.use_image_reflections"))
-		menu.menu_image_rotation = int(self.find_child_value(element, "menu_item_texture.image_y_rotation"))
-		menu_image_node = self.get_subnode(element, "menu_item_texture")
-		if not menu_image_node is None:
-			#Set the position
-			(x, y) = self.get_position(menu_image_node, self.stage)
-			menu.menu_image_x = int(x)
-			menu.menu_image_y = int(y)
-			
-			"""
-			#Set the size
-			(width, height) = self.get_dimensions(menu_image_node, self.stage)
-			if width is None:
-				print "no size change"
-				menu.menu_image_width = None
-				menu.menu_image_height = None
-			else:
-				menu.menu_image_width = int(width)
-				menu.menu_image_height = int(height)
-			"""
-		
-		#Setup the menu image transition
-		image_transition = self.find_child_value(element, "menu_item_texture.image_transition.name")
-		transition_options = self.find_child_value(element, "menu_item_texture.image_transition.options")
-		transition_path = "transitions/menu_items/" + str(image_transition)
-		try:
-			menu.menu_item_transition = __import__(transition_path).Transition(self.glossMgr)
-			menu.menu_item_transition.set_options(transition_options)
-		except ImportError:
-			print "Theme Error: No menu_item transition titled '" + str(image_transition) + "'"
-			menu.menu_item_transition = None
-			
-		#Setup the menu transition
-		menu_transition = self.find_child_value(element, "menu_transition.name")
-		menu_transition_options = self.find_child_value(element, "menu_transition.options")
-		self.glossMgr.set_menu_transition(menu_transition)
-                
-        #Finally set general actor properties (position etc)
-		self.setup_actor(menu.getItemGroup(), element, self.stage)

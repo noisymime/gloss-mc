@@ -17,6 +17,11 @@ class GlossMgr:
         
         self.themeMgr = ThemeMgr(self)
         
+        #Set the menu interface
+        element = self.themeMgr.search_docs("menu", "main").childNodes
+        interface_name = self.themeMgr.find_child_value(element, "interface")
+        self.set_menu_interface(interface_name)
+        
         #Set a default menu transition
         self.set_menu_transition("slide")
         
@@ -113,7 +118,7 @@ class GlossMgr:
             # 1) Switch to a new menu
             # 2) Launch a module
             action = self.currentMenu.get_current_item().getAction()
-            if action.__class__.__name__ == "Menu": # Check whether we're a pointing to a menu object
+            if action.__class__.__name__ == "Interface": # Check whether we're a pointing to an interface
                 self.transition.do_transition(self.currentMenu, action)
                 self.menuHistory.append(action)
             else:
@@ -162,11 +167,20 @@ class GlossMgr:
                     
     def display_msg(self, title, msg):
         self.uiMsg.display_msg(title, msg)
+    
+    def set_menu_interface(self, interface_name):
+        #Setup the menu interface
+        interface_path = "interfaces/" + interface_name + "/" + interface_name
+        self.interface = __import__(interface_path)
         
     def set_menu_transition(self, transition_name):
         #Setup the menu transition
         transition_path = "transitions/menus/" + transition_name
         self.transition = __import__(transition_path).Transition(self)
+        
+    def create_menu(self):
+        return self.interface.Interface(self)
+        
         
 class MenuSelector(clutter.Texture):
     x_offset = -50

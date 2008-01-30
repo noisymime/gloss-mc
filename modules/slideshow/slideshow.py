@@ -1,7 +1,7 @@
 import clutter
 from clutter import cluttergst
 #__import__("../../Menu", "Menu")
-from Menu import Menu
+#from Menu import Menu
 from image_preview import image_previewer
 import time
 import os.path
@@ -361,7 +361,7 @@ class Module:
     #The following generates a menu with an option for each of the slideshows in the base menu
     def generateMenu(self):
         
-        tempMenu = Menu(self.glossMgr)
+        tempMenu = self.glossMgr.create_menu() #Menu(self.glossMgr)
         self.menu = tempMenu
         #print self.baseDir
         #This occurs when there are not slideshows or we could not connect to the db to establish baseDir
@@ -391,7 +391,7 @@ class Module:
                     img_previewer.add_texture(imgPath)
                     #print imgPath
                 #new_file_list = os.listdir(dirPath)
-                #tempItem.itemTexturesGroup = img_previewer
+                tempItem.itemTexturesGroup = img_previewer
                 img_previewer.set_position(tempItem.menu.menu_image_x, tempItem.menu.menu_image_y)
                 
                 tempItem.setAction(self)

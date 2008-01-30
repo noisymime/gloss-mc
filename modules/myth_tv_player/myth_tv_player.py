@@ -6,7 +6,7 @@ import clutter
 
 from clutter import cluttergst
 from modules.myth_tv_player.MythBackendConn import MythBackendConnection
-from Menu import Menu
+#from Menu import Menu
 from VideoController import VideoController
 
 class Module:
@@ -73,7 +73,7 @@ class Module:
         #The following generates a menu with an option for each of the slideshows in the base menu
     def generateMenu(self):
         
-        tempMenu = Menu(self.MenuMgr)
+        tempMenu = self.glossMgr.create_menu() #Menu(self.MenuMgr)
         
         self.dbMgr.get_channels()
         file_list = os.listdir(self.baseDir)

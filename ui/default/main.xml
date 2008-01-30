@@ -1,5 +1,6 @@
 <gloss-theme>
 	<menu id="main">
+		<interface>ListMenu</interface>
 
 		<font id="main">
 			<face>Tahoma</face>

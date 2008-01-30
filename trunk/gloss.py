@@ -21,7 +21,7 @@ for fs_object in module_list:
         print "Found Module: " + fs_object
         modules.append(__import__(tmp_dir))
         
-from Menu import Menu
+#from Menu import Menu
 from GlossMgr import GlossMgr
 from myth.MythMySQL import mythDB
 
@@ -55,7 +55,7 @@ class MainApp:
 
         #Update splash status msg
         self.splashScreen.set_msg("Creating menus")
-        MainMenu = Menu(self.glossMgr)
+        MainMenu = self.glossMgr.create_menu() #Menu(self.glossMgr)
         #menu1.addItem("nothing", "ui/dvd.png")
         #menu1.addItem("nothing", "ui/dvd.png")
         #menu1.addItem("nothing", "ui/dvd.png")

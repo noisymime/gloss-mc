@@ -8,10 +8,10 @@ class Transition:
     
     def do_transition(self, fromMenu, toMenu):
             
-        oldGroup = fromMenu.getItemGroup()
-        newGroup = toMenu.getItemGroup()
+        #oldGroup = fromMenu.getItemGroup()
+        #newGroup = toMenu.getItemGroup()
         
-        oldGroup.set_opacity(255)
+        #oldGroup.set_opacity(255)
         
         self.timeline = clutter.Timeline(25, 50)
         self.timeline.connect('completed', self.slide_complete, fromMenu)

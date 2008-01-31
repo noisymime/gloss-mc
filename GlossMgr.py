@@ -59,12 +59,11 @@ class GlossMgr:
         
     def addMenu(self, newMenu):
         self.menus.append(newMenu)
-        
         #If this is the first menu, make it the active one
         if self.currentMenu == None:
             self.currentMenu = newMenu
             self.menuHistory.append(newMenu)
-            self.currentMenu.getItemGroup().show_all()
+            #self.currentMenu.getItemGroup().show_all()
             self.currentMenu.show_all()
             self.currentMenu.show()
             
@@ -192,9 +191,10 @@ class MenuSelector(clutter.Texture):
         self.glossMgr = glossMgr
         glossMgr.themeMgr.get_texture("selector_bar", glossMgr.stage, self)
         self.set_position(0, self.get_y())
-        self.x_offset = int(glossMgr.themeMgr.get_value("texture", "selector_bar", "position.x"))
-        self.height_percent = float(glossMgr.themeMgr.get_value("texture", "selector_bar", "height_percent")) / float(100)
-    
+        if not self.get_pixbuf() is None:
+            self.x_offset = int(glossMgr.themeMgr.get_value("texture", "selector_bar", "position.x"))
+            self.height_percent = float(glossMgr.themeMgr.get_value("texture", "selector_bar", "height_percent")) / float(100)
+        
     #This is a utility function that gets the coordinates of an that has been scaled
     def get_true_abs_position(self, selectee):
         #This whole clone label thing is a HORRIBLE hack but is there to compensate for the movement caused by scaling using GRAVITY_WEST

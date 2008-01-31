@@ -8,6 +8,7 @@ class ThemeMgr:
 	defaultTheme = "default"
 	currentTheme = "default"
 	currentTheme = "Pear"
+	currentTheme = "Mich"
 	
 	def __init__(self, glossMgr):
 		self.stage = glossMgr.stage
@@ -269,6 +270,10 @@ class ThemeMgr:
 		
 		#Setup the pixbuf
 		src = self.find_child_value(element, "image")
+		#Special case to handle no image
+		if src == "None":
+			return texture
+		
 		src = "ui/" + self.currentTheme + "/" + src
 		pixbuf = gtk.gdk.pixbuf_new_from_file(src)
 		texture.set_pixbuf(pixbuf)

@@ -8,11 +8,8 @@ class Transition:
     
     def do_transition(self, fromMenu, toMenu):
             
-            
         oldGroup = fromMenu.getItemGroup()
-        oldMenuGroup = fromMenu #.getMenuGroup()
         newGroup = toMenu.getItemGroup()
-        newMenuGroup = toMenu #.getMenuGroup()
         
         oldGroup.set_opacity(255)
         
@@ -24,16 +21,16 @@ class Transition:
         
         #Setup some knots
         knots_exiting = (\
-                (oldGroup.get_x(), oldGroup.get_y()),\
+                (fromMenu.get_x(), fromMenu.get_y()),\
                 #(-oldGroup.get_x(), int(fromMenu.getStage().get_height()/2))
-                (-oldGroup.get_x(), oldGroup.get_y())\
+                (-fromMenu.get_x(), fromMenu.get_y())\
                 )
         self.exit_behaviour_path = clutter.BehaviourPath(knots=knots_exiting, alpha=self.alpha)
-        
+
         #self.exit_behaviour_scale.apply(oldGroup)
-        self.exit_behaviour_opacity.apply(oldGroup)
-        self.exit_behaviour_opacity.apply(oldMenuGroup)
-        self.exit_behaviour_path.apply(oldGroup)
+        self.exit_behaviour_opacity.apply(fromMenu.get_current_item().itemTexturesGroup)
+        self.exit_behaviour_opacity.apply(fromMenu)
+        self.exit_behaviour_path.apply(fromMenu)
         
         
         ##################################################################
@@ -42,33 +39,27 @@ class Transition:
         self.entrance_behaviour_opacity = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=self.alpha)
         
         #Setup some knots
-        start_y = oldGroup.get_y()#int(self.stage.get_height()/2 - newGroup.get_height()/2)
+        start_y = fromMenu.get_y()#int(self.stage.get_height()/2 - newGroup.get_height()/2)
         start_x = int(self.stage.get_width())
-        newGroup.set_position(start_x, start_y)
-        #end_x = int(self.stage.get_width() - newGroup.get_width())/2
-        (end_x, end_y) = toMenu.get_display_position()
-        end_x = oldGroup.get_x() #int(end_x)
-        end_y = oldGroup.get_y() #int(end_y)
+
+        (end_x, end_y) = fromMenu.get_position()
         knots_entering = (\
-                (newGroup.get_x(), newGroup.get_y()),\
+                #(toMenu.get_x(), toMenu.get_y()),\
+                (start_x, start_y),\
                 #(-oldGroup.get_x(), int(fromMenu.getStage().get_height()/2))
                 (end_x, end_y) \
                 #toMenu.get_display_position()
                 )
-
         self.entrance_behaviour_path = clutter.BehaviourPath(self.alpha, knots_entering)
         
-        self.entrance_behaviour_opacity.apply(newGroup)
-        self.entrance_behaviour_opacity.apply(newMenuGroup)
-        self.entrance_behaviour_path.apply(newGroup)
+        self.entrance_behaviour_opacity.apply(toMenu.get_current_item().itemTexturesGroup)
+        self.entrance_behaviour_opacity.apply(toMenu)
+        self.entrance_behaviour_path.apply(toMenu)
         #newGroup.show_all()
         #newMenuGroup.show_all()
 
+        #This takes care of adding the new menu to the stage etc
         toMenu.display()
-        
-        #Add relevant new items to stage
-        self.stage.add(toMenu)
-        self.stage.add(newGroup)
         
         #Finally, move the selector bar
         (bar_x, bar_y) = self.glossMgr.selector_bar.position_0
@@ -76,9 +67,8 @@ class Transition:
         toMenu.selectFirst(False)
         
         self.timeline.start()
-
         self.glossMgr.currentMenu = toMenu
         
     def slide_complete(self, timeline, fromMenu):
         self.stage.remove(fromMenu)
-        self.stage.remove(fromMenu.getItemGroup())
+        self.stage.remove(fromMenu.get_current_item().itemTexturesGroup)

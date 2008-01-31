@@ -7,7 +7,7 @@ from xml.dom import minidom
 class ThemeMgr:
 	defaultTheme = "default"
 	currentTheme = "default"
-	#currentTheme = "Pear"
+	currentTheme = "Pear"
 	
 	def __init__(self, glossMgr):
 		self.stage = glossMgr.stage

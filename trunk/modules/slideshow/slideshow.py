@@ -359,9 +359,9 @@ class Module:
         self.nexttSong = None
         
     #The following generates a menu with an option for each of the slideshows in the base menu
-    def generateMenu(self):
-        
+    def generateMenu(self):        
         tempMenu = self.glossMgr.create_menu() #Menu(self.glossMgr)
+
         self.menu = tempMenu
         #print self.baseDir
         #This occurs when there are not slideshows or we could not connect to the db to establish baseDir

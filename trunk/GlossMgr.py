@@ -68,8 +68,8 @@ class GlossMgr:
             self.currentMenu.show_all()
             self.currentMenu.show()
             
-            self.stage.add(self.currentMenu)
-            self.stage.add(self.currentMenu.getItemGroup())
+            #self.stage.add(self.currentMenu)
+            #self.stage.add(self.currentMenu.getItemGroup())
             
             #This is a bit hacky, but we set the selector bar size based on the font size
             tmpLabel = clutter.Label()
@@ -79,6 +79,7 @@ class GlossMgr:
             self.selector_bar.set_height( int(tmpLabel.get_height()*self.selector_bar.height_percent) )
             self.selector_bar.set_menu(self.currentMenu)
             tmpLabel = None
+
         
     def get_selector_bar(self):
         return self.selector_bar
@@ -130,7 +131,6 @@ class GlossMgr:
                     #hide any unnecesary actors
                     self.currentMenu.hide()
                     #self.stage.remove(self.currentMenu.getItemGroup())
-                    
                     #And begin the plugin
                     action.begin( self )
         # This is tres bodge

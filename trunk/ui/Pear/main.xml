@@ -1,6 +1,7 @@
 <gloss-theme>
 	<menu id="main">
-
+		<interface>ListMenu</interface>
+		
 		<font id="main">
 			<face>Tahoma</face>
 			<size id="default">30</size>
@@ -48,7 +49,7 @@
 		
 		<!-- Used for transitioning between menus -->
 		<menu_transition>
-				<name>zoom_fade</name>
+				<name>slide</name>
 				<options>None</options>
 		</menu_transition>
 

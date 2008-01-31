@@ -55,15 +55,7 @@ class MainApp:
 
         #Update splash status msg
         self.splashScreen.set_msg("Creating menus")
-        MainMenu = self.glossMgr.create_menu() #Menu(self.glossMgr)
-        #menu1.addItem("nothing", "ui/dvd.png")
-        #menu1.addItem("nothing", "ui/dvd.png")
-        #menu1.addItem("nothing", "ui/dvd.png")
-
-        #menu1.setListFont('Tahoma 42')
-        MainMenu.setMenuPositionByName("center")
-        #self.MainMenu = menu
-
+        MainMenu = self.glossMgr.create_menu() 
 
         #Update splash status msg
         self.splashScreen.set_msg("Connecting to MythTV server")        
@@ -79,9 +71,8 @@ class MainApp:
             self.splashScreen.set_msg("Loading "+title)
             temp_menu_item = MainMenu.addItem(title)
             temp_menu_item.add_image_from_texture(tempMod.menu_image)
-            
             temp_menu_item.setAction(tempMod.action())
-        
+            
         self.splashScreen.remove()
         self.stage.connect('key-press-event', self.glossMgr.on_key_press_event)
         MainMenu.display()
@@ -89,8 +80,6 @@ class MainApp:
         
        
         return False
-        #print self.menuMgr.get_selector_bar().get_abs_position()
-        #self.menuMgr.get_selector_bar().set_spinner(True)
 
 
     def on_button_press_event (self, stage, event):

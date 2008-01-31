@@ -20,11 +20,14 @@ class Interface(clutter.Group):
         self.setup_ui(self.glossMgr.themeMgr, "main", self)
         
         self.selected = 0
+        self.off = 0
         
         #Setup input queue controller
         self.input_queue = InputQueue()
         self.input_queue.set_action(InputQueue.NORTH, self.selectPrevious)
         self.input_queue.set_action(InputQueue.SOUTH, self.selectNext)
+        
+        self.glossMgr.addMenu(self)
         
     def setup_ui(self, themeMgr, name, menu):
         element = themeMgr.search_docs("menu", name).childNodes
@@ -85,6 +88,7 @@ class Interface(clutter.Group):
     
     def display(self):
         self.timeline = clutter.Timeline(20, 60)
+        self.input_queue.set_timeline(self.timeline)
         alpha_sine_inc = clutter.Alpha(self.timeline, clutter.sine_inc_func)
         self.step = 360.0 / self.itemGroup.get_n_children()
         self.ang = 0.0
@@ -95,35 +99,33 @@ class Interface(clutter.Group):
             self.add(tmpTexturesGroup)
 
             tmpTexturesGroup.behaviour_ellipse = clutter.BehaviourEllipse(\
-                                                       int(stage_width/4),\
-                                                       int(stage_height-stage_height/3),\
-                                                       int(stage_width/2),\
-                                                       int(stage_height-stage_height/4),\
-                                                       clutter.ROTATE_CW,\
-                                                       self.ang,\
-                                                       (self.ang+self.step),\
-                                                       alpha-alpha_since_inc\
+                                                       x = int(stage_width/4),\
+                                                       y = int(stage_height-stage_height/3),\
+                                                       width = int(stage_width/2),\
+                                                       height = int(stage_height-stage_height/4),\
+                                                       #clutter.ROTATE_CW,\
+                                                       start = self.ang,\
+                                                       end = (self.ang+self.step),\
+                                                       alpha = alpha_sine_inc\
                                                        )
-            tmpTexturesGroup.behaviour_opacity = clutter.BehavourOpacity(opacity_start=0x66, opacity_end=0x66, alpha=alpha_sine_inc)
-            tmpTexturesGroup.behaviour_scale = clutter.BehaviourScale(x_scale_start=0.6, y_scale_start=0.6, x_scale_end=0.6, y_scale_end=0.6, alpha=alpha)
+            tmpTexturesGroup.behaviour_opacity = clutter.BehaviourOpacity(opacity_start=0x66, opacity_end=0x66, alpha=alpha_sine_inc)
+            tmpTexturesGroup.behaviour_scale = clutter.BehaviourScale(x_scale_start=0.6, y_scale_start=0.6, x_scale_end=0.6, y_scale_end=0.6, alpha=alpha_sine_inc)
             
             tmpTexturesGroup.behaviour_ellipse.apply(tmpTexturesGroup)
             tmpTexturesGroup.behaviour_opacity.apply(tmpTexturesGroup)
-            behaviour_scale.apply(tmpTexturesGroup)
+            tmpTexturesGroup.behaviour_scale.apply(tmpTexturesGroup)
 
             self.ang = self.ang + self.step
             tmpTexturesGroup.show()
+            tmpTexturesGroup.show_all()
         
-        for i in range(self.displaySize):
-            self.itemGroup.get_nth_child(i).show()
-        
-        self.introduce_items()
+        self.selectFirst(False)
         self.stage.add(self)
 
         self.itemGroup.show()
         self.show()
         
-    def introduce_items(self):
+    def selectFirst(self, moveBar):
         for i in range(self.itemGroup.get_n_children()):
             
             ang_start = -90.0
@@ -141,14 +143,74 @@ class Interface(clutter.Group):
         self.timeline.start()
         
     def selectPrevious(self):
-        pass
+        self.do_selection(-1)
     
     def selectNext(self):
-        pass
+        self.do_selection(1)
+    
+    def do_selection(self, step):
+        from_index = self.selected
+        
+        self.selected = self.selected + (-1 * step)
+
+        if (self.selected < 0): self.selected = self.itemGroup.get_n_children()-1
+        if (self.selected >= self.itemGroup.get_n_children()): self.selected = 0
+        
+        self.ang = self.off
+        for i in range(self.itemGroup.get_n_children()):
+            tmpTexturesGroup = self.itemGroup.get_nth_child(i).itemTexturesGroup
+            
+            ang_start = self.ang
+            ang_end   = self.ang + (self.step * step)
+            
+            #Set the rotation based on the step
+            if step > 0:
+                direction = clutter.ROTATE_CW
+            else:
+                direction= clutter.ROTATE_CCW
+            tmpTexturesGroup.behaviour_ellipse.set_direction(direction)
+
+            #Set the angles
+            tmpTexturesGroup.behaviour_ellipse.set_angle_start(ang_start)
+            tmpTexturesGroup.behaviour_ellipse.set_angle_end(ang_end)
+            
+            if i == from_index:
+                tmpTexturesGroup.behaviour_opacity.set_property("opacity_start", 0xff)
+                tmpTexturesGroup.behaviour_opacity.set_property("opacity_end", 0x66)
+                
+                tmpTexturesGroup.behaviour_scale.set_property("x_scale_start", 1)
+                tmpTexturesGroup.behaviour_scale.set_property("y_scale_start", 1)
+                tmpTexturesGroup.behaviour_scale.set_property("x_scale_end", 0.6)
+                tmpTexturesGroup.behaviour_scale.set_property("y_scale_end", 0.6)
+            elif i == self.selected:
+                tmpTexturesGroup.behaviour_opacity.set_property("opacity_start", 0x66)
+                tmpTexturesGroup.behaviour_opacity.set_property("opacity_end", 0xff)
+                
+                tmpTexturesGroup.behaviour_scale.set_property("x_scale_start", 0.6)
+                tmpTexturesGroup.behaviour_scale.set_property("y_scale_start", 0.6)
+                tmpTexturesGroup.behaviour_scale.set_property("x_scale_end", 1)
+                tmpTexturesGroup.behaviour_scale.set_property("y_scale_end", 1)
+            else:
+                tmpTexturesGroup.behaviour_opacity.set_property("opacity_start", 0x66)
+                tmpTexturesGroup.behaviour_opacity.set_property("opacity_end", 0x66)
+                
+                tmpTexturesGroup.behaviour_scale.set_property("x_scale_start", 0.6)
+                tmpTexturesGroup.behaviour_scale.set_property("y_scale_start", 0.6)
+                tmpTexturesGroup.behaviour_scale.set_property("x_scale_end", 0.6)
+                tmpTexturesGroup.behaviour_scale.set_property("y_scale_end", 0.6)
+
+
+            self.ang = self.ang + self.step
+
+        self.timeline.start()
+        self.off = self.off + (self.step * step)
+        if self.off > 360:
+            self.off = self.off - 360
         
     def getItem(self, index):
         return self.itemGroup.get_nth_child(index)
     def get_current_item(self):
+        print "Selected: " + str(self.itemGroup.get_nth_child(self.selected))
         return self.itemGroup.get_nth_child(self.selected)
     
 class WheelListItem(MenuItem):

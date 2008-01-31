@@ -24,9 +24,11 @@ class MenuItem (clutter.Label):
         self.set_color(self.color)
         self.currentOpacity = 255
         self.data = itemLabel #By default the items data is simply its label
-        #The width is the length of the selector bar minus its offset
-        width = glossMgr.get_selector_bar().get_width() + glossMgr.get_selector_bar().get_x_offset()
-        self.set_width(width)
+        
+        if not glossMgr.get_selector_bar().get_pixbuf() is None:
+            #The width is the length of the selector bar minus its offset
+            width = glossMgr.get_selector_bar().get_width() + glossMgr.get_selector_bar().get_x_offset()
+            self.set_width(width)
 
         self.set_ellipsize(pango.ELLIPSIZE_END)
         #Text is actually scaled down in 'regular' position so that it doesn't get jaggies when zoomed in

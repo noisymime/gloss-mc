@@ -39,6 +39,7 @@ class image_previewer(clutter.Group):
         self.timeline3.connect('new-frame', self.kickoff)
         
         self.connect('show', self.start)
+        self.connect('hide', self.stop)
         
         self.alpha1 = clutter.Alpha(self.timeline1, clutter.ramp_inc_func)
         self.alpha2 = clutter.Alpha(self.timeline2, clutter.ramp_inc_func)
@@ -57,45 +58,49 @@ class image_previewer(clutter.Group):
         if len(self.textures) == 0:
             return None
         
-        self.tex1 = self.get_rand_tex()
-        self.tex2 = self.get_rand_tex()
-        self.tex3 = self.get_rand_tex()
+        #Check if this previewer has already run before
+        if self.tex1 is None:
+            self.tex1 = self.get_rand_tex()
+            self.tex2 = self.get_rand_tex()
+            self.tex3 = self.get_rand_tex()
+            
+            self.behave1 = clutter.BehaviourPath(self.alpha1, self.get_texture_knots(self.tex1))
+            self.behave2 = clutter.BehaviourPath(self.alpha2, self.get_texture_knots(self.tex2))
+            self.behave3 = clutter.BehaviourPath(self.alpha3, self.get_texture_knots(self.tex3))
+            
+            #self.tex1.set_scale(self.scale_start, self.scale_start)
+            self.behaviour_depth1.apply(self.tex1)
+            self.behave1.apply(self.tex1)
+            self.behaviour_depth2.apply(self.tex2)
+            self.behave2.apply(self.tex2)
+            self.behaviour_depth3.apply(self.tex3)
+            self.behave3.apply(self.tex3)
+            
+            #Special opacity behaviour to brin ghte fist texture in
+            timeline_opacity = clutter.Timeline(20, self.fps)
+            alpha_opacity = clutter.Alpha(timeline_opacity, clutter.ramp_inc_func)
+            self.behaviour_opacity = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha_opacity)
+            self.tex1.set_opacity(0)
+            self.behaviour_opacity.apply(self.tex1)
+            
         
-        self.behave1 = clutter.BehaviourPath(self.alpha1, self.get_texture_knots(self.tex1))
-        self.behave2 = clutter.BehaviourPath(self.alpha2, self.get_texture_knots(self.tex2))
-        self.behave3 = clutter.BehaviourPath(self.alpha3, self.get_texture_knots(self.tex3))
-        
-        #self.tex1.set_scale(self.scale_start, self.scale_start)
-        self.behaviour_depth1.apply(self.tex1)
-        self.behave1.apply(self.tex1)
-        self.behaviour_depth2.apply(self.tex2)
-        self.behave2.apply(self.tex2)
-        self.behaviour_depth3.apply(self.tex3)
-        self.behave3.apply(self.tex3)
-        
-        #Special opacity behaviour to brin ghte fist texture in
-        timeline_opacity = clutter.Timeline(20, self.fps)
-        alpha_opacity = clutter.Alpha(timeline_opacity, clutter.ramp_inc_func)
-        self.behaviour_opacity = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha_opacity)
-        self.tex1.set_opacity(0)
-        self.behaviour_opacity.apply(self.tex1)
-        
-        
-        self.add(self.tex1)
-        parent = self.get_parent()
-        if parent is None:
-            print "Parent is none!"
-        parent.show()
-        #self.set_depth(100)
-        #self.tex1.set_depth(100)
-        #self.set_opacity(255)
-        self.frontTex = self.tex1
-        self.tex1.show()
-        self.show()
-        #parent.add(self)
-        self.timeline1.start()
-        timeline_opacity.start()
-        self.nextTexture = self.get_rand_tex()
+            self.add(self.tex1)
+            
+            parent = self.get_parent()
+            if parent is None:
+                print "Parent is none!"
+            
+            parent.show()
+            self.frontTex = self.tex1
+            self.tex1.show()
+            self.show()
+            self.timeline1.start()
+            timeline_opacity.start()
+            self.nextTexture = self.get_rand_tex()
+        else:
+            self.timeline1.start()
+            self.timeline2.start()
+            self.timeline3.start()
         
     #This starts the various timelines at the appropriate points
     def kickoff(self, timeline, frame_no):
@@ -194,4 +199,9 @@ class image_previewer(clutter.Group):
                 )
         
         return knots
+    
+    def stop(self, data):
+        self.timeline1.pause()
+        self.timeline2.pause()
+        self.timeline3.pause()
         

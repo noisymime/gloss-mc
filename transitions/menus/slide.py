@@ -55,8 +55,6 @@ class Transition:
         self.entrance_behaviour_opacity.apply(toMenu.get_current_item().itemTexturesGroup)
         self.entrance_behaviour_opacity.apply(toMenu)
         self.entrance_behaviour_path.apply(toMenu)
-        #newGroup.show_all()
-        #newMenuGroup.show_all()
 
         #This takes care of adding the new menu to the stage etc
         toMenu.display()

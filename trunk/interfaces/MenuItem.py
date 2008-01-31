@@ -7,7 +7,7 @@ class MenuItem (clutter.Label):
 
     def __init__ (self, menu, itemLabel, y):
         clutter.Label.__init__ (self)
-        glossMgr = menu.getGlossMgr()
+        glossMgr = menu.glossMgr
         self.menu = menu
         self.stage = glossMgr.get_stage()
         

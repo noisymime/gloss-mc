@@ -1,0 +1,32 @@
+The main interface filename must be the same as the directory its in:
+<intefaces>
+	<ListMenu>
+		ListMenu.py
+	<WheelMenu>
+		WheelMenu.py
+
+Class name must be 'Interface' and be a subclass of clutter.Group
+__init__ function takes form (self, glossMgr)
+
+####################################################
+#Interfaces require the following to be implemented:
+####################################################
+Class Name = Interface
+- addItem(label)
+- display()
+- getItem(index)
+	- Returns the menu item identified by index
+- selectNext()
+- selectPrevious()
+- selectFirst()
+- get_current_item()
+	- Returns the currently selected item
+	
+#####################################################
+HIGHLY RECOMMENDED:
+Implement the inputQueue mgr with the following:
+
+#Setup input queue controller
+self.input_queue = InputQueue()
+self.input_queue.set_action(InputQueue.NORTH, self.selectPrevious)
+self.input_queue.set_action(InputQueue.SOUTH, self.selectNext)

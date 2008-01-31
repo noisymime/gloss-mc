@@ -1,0 +1,64 @@
+<gloss-theme>
+	<menu id="main">
+		<interface>WheelMenu</interface>
+		
+		<font id="main">
+			<face>Tahoma</face>
+			<size id="default">30</size>
+			<size id="1024x768">38</size>
+			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
+		</font>
+
+		<dimensions type="relativeToStage">
+			<width>40%</width>
+			<height>40%</height>
+		</dimensions>
+		<position type="relativeToStage">
+			<x>0</x>
+			<y>0</y>
+		</position>
+
+		<item_gap>0</item_gap>
+		<num_visible_elements>4</num_visible_elements>
+
+		<!-- The following properties all relate to the image / textures that accompany each menu item -->
+		<menu_item_texture>
+			<use_image_reflections>0</use_image_reflections>
+			<image_y_rotation>0</image_y_rotation>
+			<image_transition>
+				<name>ring</name>
+				<options>None</options>
+			</image_transition>
+
+			<position type="relativeToStage">
+				<x>5%</x>
+				<y>20%</y>
+			</position>
+			
+		</menu_item_texture>
+		
+		<!-- Used for transitioning between menus -->
+		<menu_transition>
+				<name>slide</name>
+				<options>None</options>
+		</menu_transition>
+
+	</menu>
+
+	<texture id="background">
+		<image>background.png</image>
+		<dimensions type="relativeToStage">
+			<width>100%</width>
+			<height>100%</height>
+		</dimensions>
+		<position type="blah">
+			<x>0</x>
+			<y>0</y>
+		</position>
+	</texture>
+
+	<texture id="selector_bar">
+		<image>None</image>
+	</texture>
+</gloss-theme>

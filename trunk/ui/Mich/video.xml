@@ -1,0 +1,61 @@
+<gloss-theme>
+	<texture id="video_covers_background">
+		<image>video_player/cover_bg_long.png</image>
+		<dimensions type="relativeToStage">
+			<width>70%</width>
+			<height>90%</height>
+		</dimensions>
+		<position type="relativeToStage">
+			<x>25%</x>
+			<y>4%</y>
+		</position>
+	</texture>
+
+	<texture id="video_menu_image">
+		<image>video_player/videos.png</image>
+		<dimensions type="relativeToSelf">
+			<width>100%</width>
+			<height>relative</height>
+		</dimensions>
+		<position type="relativeToParent">
+			<x>0</x>
+			<y>0</y>
+		</position>
+	</texture>
+	
+	<video_cover_viewer id="main">
+		<video_default_src>video_player/video_default.png</video_default_src>
+		<folder_img_src>video_player/mv_gallery_folder_sel.png</folder_img_src>
+		<dimensions type="relativeToStage">
+			<width>60%</width>
+			<height>60%</height>
+		</dimensions>
+		<position type="relativeToStage">
+			<x>30%</x>
+			<y>5%</y>
+		</position>
+	</video_cover_viewer>
+	
+	<video_cover_details id="main">
+		<dimensions type="relativeToStage">
+			<width>60%</width>
+			<height>20%</height>
+		</dimensions>
+		<position type="relativeToStage">
+			<x>30%</x>
+			<y>65%</y>
+		</position>
+	</video_cover_details>
+	
+	<video_folder_menu id="main">
+		<dimensions type="relativeToStage">
+			<width>20%</width>
+			<height>60%</height>
+		</dimensions>
+		<position type="relativeToStage">
+			<x>5%</x>
+			<y>5%</y>
+		</position>
+	</video_folder_menu>
+	
+</gloss-theme>

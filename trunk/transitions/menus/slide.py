@@ -69,4 +69,5 @@ class Transition:
         
     def slide_complete(self, timeline, fromMenu):
         self.stage.remove(fromMenu)
-        self.stage.remove(fromMenu.get_current_item().itemTexturesGroup)
+        #self.stage.remove(fromMenu.get_current_item().itemTexturesGroup)
+        fromMenu.get_current_item().itemTexturesGroup.get_parent().remove(fromMenu.get_current_item().itemTexturesGroup)

@@ -93,10 +93,13 @@ class Interface(clutter.Group):
         self.step = 360.0 / self.itemGroup.get_n_children()
         self.ang = 0.0
         (stage_width, stage_height) = self.stage.get_size()
+        self.add(self.itemGroup)
         
         for i in range(self.itemGroup.get_n_children()):
-            tmpTexturesGroup =self.itemGroup.get_nth_child(i).itemTexturesGroup
+            tmpTexturesGroup = self.itemGroup.get_nth_child(i).itemTexturesGroup
+            tmpItem = self.itemGroup.get_nth_child(i)
             self.add(tmpTexturesGroup)
+
 
             tmpTexturesGroup.behaviour_ellipse = clutter.BehaviourEllipse(\
                                                        x = int(stage_width/4),\
@@ -114,10 +117,17 @@ class Interface(clutter.Group):
             tmpTexturesGroup.behaviour_ellipse.apply(tmpTexturesGroup)
             tmpTexturesGroup.behaviour_opacity.apply(tmpTexturesGroup)
             tmpTexturesGroup.behaviour_scale.apply(tmpTexturesGroup)
+            
+            tmpTexturesGroup.behaviour_ellipse.apply(tmpItem)
+            tmpTexturesGroup.behaviour_opacity.apply(tmpItem)
+            tmpTexturesGroup.behaviour_scale.apply(tmpItem)
+            
+            tmpItem.set_position(tmpTexturesGroup.get_width(), 100)
 
             self.ang = self.ang + self.step
             tmpTexturesGroup.show()
             tmpTexturesGroup.show_all()
+            tmpItem.show()
         
         self.selectFirst(False)
         self.stage.add(self)
@@ -182,6 +192,11 @@ class Interface(clutter.Group):
                 tmpTexturesGroup.behaviour_scale.set_property("y_scale_start", 1)
                 tmpTexturesGroup.behaviour_scale.set_property("x_scale_end", 0.6)
                 tmpTexturesGroup.behaviour_scale.set_property("y_scale_end", 0.6)
+                
+                #Pause the image previewer (if in use)
+                if tmpTexturesGroup.__class__.__name__ == "image_previewer":
+                    tmpTexturesGroup.stop(None)
+                    
             elif i == self.selected:
                 tmpTexturesGroup.behaviour_opacity.set_property("opacity_start", 0x66)
                 tmpTexturesGroup.behaviour_opacity.set_property("opacity_end", 0xff)
@@ -210,7 +225,7 @@ class Interface(clutter.Group):
     def getItem(self, index):
         return self.itemGroup.get_nth_child(index)
     def get_current_item(self):
-        print "Selected: " + str(self.itemGroup.get_nth_child(self.selected))
+        #print "Selected: " + str(self.itemGroup.get_nth_child(self.selected))
         return self.itemGroup.get_nth_child(self.selected)
     
 class WheelListItem(MenuItem):

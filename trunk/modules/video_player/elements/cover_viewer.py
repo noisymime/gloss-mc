@@ -130,7 +130,6 @@ class coverViewer(clutter.Group):
         
         alpha = clutter.Alpha(self.timeline, clutter.smoothstep_inc_func)# clutter.ramp_inc_func)
         self.behaviourNew_scale = clutter.BehaviourScale(x_scale_start=1, y_scale_start=1, x_scale_end=self.scaleFactor, y_scale_end=self.scaleFactor, alpha=alpha) #clutter.GRAVITY_CENTER)
-        self.behaviourNew_scale.set_property("scale-gravity", clutter.GRAVITY_CENTER)
         self.behaviourNew_z = clutter.BehaviourDepth(depth_start=1, depth_end=2, alpha=alpha)
         #If we're performing a roll (See above) then the incoming opacity should start at 0 rather than the normal inactive opacity
         if rolling:

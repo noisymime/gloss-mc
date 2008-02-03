@@ -194,6 +194,8 @@ class MenuSelector(clutter.Texture):
         if not self.get_pixbuf() is None:
             self.x_offset = int(glossMgr.themeMgr.get_value("texture", "selector_bar", "position.x"))
             self.height_percent = float(glossMgr.themeMgr.get_value("texture", "selector_bar", "height_percent")) / float(100)
+        else:
+            self.position_0 = (0, 0)
         
     #This is a utility function that gets the coordinates of an that has been scaled
     def get_true_abs_position(self, selectee):

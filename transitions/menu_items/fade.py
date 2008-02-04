@@ -16,7 +16,7 @@ class Transition:
         
     def do_transition(self, timeline, oldGroup, newGroup):
         timeline.connect('completed', self.on_transition_complete, oldGroup)
-    
+
         newGroup.set_opacity(0)
         (x, y) = oldGroup.get_position()
         newGroup.set_position(x, y)

@@ -27,6 +27,8 @@ class GlossMgr:
         
         #The background is a bit messy due to the depth issues :(
         background = self.themeMgr.get_texture("background", None, None)
+        background.set_size(self.stage.get_width(), self.stage.get_height())
+        """
         (width, height) = background.get_abs_size()
         print background.get_abs_size()
         #background.set_anchor_point_from_gravity(clutter.GRAVITY_NORTH_WEST)
@@ -44,7 +46,9 @@ class GlossMgr:
         print background.get_abs_size()
         #background.set_width(width)
         #background.set_height(height)
+        """
         background.show()
+        
         self.stage.add(background)
         print "Perspective: " + str(stage.get_perspective())
         #stage.set_perspective(60.0, 1.0, 0.1, 1)

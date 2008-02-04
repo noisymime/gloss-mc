@@ -1,5 +1,7 @@
 import clutter
 import pango
+import gtk
+import pygtk
 
 class MenuItem (clutter.Label):
     zoomLevel = 0.5
@@ -46,11 +48,11 @@ class MenuItem (clutter.Label):
 
         
     def add_image_from_path(self, path, x, y):
-        self.tempTexture = clutter.Texture()
+        tempTexture = clutter.Texture()
         pixbuf = gtk.gdk.pixbuf_new_from_file(path)
         tempTexture.set_pixbuf(pixbuf)
         
-        self.add_image_from_texture(tempTexture, x, y)
+        self.add_image_from_texture(tempTexture)
         
     def add_image_from_texture(self, texture):
         if texture is None:

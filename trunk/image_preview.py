@@ -68,13 +68,22 @@ class image_previewer(clutter.Group):
             self.behave2 = clutter.BehaviourPath(self.alpha2, self.get_texture_knots(self.tex2))
             self.behave3 = clutter.BehaviourPath(self.alpha3, self.get_texture_knots(self.tex3))
             
-            #self.tex1.set_scale(self.scale_start, self.scale_start)
+            self.behaviour_rotate1 = clutter.BehaviourRotate(axis=clutter.Y_AXIS, direction=clutter.ROTATE_CCW, angle_start=0, angle_end=270, alpha=self.alpha1)
+            self.behaviour_rotate2 = clutter.BehaviourRotate(axis=clutter.Y_AXIS, direction=clutter.ROTATE_CCW, angle_start=0, angle_end=270, alpha=self.alpha2)
+            self.behaviour_rotate3 = clutter.BehaviourRotate(axis=clutter.Y_AXIS, direction=clutter.ROTATE_CCW, angle_start=0, angle_end=270, alpha=self.alpha3)
+            
+            #self.tex1.set_scale(self.scale_start, self.scale_start)Path
             self.behaviour_depth1.apply(self.tex1)
             self.behave1.apply(self.tex1)
+            self.behaviour_rotate1.apply(self.tex1)
+            
             self.behaviour_depth2.apply(self.tex2)
             self.behave2.apply(self.tex2)
+            self.behaviour_rotate2.apply(self.tex2)
+            
             self.behaviour_depth3.apply(self.tex3)
             self.behave3.apply(self.tex3)
+            self.behaviour_rotate3.apply(self.tex3)
             
             #Special opacity behaviour to brin ghte fist texture in
             timeline_opacity = clutter.Timeline(20, self.fps)
@@ -107,18 +116,27 @@ class image_previewer(clutter.Group):
         if frame_no == (math.floor(self.fps*self.seconds/3)) or frame_no == (2*math.floor(self.fps*self.seconds/3)):
             if timeline == self.timeline1:
                 self.add(self.tex2)
+                self.tex2.set_opacity(0)
                 self.tex2.show()
                 self.timeline2.start()
                 self.timeline1.disconnect(self.handler_id1)
                 self.handler_id1 = None
+                
+                fade_template = clutter.EffectTemplate( clutter.Timeline(20, self.fps), clutter.ramp_inc_func)
+                effect = clutter.effect_fade(template=fade_template, actor=self.tex2, opacity_end=255)
+                effect.start()
+                
             if timeline == self.timeline2:
                 self.add(self.tex3)
+                self.tex3.set_opacity(0)
                 self.tex3.show()
                 self.timeline3.start()
                 self.timeline2.disconnect(self.handler_id2)
                 self.handler_id2 = None
             
-        
+                fade_template = clutter.EffectTemplate( clutter.Timeline(20, self.fps), clutter.ramp_inc_func)
+                effect = clutter.effect_fade(template=fade_template, actor=self.tex3, opacity_end=255)
+                effect.start()
         
     def get_rand_tex(self):
         rand = random.randint(0, len(self.textures)-1)
@@ -155,16 +173,15 @@ class image_previewer(clutter.Group):
             self.behave1 = clutter.BehaviourPath(self.alpha1, knots)
             self.behave1.apply(self.tex1)
             self.behaviour_depth1.apply(self.tex1)
+            self.behaviour_rotate1.apply(self.tex1)
             self.frontTex = self.tex2
-            
-            #texture.lower(self.tex2)
-            #texture.lower(self.tex3)
             
         elif self.frontTex == self.tex2:
             self.tex2 = texture
             self.behave2 = clutter.BehaviourPath(self.alpha2, knots)
             self.behave2.apply(self.tex2)
             self.behaviour_depth2.apply(self.tex2)
+            self.behaviour_rotate2.apply(self.tex2)
             self.frontTex = self.tex3
             
         elif self.frontTex == self.tex3:
@@ -172,6 +189,7 @@ class image_previewer(clutter.Group):
             self.behave3 = clutter.BehaviourPath(self.alpha3, knots)
             self.behave3.apply(self.tex3)
             self.behaviour_depth3.apply(self.tex3)
+            self.behaviour_rotate3.apply(self.tex3)
             self.frontTex = self.tex1
             
             #texture.lower(self.tex1)

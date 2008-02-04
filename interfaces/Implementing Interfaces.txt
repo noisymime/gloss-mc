@@ -11,6 +11,8 @@ __init__ function takes form (self, glossMgr)
 ####################################################
 #Interfaces require the following to be implemented:
 ####################################################
+Global Variables:
+- usePreviewEffects (Bool) = Whether or not the modules should use preview effects
 Class Name = Interface
 - addItem(label)
 - display()

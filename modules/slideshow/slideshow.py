@@ -391,8 +391,11 @@ class Module:
                     img_previewer.add_texture(imgPath)
                     #print imgPath
                 #new_file_list = os.listdir(dirPath)
-                tempItem.itemTexturesGroup = img_previewer
-                img_previewer.set_position(tempItem.menu.menu_image_x, tempItem.menu.menu_image_y)
+                if tempMenu.usePreviewEffects:
+                    tempItem.itemTexturesGroup = img_previewer
+                    img_previewer.set_position(tempItem.menu.menu_image_x, tempItem.menu.menu_image_y)
+                else:
+                    tempItem.add_image_from_path(imgPath, 0, 0)
                 
                 tempItem.setAction(self)
                 

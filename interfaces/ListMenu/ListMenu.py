@@ -10,6 +10,7 @@ from InputQueue import InputQueue
 #from interfaces.ListMenu import themeLoad
 
 class Interface(clutter.Group):
+    usePreviewEffects = True # Tells the modules to use any image preview effects where available
     font = ""
     menu_item_transition = None
     zoomLevel = 0.5

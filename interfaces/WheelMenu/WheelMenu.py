@@ -9,6 +9,7 @@ from interfaces.MenuItem import MenuItem
 from InputQueue import InputQueue
 
 class Interface(clutter.Group):
+    usePreviewEffects = False # Tells the modules NOT to use any effects on the images
     itemGroup = clutter.Group()
     menu_image_rotation = 0
     
@@ -122,7 +123,7 @@ class Interface(clutter.Group):
             tmpTexturesGroup.behaviour_opacity.apply(tmpItem)
             tmpTexturesGroup.behaviour_scale.apply(tmpItem)
             
-            tmpItem.set_position(tmpTexturesGroup.get_width(), 100)
+            tmpItem.set_position(-tmpTexturesGroup.get_width()*2, -1000)
 
             self.ang = self.ang + self.step
             tmpTexturesGroup.show()

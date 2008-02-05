@@ -98,15 +98,31 @@ class Interface(clutter.Group):
         
         for i in range(self.itemGroup.get_n_children()):
             tmpTexturesGroup = self.itemGroup.get_nth_child(i).itemTexturesGroup
+            tmpTexturesGroup.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
             tmpItem = self.itemGroup.get_nth_child(i)
+            tmpItem.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
             self.add(tmpTexturesGroup)
 
 
             tmpTexturesGroup.behaviour_ellipse = clutter.BehaviourEllipse(\
-                                                       x = int(stage_width/4),\
-                                                       y = int(stage_height-stage_height/3),\
-                                                       width = int(stage_width/2),\
+                                                       #x = int(stage_width/4),\
+                                                       #y = int(stage_height-stage_height/3),\
+                                                       x = int(stage_width/2),\
+                                                       y = int(3*stage_height/4),\
+                                                       width = int(3*stage_width/4),\
                                                        height = int(stage_height-stage_height/4),\
+                                                       #clutter.ROTATE_CW,\
+                                                       start = self.ang,\
+                                                       end = (self.ang+self.step),\
+                                                       alpha = alpha_sine_inc\
+                                                       )
+            tmpItem.behaviour_ellipse = clutter.BehaviourEllipse(\
+                                                       x = int(stage_width/2),\
+                                                       y = int(3*stage_height/4),\
+                                                       #x = int(stage_width*.66),\
+                                                       #y = int(stage_height/2),\
+                                                       width = int(3*stage_width/4),\
+                                                       height = int(0),\
                                                        #clutter.ROTATE_CW,\
                                                        start = self.ang,\
                                                        end = (self.ang+self.step),\
@@ -119,16 +135,16 @@ class Interface(clutter.Group):
             tmpTexturesGroup.behaviour_opacity.apply(tmpTexturesGroup)
             tmpTexturesGroup.behaviour_scale.apply(tmpTexturesGroup)
             
-            tmpTexturesGroup.behaviour_ellipse.apply(tmpItem)
+            tmpItem.behaviour_ellipse.apply(tmpItem)
             tmpTexturesGroup.behaviour_opacity.apply(tmpItem)
             tmpTexturesGroup.behaviour_scale.apply(tmpItem)
             
-            tmpItem.set_position(-tmpTexturesGroup.get_width()*2, -1000)
+            #tmpItem.set_position(-tmpTexturesGroup.get_width()*2, -1000)
 
             self.ang = self.ang + self.step
             tmpTexturesGroup.show()
             tmpTexturesGroup.show_all()
-            tmpItem.show()
+            #tmpItem.show()
         
         self.selectFirst(False)
         self.stage.add(self)
@@ -143,14 +159,19 @@ class Interface(clutter.Group):
             ang_end   = (self.step * i)
 
             tmpTexturesGroup = self.itemGroup.get_nth_child(i).itemTexturesGroup
+            tmpItem = self.itemGroup.get_nth_child(i)
             
             tmpTexturesGroup.behaviour_ellipse.set_angle_start(ang_start)
             tmpTexturesGroup.behaviour_ellipse.set_angle_end(ang_end)
+            
+            tmpItem.behaviour_ellipse.set_angle_start(ang_start)
+            tmpItem.behaviour_ellipse.set_angle_end(ang_end)
             
             if i == self.selected:
                 tmpTexturesGroup.behaviour_opacity.set_property("opacity_start", 0x66)
                 tmpTexturesGroup.behaviour_opacity.set_property("opacity_end", 0xff)
 
+        tmpItem.show()
         self.timeline.start()
         
     def selectPrevious(self):
@@ -170,6 +191,7 @@ class Interface(clutter.Group):
         self.ang = self.off
         for i in range(self.itemGroup.get_n_children()):
             tmpTexturesGroup = self.itemGroup.get_nth_child(i).itemTexturesGroup
+            tmpItem = self.itemGroup.get_nth_child(i)
             
             ang_start = self.ang
             ang_end   = self.ang + (self.step * step)
@@ -180,10 +202,13 @@ class Interface(clutter.Group):
             else:
                 direction= clutter.ROTATE_CCW
             tmpTexturesGroup.behaviour_ellipse.set_direction(direction)
+            tmpItem.behaviour_ellipse.set_direction(direction)
 
             #Set the angles
             tmpTexturesGroup.behaviour_ellipse.set_angle_start(ang_start)
             tmpTexturesGroup.behaviour_ellipse.set_angle_end(ang_end)
+            tmpItem.behaviour_ellipse.set_angle_start(ang_start)
+            tmpItem.behaviour_ellipse.set_angle_end(ang_end)
             
             if i == from_index:
                 tmpTexturesGroup.behaviour_opacity.set_property("opacity_start", 0xff)
@@ -193,6 +218,8 @@ class Interface(clutter.Group):
                 tmpTexturesGroup.behaviour_scale.set_property("y_scale_start", 1)
                 tmpTexturesGroup.behaviour_scale.set_property("x_scale_end", 0.6)
                 tmpTexturesGroup.behaviour_scale.set_property("y_scale_end", 0.6)
+                
+                tmpItem.hide()
                 
                 #Pause the image previewer (if in use)
                 if tmpTexturesGroup.__class__.__name__ == "image_previewer":
@@ -206,6 +233,8 @@ class Interface(clutter.Group):
                 tmpTexturesGroup.behaviour_scale.set_property("y_scale_start", 0.6)
                 tmpTexturesGroup.behaviour_scale.set_property("x_scale_end", 1)
                 tmpTexturesGroup.behaviour_scale.set_property("y_scale_end", 1)
+                
+                tmpItem.show()
             else:
                 tmpTexturesGroup.behaviour_opacity.set_property("opacity_start", 0x66)
                 tmpTexturesGroup.behaviour_opacity.set_property("opacity_end", 0x66)

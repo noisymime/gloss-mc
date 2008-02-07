@@ -21,7 +21,7 @@ Using the SVN of Clutter is HIGHLY recommended as it is required for all newer v
 The following instructions are a rough guide for Ubuntu Gutsy
 
   # `sudo apt-get install libgtk2.0-dev gtk-doc-tools gcc libpango1.0-dev libsdl-pango-dev python automake1.9 subversion gstreamer0.10-fluendo-mpegdemux jackd python-mysqldb python-dev python-gtk2-dev python-gobject-dev libgstreamer-plugins-base0.10-dev python-gobject-doc`
-  # `svn co http://svn.o-hand.com/repos/clutter/trunk clutter
+  # `svn co http://svn.o-hand.com/repos/clutter/trunk clutter`
   # `cd clutter/clutter`
   # `./autogen.sh`
   # `sudo make install`
@@ -33,7 +33,7 @@ The following instructions are a rough guide for Ubuntu Gutsy
   # `sudo make install`
 
 == Getting Gloss ==
-Once you have clutter installed, getting Gloss running should be fairly easy:
+Once you have Clutter installed, getting Gloss running should be fairly easy:
   # `svn checkout http://gloss-mc.googlecode.com/svn/trunk/ gloss-mc`
   # `cd gloss-mc`
   # `python gloss.py`

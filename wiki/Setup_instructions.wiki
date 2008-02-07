@@ -5,18 +5,17 @@ This page will give a very brief overview on how to get Gloss up and running on 
 Note: If using Clutter 0.4.x please use SVN rev. 86 as anything past this has been updated for Clutter 0.6
 
 = Ubuntu =
+Gloss was developed on Ubuntu so hence I can give the best instructions for how to get it working on this platform.
 
-Gloss was developed on Ubuntu so hence I can give the best instructions for how to get it working on this platform. Simply copy the following lines into the command prompt, one at a time. 
+== Getting Clutter ==
+ There are currently two main methods for obtaining Clutter, which is required by Gloss. The first is using the prebuilt binaries and is relatively straightforward. The second is a little more complicated, but gives you the newest version of Clutter which is required for many of the latest functions to work. In each case, simply copy the lines into the command prompt, one at a time. 
 
+=== Binaries (apt-get) ===
   # `echo "deb http://debian.o-hand.com feisty/" | sudo tee -a /etc/apt/sources.list` (Replace fiesty with edgy / dapper if required)
   # `sudo apt-get update`
   # `sudo apt-get install libclutter-0.4-0 libclutter-gst-0.4-0 python-clutter python-mysqldb subversion eyed3 gstreamer0.10-fluendo-mpegdemux jackd`
-  # `svn checkout http://gloss-mc.googlecode.com/svn/trunk/ gloss-mc`
-  # `cd gloss-mc`
-  # `python gloss.py`
 
-
-= SVN = 
+=== SVN === 
 
 Using the SVN of Clutter is HIGHLY recommended as it is required for all newer versions of Gloss.
 The following instructions are a rough guide for Ubuntu Gutsy
@@ -33,4 +32,8 @@ The following instructions are a rough guide for Ubuntu Gutsy
   # ./autogen.sh
   # sudo make install
 
-
+== Getting Gloss ==
+Once you have clutter installed, getting Gloss running should be fairly easy:
+  # `svn checkout http://gloss-mc.googlecode.com/svn/trunk/ gloss-mc`
+  # `cd gloss-mc`
+  # `python gloss.py`

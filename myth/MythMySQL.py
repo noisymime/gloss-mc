@@ -1,12 +1,15 @@
 import MySQLdb
 import os, socket
+import clutter
 
 class mythDB():
 
     def __init__(self):
 
         self.localHost = socket.gethostname()
-        self.read_config()
+        if not self.read_config():
+            self.connected = False
+            return
         
         try:
             self.db = MySQLdb.connect(self.server, self.uid, self.passwd,self.db)
@@ -17,14 +20,6 @@ class mythDB():
             return None
         
         self.cursor = self.db.cursor()
-        #self.get_gallery_directory()
-
-        #cursor.execute("SELECT * FROM videometadatagenre")
-        # get the resultset as a tuple
-        #result = cursor.fetchall()
-        # iterate through resultset
-        #for record in result:
-            #print record[0] , "-->", record[1]
             
     #Attempts to read the local mythtv config file to get the server, username and password
     def read_config(self):
@@ -48,6 +43,8 @@ class mythDB():
                     self.passwd = variables[1].rstrip()
                 if variables[0] == "DBName":
                     self.db = variables[1].rstrip()
+        
+        return True
     
     def run_sql(self, sql):
         if not self.connected:

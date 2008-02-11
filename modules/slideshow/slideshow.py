@@ -366,7 +366,7 @@ class Module:
         #print self.baseDir
         #This occurs when there are not slideshows or we could not connect to the db to establish baseDir
         if self.baseDir is None:
-            tempItem = tempMenu.addItem("No slideshows available", "")
+            tempItem = tempMenu.addItem("No slideshows available")
             tempItem.setAction(self)
             return
         

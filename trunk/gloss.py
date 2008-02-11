@@ -62,6 +62,9 @@ class MainApp:
         #Create a master mySQL connection
         self.dbMgr = mythDB()
         
+        if not self.dbMgr.connected:
+            return
+        
         #Update splash status msg
         for mods in modules:
             #print "Loading mod..."

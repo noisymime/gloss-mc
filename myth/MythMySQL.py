@@ -30,6 +30,9 @@ class mythDB():
     def read_config(self):
         conf_file = os.path.expanduser("~/.mythtv/mysql.txt")
         if not os.path.exists(conf_file):
+            print "ERROR: No config file found at ~.mythtv/mysql.txt!"
+            print "No connection to MythTV Database can be made. Quitting"
+            clutter.main_quit()
             return False
   
         f=open(conf_file, 'r')

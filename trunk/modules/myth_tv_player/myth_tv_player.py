@@ -6,6 +6,7 @@ import clutter
 
 from clutter import cluttergst
 from modules.myth_tv_player.MythBackendConn import MythBackendConnection
+from modules.myth_tv_player.tv_db_controller import tv_db_controller
 #from Menu import Menu
 from VideoController import VideoController
 
@@ -15,10 +16,14 @@ class Module:
     def __init__(self, glossMgr, dbMgr):
         self.stage = glossMgr.get_stage()
         self.glossMgr = glossMgr
+        self.dbMgr = dbMgr
         self.setup_ui()
         
         self.videoController = VideoController(glossMgr)
-        self.dbMgr = dbMgr
+        self.dbController = tv_db_controller(dbMgr)
+        self.dbController.get_current_show(1033)
+        channels = self.dbController.get_channels()
+
         self.isRunning = False
         
     def setup_ui(self):

@@ -16,6 +16,7 @@ class mythDB():
             self.connected = True
         except MySQLdb.Error, e:
             print "Error %d: %s" % (e.args[0], e.args[1])
+            clutter.main_quit()
             self.connected = False
             return None
         

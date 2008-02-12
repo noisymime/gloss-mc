@@ -239,7 +239,7 @@ class Module():
         #Check that the library actually contains something
         #if len(self.currentViewer.textureLibrary) == 0:
         if self.currentViewer is None:
-            self.MenuMgr.display_msg("Error: No videos", "There are no videos available in the library. This maybe caused by an empty library or a failed connection to the server.")
+            self.glossMgr.display_msg("Error: No videos", "There are no videos available in the library. This maybe caused by an empty library or a failed connection to the server.")
             self.stop()
             return
        
@@ -304,11 +304,11 @@ class Module():
         timeline_stop = clutter.Timeline(10,30)
         alpha = clutter.Alpha(timeline_stop, clutter.ramp_inc_func)
         self.stop_behaviour = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=alpha)
-        self.stop_behaviour.apply(self.currentViewer)
-        self.stop_behaviour.apply(self.backdrop)
-        self.stop_behaviour.apply(self.folderLibrary[self.folder_level])
-        self.stop_behaviour.apply(self.video_details)
-        self.stop_behaviour.apply(self.covers_background)
+        if not self.currentViewer is None: self.stop_behaviour.apply(self.currentViewer)
+        if not self.backdrop is None: self.stop_behaviour.apply(self.backdrop)
+        if not self.folderLibrary[self.folder_level] is None: self.stop_behaviour.apply(self.folderLibrary[self.folder_level])
+        if not self.video_details is None: self.stop_behaviour.apply(self.video_details)
+        if not self.covers_background is None: self.stop_behaviour.apply(self.covers_background)
         timeline_stop.connect('completed', self.destroyPlugin)
         timeline_stop.start()
         

@@ -26,17 +26,17 @@ from GlossMgr import GlossMgr
 from myth.MythMySQL import mythDB
 
 class MainApp:
-    def __init__ (self):
+    def __init__ (self, args):
         gtk.gdk.threads_init()
         clutter.threads_init()
     
+        self.args = args
+    
         self.stage = clutter.stage_get_default()
         self.stage.set_color(clutter.color_parse('Black'))
-        #self.stage.set_size(800, 600)
         self.stage.set_property("fullscreen", True)
         self.stage.connect('button-press-event', self.on_button_press_event)
         self.stage.show_all()
-        #clutter.main()
         
         #hide the cursor
         self.stage.hide_cursor()
@@ -52,6 +52,12 @@ class MainApp:
     def loadGloss(self):
         
         self.glossMgr = GlossMgr(self.stage)
+        
+        #loop through the args
+        for arg in self.args:
+            if arg == "--debug":
+                print "Using debug mode"
+                self.glossMgr.debug = True
 
         #Update splash status msg
         self.splashScreen.set_msg("Creating menus")
@@ -98,7 +104,7 @@ class MainApp:
         clutter.main()
 
 def main (args):
-    app = MainApp()
+    app = MainApp(args)
     #app.loadGloss()
     app.run()
 

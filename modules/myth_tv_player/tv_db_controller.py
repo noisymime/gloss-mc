@@ -68,7 +68,7 @@ class channel:
             self.atsc_minor_chan = mythObject[25]
             self.last_record = mythObject[26]
         except IndexError, e:
-            print "Found difference in DB structure. Attempting to continue."
+            print "TV_Player: Found difference in DB structure for channels. Attempting to continue."
         
 class show:
     
@@ -107,4 +107,4 @@ class show:
             self.first = mythObject[27]
             self.last = mythObject[28]
         except IndexError, e:
-            print "Found difference in DB structure. Attempting to continue."
+            print "TV_Player: Found difference in DB structure for show. Attempting to continue."

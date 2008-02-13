@@ -13,6 +13,7 @@ class GlossMgr:
         self.menus = []
         self.menuHistory = [] #A list that contains menus in the order that they've been viewed
         self.currentMenu = None
+        self.debug = False #Debug flag
         self.uiMsg = message(stage)
         
         self.themeMgr = ThemeMgr(self)

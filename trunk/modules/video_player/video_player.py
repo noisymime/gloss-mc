@@ -35,6 +35,12 @@ class Module():
     foldersPosX = 50
     foldersPosX = 50
     cover_size = int(coverViewerWidth / coverViewerColumns)
+    
+    #Basic UI elements
+    currentViewer = None
+    backdrop = None
+    video_details = None
+    covers_background = None
 
     def __init__(self, glossMgr, dbMgr):
         self.stage = glossMgr.get_stage()
@@ -53,6 +59,8 @@ class Module():
         #This block can be moved to begin() but causes a performance hit when loading the module *shrug*
         #All it does is load the initial folders into the viewers
         self.baseDir = dbMgr.get_setting("VideoStartupDir")
+        if self.glossMgr.debug: print "VideoPlayer: Base directory=" + str(self.baseDir)
+        
         self.cwd = self.baseDir
         self.folder_level = 0
         self.base_folder_menu = folderMenu(glossMgr, self.coverViewerRows, self.folders_cover_size)
@@ -104,10 +112,10 @@ class Module():
         try:
             new_file_list = os.listdir(dirPath)
         except os.error, (errno, errstr):
-            self.glossMgr.display_msg("File Error", "Could not load Slideshow directory")
+            self.glossMgr.display_msg("VideoPlayer File Error", "Could not load Video directory")
             return
         
-        #Images and Directories
+        #Videos and Directories
         for dir_entry in new_file_list:
             tempPath = dirPath + "/" + dir_entry
             if os.path.isdir(tempPath) and not ( dir_entry[0] == "."):
@@ -117,13 +125,13 @@ class Module():
             
     def loadDir(self, dirPath, cover_viewer):
         if not os.path.isdir(dirPath):
-            print "ERROR: Invalid path"
+            print "ERROR VideoPlayer: Invalid video path"
             return None
         
         final_file_list = []
         new_file_list = os.listdir(dirPath)
 
-        #Images and Directories
+        #Videos and Directories
         for dir_entry in new_file_list:
             if os.path.isdir(dirPath + "/" + dir_entry) and not ( dir_entry[0] == "."):
                 cover_viewer.add_folder(dir_entry)
@@ -148,7 +156,9 @@ class Module():
         sqlLength = int(len(sql) - 2)
         sql = sql[:sqlLength]
         sql = sql + ")"
-        #print sql
+        
+        if self.glossMgr.debug: print "Video SQL: " + sql
+            
         results = self.dbMgr.run_sql(sql)
         
         #Check for null return

@@ -257,6 +257,8 @@ class Interface(clutter.Group):
     def get_current_item(self):
         #print "Selected: " + str(self.itemGroup.get_nth_child(self.selected))
         return self.itemGroup.get_nth_child(self.selected)
+    def getItemGroup(self):
+        return self.itemGroup
     
 class WheelListItem(MenuItem):
 

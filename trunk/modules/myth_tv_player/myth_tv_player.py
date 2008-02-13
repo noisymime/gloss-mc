@@ -3,6 +3,7 @@ import pygtk
 import pygst
 import os
 import clutter
+import gobject
 
 from clutter import cluttergst
 from modules.myth_tv_player.MythBackendConn import MythBackendConnection
@@ -19,10 +20,12 @@ class Module:
         self.dbMgr = dbMgr
         self.setup_ui()
         
+        self.osd = osd()
         self.videoController = VideoController(glossMgr)
         self.dbController = tv_db_controller(dbMgr)
-        self.dbController.get_current_show(1033)
-        channels = self.dbController.get_channels()
+        #self.dbController.get_current_show(1033)
+        self.channels = self.dbController.get_channels()
+        self.currentChannel = 0
 
         self.isRunning = False
         
@@ -55,17 +58,23 @@ class Module:
         
     def stop(self):
         self.videoController.stop_video()
-        self.myConn.stop() # Stops the backend / frontend streaming
+        if self.myConn:
+            self.myConn.stop() # Stops the backend / frontend streaming
         
     def stop_video(self):
         self.myConn.stop() 
     
     def on_key_press_event (self, stage, event):
         if self.isRunning:
+            #Handle up/down presses for OSD
+            if (event.keyval == clutter.keysyms.Up) or (event.keyval == clutter.keysyms.Down):
+                self.osd.on_key_press_event(self.stage, event, self)
+            
             self.videoController.on_key_press_event(event)
         if event.keyval == clutter.keysyms.Escape:
             return True
         #print event.hardware_keycode
+
 
         """if event.keyval == clutter.keysyms.p:
             if self.paused:
@@ -95,14 +104,33 @@ class Module:
         return tempMenu
             
             
-class channel:
+class osd:
     
-    def __init__(self, chanID, channum, name, iconLocation, xmltvid):
-        self.chanID = chanID
-        self.channum = channum
-        self.name = name
-        self.iconLocation = iconLocation
-        self.xmltvid = xmltvid
+    def __init__(self):
+        self.background = clutter.Texture()
+        self.text = clutter.Label()
+        self.text.set_font_name("Mono 40")
+        self.text.show()
         
-    def get_name():
-        return self.name
+        self.on_screen = False
+        self.channelOffset = 0 
+        
+    def on_key_press_event(self, stage, event, tv_player):
+        if self.on_screen:
+            if (event.keyval == clutter.keysyms.Up):
+                self.channelOffset += 1
+            elif (event.keyval == clutter.keysyms.Down):
+                self.channelOffset -= 1
+        else:
+            stage.add(self.text)
+            self.channelOffset = 0
+            
+        self.currentChannel = tv_player.channels[tv_player.currentChannel+self.channelOffset]
+
+        self.text.set_text(self.currentChannel.name)
+        self.on_screen = True
+        gobject.timeout_add(1500, self.exit, stage)
+        
+    def exit(self, stage):
+        stage.remove(self.text)
+        self.on_screen = False

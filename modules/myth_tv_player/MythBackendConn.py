@@ -116,10 +116,19 @@ class MythBackendConnection(threading.Thread):
         check_string = "QUERY_RECORDER "+str(self.recorder)+"[]:[]IS_RECORDING"
         self.send_cmd(self.sock, check_string)
         is_recording = self.receive_reply(self.sock)
-        if not is_recording == str(1):
+        #if not is_recording == str(1):
+        counter = 0
+        while (not is_recording == str(1)) and counter < 30:
             #Just send the check again
+            counter += 1
             self.send_cmd(self.sock, check_string)
-        
+            is_recording = self.receive_reply(self.sock)
+            
+        if counter >28:
+            if self.videoPlayer.glossMgr.debug: print "TV_PLAYER: Recorder reports no recording after 30 attempts. This is a problem"
+        else:
+            if self.videoPlayer.glossMgr.debug: print "TV_PLAYER: Recorder reports successful recording"
+            
         #Create a new data socket (For receiving the data stream)
         protString = "MYTH_PROTO_VERSION "+ str(self.protocolVersion)
         self.send_cmd(self.data_sock, protString)
@@ -128,7 +137,11 @@ class MythBackendConnection(threading.Thread):
 
         
         #This is just a hack to make sure the channel has locked, I'll fix it later
-        time.sleep(5)
+        if self.videoPlayer.glossMgr.debug:
+            print "TV_PLAYER: Using longer timeout as debug is turned on"
+            time.sleep(10)
+        else:
+            time.sleep(5)
         #while not self.lock:
         #   pass
         
@@ -136,15 +149,14 @@ class MythBackendConnection(threading.Thread):
         filename_string = "QUERY_RECORDER "+str(self.recorder)+"[]:[]GET_CURRENT_RECORDING"
         self.send_cmd(self.sock, filename_string)
         filedetails = self.receive_reply(self.sock)
+        if self.videoPlayer.glossMgr.debug: print "TV_Player: Results from GET_CURRENT_RECORDING='%s'" % str(filedetails)
         detail_list = filedetails.rsplit("[]:[]")
-        
-        if self.videoPlayer.glossMgr.debug: print "TV_Player: Results from GET_CURRENT_RECORDING='%s'" % str(detail_list)
+
         #This is an attempt to get the filename (Its meant to be at position 8)
         try:
             filename_list = detail_list[8].rsplit("/")
         except IndexError, e:
-            print "TV_PLAYER: Unable to retrieve recording details"
-            print "TV_Player: Results from GET_CURRENT_RECORDING='%s'" % str(detail_list)
+            print "TV_PLAYER: Unable to retrieve recording details. No filename returned by backend."
             print "TV_PLAYER: Aborting!"
             self.stop()
             return
@@ -158,7 +170,6 @@ class MythBackendConnection(threading.Thread):
         announce_cmd = "ANN FileTransfer " + self.localhost_name + "[]:[]" + filename
         self.send_cmd(self.data_sock, announce_cmd)
         result = self.receive_reply(self.data_sock)
-        #result = self.receive_datagram(self.data_sock)
         result_list = result.rsplit("[]:[]")
         self.data_socket_id = result_list[1]
         

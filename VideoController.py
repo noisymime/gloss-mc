@@ -86,12 +86,13 @@ class VideoController:
         if t == gst.MESSAGE_ELEMENT:
             #This occurs when an invalid codec is attempted to be played
             #Need to insert some form of message to the user here
-            #print "Element: " + message.structure.to_string()
+            if self.player.glossMgr.debug: print "GStreamer Bus msg: " + message.structure.to_string()
             struc = message.structure
             if struc is None:
                 return
             
             if struc.get_name() == "missing-plugin":
+                print "GStreamer Error (missing-plugin): " + message.structure.to_string()
                 self.isPlaying = False
                 self.video_texture.set_playing(False)
                 self.player.stop_video()

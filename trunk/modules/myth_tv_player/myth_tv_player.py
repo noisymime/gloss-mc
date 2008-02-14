@@ -67,7 +67,7 @@ class Module:
     def on_key_press_event (self, stage, event):
         if self.isRunning:
             #Handle up/down presses for OSD
-            if (event.keyval == clutter.keysyms.Up) or (event.keyval == clutter.keysyms.Down):
+            if (event.keyval == clutter.keysyms.Up) or (event.keyval == clutter.keysyms.Down) or (event.keyval == clutter.keysyms.Return):
                 self.osd.on_key_press_event(self.stage, event, self)
             
             self.videoController.on_key_press_event(event)
@@ -121,16 +121,21 @@ class osd:
                 self.channelOffset += 1
             elif (event.keyval == clutter.keysyms.Down):
                 self.channelOffset -= 1
+                
+            if (event.keyval == clutter.keysyms.Return):
+                tv_player.myConn.change_channel(self.currentChannel.name)
         else:
             stage.add(self.text)
             self.channelOffset = 0
             
         self.currentChannel = tv_player.channels[tv_player.currentChannel+self.channelOffset]
 
+
         self.text.set_text(self.currentChannel.name)
         self.on_screen = True
-        gobject.timeout_add(1500, self.exit, stage)
+        self.timeout_id = gobject.timeout_add(3000, self.exit, stage)
         
     def exit(self, stage):
         stage.remove(self.text)
         self.on_screen = False
+        return False

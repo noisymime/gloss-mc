@@ -35,6 +35,7 @@ class MainApp:
         self.stage = clutter.stage_get_default()
         self.stage.set_color(clutter.color_parse('Black'))
         self.stage.set_property("fullscreen", True)
+        self.stage.fullscreen()
         self.stage.connect('button-press-event', self.on_button_press_event)
         self.stage.show_all()
         

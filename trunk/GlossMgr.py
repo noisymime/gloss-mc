@@ -51,8 +51,6 @@ class GlossMgr:
         background.show()
         
         self.stage.add(background)
-        print "Perspective: " + str(stage.get_perspective())
-        #stage.set_perspective(60.0, 1.0, 0.1, 1)
         
         #Setip the selector bar
         self.selector_bar = MenuSelector(self)
@@ -162,7 +160,7 @@ class GlossMgr:
     
     def get_current_menu(self):
         return self.currentMenu
-    
+
     def go_up_x_levels(self, num_levels):
         for i in range(1, num_levels):
             if len(self.menuHistory)>1:

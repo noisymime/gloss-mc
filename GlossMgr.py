@@ -190,6 +190,7 @@ class MenuSelector(clutter.Texture):
     x_offset = -50
     height_percent = 1
     position_0 = None
+    blank = True
 
     def __init__ (self, glossMgr):
         clutter.Texture.__init__ (self)
@@ -199,6 +200,7 @@ class MenuSelector(clutter.Texture):
         if not self.get_pixbuf() is None:
             self.x_offset = int(glossMgr.themeMgr.get_value("texture", "selector_bar", "position.x"))
             self.height_percent = float(glossMgr.themeMgr.get_value("texture", "selector_bar", "height_percent")) / float(100)
+            self.blank = False
         else:
             self.position_0 = (0, 0)
         
@@ -255,6 +257,10 @@ class MenuSelector(clutter.Texture):
         self.menu = menu
         
     def set_spinner(self, state):
+        #Make sure we're not blank first
+        if self.blank:
+            return
+        
         self.timeline = clutter.Timeline(25, 25)
         self.alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
         self.behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=self.alpha)

@@ -209,11 +209,11 @@ class MythBackendConnection(threading.Thread):
             
             #This tries to optimise the request size
             if (num_bytes == request_size) and (request_size < max_request_size):
-                request_size = request_size + request_size_step
+                request_size += request_size_step
                 if request_size > max_request_size:
                     request_size = max_request_size
             elif (request_size > request_size_step) and (num_bytes != request_size):
-                request_size = request_size - request_size_step
+                request_size -= request_size_step
                 
         
         print "Ending playback"

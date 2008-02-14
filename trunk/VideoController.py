@@ -96,20 +96,22 @@ class VideoController:
                 self.isPlaying = False
                 self.video_texture.set_playing(False)
                 self.player.stop_video()
-        if t == gst.MESSAGE_BUFFERING:
+        elif t == gst.MESSAGE_BUFFERING:
             percent = message.parse_buffering()
             print "Buffer: " + str(percent)
             if percent < 100:
                 self.bin.set_state(gst.STATE_PAUSED)
             else:
                 self.bin.set_state(gst.STATE_PLAYING)
-        if t == gst.MESSAGE_STATE_CHANGED:
+        elif t == gst.MESSAGE_STATE_CHANGED:
             prev, current, next = message.parse_state_changed()
             #print "State Changed. Previous state: " + str(prev)
             #print "State Changed. Current state: " + str(current)
         elif t == gst.STREAM_ERROR:
             #print "OHH NOES!"
-            print "GST Message: " + message.structure.to_string()
+            print "GST Stream Error: " + message.structure.to_string()
+        else:
+            if self.player.glossMgr.debug: print "GST Message: " + message.structure.to_string()
     
     def stop_video(self):
         if self.video_texture.get_playing():

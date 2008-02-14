@@ -23,7 +23,7 @@ class Transition:
         knots_exiting = (\
                 (fromMenu.get_x(), fromMenu.get_y()),\
                 #(-oldGroup.get_x(), int(fromMenu.getStage().get_height()/2))
-                (-fromMenu.get_x(), fromMenu.get_y())\
+                (-fromMenu.get_x(), fromMenu.get_group_y())\
                 )
         self.exit_behaviour_path = clutter.BehaviourPath(knots=knots_exiting, alpha=self.alpha)
 
@@ -47,7 +47,7 @@ class Transition:
                 #(toMenu.get_x(), toMenu.get_y()),\
                 (start_x, start_y),\
                 #(-oldGroup.get_x(), int(fromMenu.getStage().get_height()/2))
-                (end_x, end_y) \
+                (end_x, fromMenu.get_group_y()) \
                 #toMenu.get_display_position()
                 )
         self.entrance_behaviour_path = clutter.BehaviourPath(self.alpha, knots_entering)

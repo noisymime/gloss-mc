@@ -18,6 +18,7 @@ class MythBackendConnection(threading.Thread):
         #3 Sockets, 1 for cmds, 1 for data, 1 for monitoring messages
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.data_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.data_socket_id = None
         self.data_sock.connect((self.server, self.server_port))
         self.msg_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.msg_sock.connect((self.server, self.server_port))
@@ -119,14 +120,12 @@ class MythBackendConnection(threading.Thread):
             #Just send the check again
             self.send_cmd(self.sock, check_string)
         
-        #Create a new data socket
-        #self.data_sock.connect( (self.server, self.server_port) )
+        #Create a new data socket (For receiving the data stream)
         protString = "MYTH_PROTO_VERSION "+ str(self.protocolVersion)
         self.send_cmd(self.data_sock, protString)
-        #self.send_datagram(self.data_sock, protString)
         protRecvString = "ACCEPT[]:[]" + str(self.protocolVersion)
         result = self.receive_reply(self.data_sock)
-        #result = self.receive_datagram(self.data_sock)
+
         
         #This is just a hack to make sure the channel has locked, I'll fix it later
         time.sleep(5)
@@ -162,7 +161,6 @@ class MythBackendConnection(threading.Thread):
         #result = self.receive_datagram(self.data_sock)
         result_list = result.rsplit("[]:[]")
         self.data_socket_id = result_list[1]
-        #print "Socket ID: " + str(data_socket_id)
         
         #Do some housekeeping
         frontend_ready_cmd = "QUERY_RECORDER "+str(self.recorder) +"[]:[]FRONTEND_READY"
@@ -179,9 +177,6 @@ class MythBackendConnection(threading.Thread):
         self.buffer_live(self.sock, self.data_sock, self.data_socket_id)
     
     def buffer_live(self, cmd_sock, data_sock, socket_id):
-        #Create a buffer file
-        buffer_file_name = "test.mpg"
-        self.buffer_file = open(buffer_file_name,"w")
         request_size = 32768
         #max_request_size = 135000
         max_request_size = 270000
@@ -256,7 +251,6 @@ class MythBackendConnection(threading.Thread):
         self.send_cmd(self.sock, stop_cmd)
         result = self.receive_reply(self.sock)
         
-        end_transfer_cmd = "QUERY_FILETRANSFER "+str(self.data_socket_id) +"[]:[]DONE"
-        self.send_cmd(self.sock, end_transfer_cmd)
-        #Shouldn't need to monitor for a reply here, we're done.
-        #result = self.receive_reply(self.sock)
+        if not self.data_socket_id is None:
+            end_transfer_cmd = "QUERY_FILETRANSFER "+str(self.data_socket_id) +"[]:[]DONE"
+            self.send_cmd(self.sock, end_transfer_cmd)

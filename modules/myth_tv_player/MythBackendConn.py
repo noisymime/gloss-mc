@@ -64,7 +64,8 @@ class MythBackendConnection(threading.Thread):
         self.send_cmd(self.sock, protString)
         protRecvString = "ACCEPT[]:[]" + str(self.protocolVersion)
         result = self.receive_reply(self.sock)
-        print result
+        if self.videoPlayer.glossMgr.debug: print "TV_Player: Protocol version check: " + result
+        
         if not result == protRecvString:
             #Protocol Version check failed
             raise RuntimeError, "Myth Protocol version failure. Aborting."
@@ -96,11 +97,11 @@ class MythBackendConnection(threading.Thread):
             #Then everything worked fine
             self.recorder = result_list[0]
         else:
-            print "Myth: No recorders available"
+            print "TV_PLAYER: Backend reports no recorders available"
             
     def spawn_live(self):
         if self.recorder == None:
-            print "Myth: Cannot spawn live tv, no recorder available"
+            print "TV_PLAYER: Cannot spawn live tv, no recorder available"
         
         chainID = "live-" + self.localhost_name + "-2007-08-03T21:54:21"#+str(time.clock())
         spawn_string = "QUERY_RECORDER "+str(self.recorder)+"[]:[]SPAWN_LIVETV[]:[]"+chainID +"[]:[]0"
@@ -108,7 +109,7 @@ class MythBackendConnection(threading.Thread):
         spawn_receive_string = "ok"
         result = self.receive_reply(self.sock)
         if not result == spawn_receive_string:
-            print "Myth: failed to spawn live tv. Result: "+str(result)
+            print "TV_PLAYER: failed to spawn live tv. Result: "+str(result)
         
         #Check the recording
         check_string = "QUERY_RECORDER "+str(self.recorder)+"[]:[]IS_RECORDING"
@@ -137,10 +138,22 @@ class MythBackendConnection(threading.Thread):
         self.send_cmd(self.sock, filename_string)
         filedetails = self.receive_reply(self.sock)
         detail_list = filedetails.rsplit("[]:[]")
-        filename_list = detail_list[8].rsplit("/")
+        
+        if self.videoPlayer.glossMgr.debug: print "TV_Player: Results from GET_CURRENT_RECORDING='%s'" % str(detail_list)
+        #This is an attempt to get the filename (Its meant to be at position 8)
+        try:
+            filename_list = detail_list[8].rsplit("/")
+        except IndexError, e:
+            print "TV_PLAYER: Unable to retrieve recording details"
+            print "TV_Player: Results from GET_CURRENT_RECORDING='%s'" % str(detail_list)
+            print "TV_PLAYER: Aborting!"
+            self.stop()
+            return
+        
         filename_list.reverse()
         filename = "/" + filename_list[0]
-        print filename
+        
+        if self.videoPlayer.glossMgr.debug: print "TV_Player: Playback filename=" + filename
              
         #Announce our intent to read a file
         announce_cmd = "ANN FileTransfer " + self.localhost_name + "[]:[]" + filename
@@ -208,7 +221,6 @@ class MythBackendConnection(threading.Thread):
         self.send_cmd(self.msg_sock, protString)
         protRecvString = "ACCEPT[]:[]" + str(self.protocolVersion)
         result = self.receive_reply(self.msg_sock)
-        print result
         if not result == protRecvString:
             #Protocol Version check failed
             raise RuntimeError, "Myth Protocol version failure. Aborting."
@@ -225,10 +237,9 @@ class MythBackendConnection(threading.Thread):
             #ANN_recv_string = "OK" #What a successful return should be
             result = self.receive_reply(self.msg_sock)
             result_list = result.rsplit("[]:[]")
-            print result
+            if self.videoPlayer.glossMgr.debug: print "TV_Player: Backend Message: " + result
             
             if result_list[1] == "RECORDING_LIST_CHANGE":
-                #print resul
                 self.lock = True
         
     def change_channel(self):

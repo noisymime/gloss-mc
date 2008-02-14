@@ -111,7 +111,8 @@ class VideoController:
             #print "OHH NOES!"
             print "GST Stream Error: " + message.structure.to_string()
         else:
-            if self.player.glossMgr.debug: print "GST Message: " + message.structure.to_string()
+            if not self.player is None:
+                if self.player.glossMgr.debug: print "GST Message: " + str(message)
     
     def stop_video(self):
         if self.video_texture.get_playing():

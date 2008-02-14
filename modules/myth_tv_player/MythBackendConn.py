@@ -116,34 +116,22 @@ class MythBackendConnection(threading.Thread):
         check_string = "QUERY_RECORDER "+str(self.recorder)+"[]:[]IS_RECORDING"
         self.send_cmd(self.sock, check_string)
         is_recording = self.receive_reply(self.sock)
-        #if not is_recording == str(1):
-        counter = 0
-        while (not is_recording == str(1)) and counter < 30:
-            #Just send the check again
-            counter += 1
-            self.send_cmd(self.sock, check_string)
-            is_recording = self.receive_reply(self.sock)
-            
-        if counter >28:
-            if self.videoPlayer.glossMgr.debug: print "TV_PLAYER: Recorder reports no recording after 30 attempts. This is a problem"
-        else:
-            if self.videoPlayer.glossMgr.debug: print "TV_PLAYER: Recorder reports successful recording"
+
+        #Wait for the recorder to start doing things
+        record_string = "QUERY_RECORDER " +str(self.recorder)+"[]:[]GET_FRAMES_WRITTEN"
+        self.send_cmd(self.sock, record_string)
+        frames = self.receive_reply(self.sock).rsplit("[]:[]")[1]
+        frames = int(frames)
+        while frames < 2:
+            self.send_cmd(self.sock, record_string)
+            frames = self.receive_reply(self.sock).rsplit("[]:[]")[1]
+            frames = int(frames)
             
         #Create a new data socket (For receiving the data stream)
         protString = "MYTH_PROTO_VERSION "+ str(self.protocolVersion)
         self.send_cmd(self.data_sock, protString)
         protRecvString = "ACCEPT[]:[]" + str(self.protocolVersion)
         result = self.receive_reply(self.data_sock)
-
-        
-        #This is just a hack to make sure the channel has locked, I'll fix it later
-        if self.videoPlayer.glossMgr.debug:
-            print "TV_PLAYER: Using longer timeout as debug is turned on"
-            time.sleep(10)
-        else:
-            time.sleep(5)
-        #while not self.lock:
-        #   pass
         
         #Get the recording filename
         filename_string = "QUERY_RECORDER "+str(self.recorder)+"[]:[]GET_CURRENT_RECORDING"
@@ -248,9 +236,23 @@ class MythBackendConnection(threading.Thread):
             if result_list[1] == "RECORDING_LIST_CHANGE":
                 self.lock = True
         
-    def change_channel(self):
+    def change_channel(self, chanName):
         if self.Playing:
-            pass #self.Playing = False
+            #First check its a valid channel ID
+            validate_cmd = "QUERY_RECORDER "+str(self.recorder) +"[]:[]CHECK CHANNEL[]:[]"+str(chanName)
+            self.send_cmd(self.sock, validate_cmd)
+            result = self.receive_reply(self.sock)
+            
+            if result == "ok":
+                self.Playing = False
+                
+                change_cmd = "QUERY_RECORDER "+str(self.recorder) +"[]:[]SET CHANNEL[]:[]"+str(chanName)
+                self.send_cmd(self.sock, change_cmd)
+                result = self.receive_reply(self.sock)
+                print "Change result: " + result
+                
+                #Start a recording thread
+                self.buffer_live(self.sock, self.data_sock, self.data_socket_id)
 
     def end_stream(self):
         self.stream = False

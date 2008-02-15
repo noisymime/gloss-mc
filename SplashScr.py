@@ -7,28 +7,30 @@ import pango
 import clutter
 from Spinner import Spinner
 
-class SplashScr():
+class SplashScr(clutter.Group):
     font = "Lucida Grande "
     message_font_size = 30
     detail_font_size = 22
     
     def __init__(self, stage):
+        clutter.Group.__init__ (self)
         self.stage = stage
         
         self.backdrop = clutter.Rectangle()
         self.backdrop.set_color(clutter.color_parse('Black'))
         self.backdrop.set_width(self.stage.get_width())
         self.backdrop.set_height(self.stage.get_height())
-
-
-        self.main_group = clutter.Group()
+        self.add(self.backdrop)
+        
+        self.centre_group = clutter.Group()
+        self.add(self.centre_group)
         
         pixbuf = gtk.gdk.pixbuf_new_from_file("ui/splash_box.png")
         self.box = clutter.Texture()
         self.box.set_pixbuf(pixbuf)
         self.box.set_opacity(int(255 * 0.75))
         self.box.set_height(int(self.stage.get_height()* 0.15))
-        self.main_group.add(self.box)
+        self.centre_group.add(self.box)
        
         self.spinner = Spinner()
         height = int(self.box.get_height() * 0.90)
@@ -36,7 +38,7 @@ class SplashScr():
         self.spinner.set_height(height)
         self.spinner.set_width(height)
         self.spinner.set_position(5, int(self.box.get_height() * 0.05 ) )
-        self.main_group.add(self.spinner)
+        self.centre_group.add(self.spinner)
 
         self.message = clutter.Label()
         self.message.set_font_name(self.font + str(self.message_font_size))
@@ -45,30 +47,47 @@ class SplashScr():
         pos_x = pos_x + int (self.spinner.get_width() * 1.1)
         self.message.set_position(pos_x, 0)
         self.message.set_text("Loading...")
-        self.main_group.add(self.message)
+        self.centre_group.add(self.message)
         
         self.detail = clutter.Label()
         self.detail.set_font_name(self.font + str(self.detail_font_size))
         self.detail.set_color(clutter.color_parse('White'))
-        self.main_group.add(self.detail)
-        
-        
+        self.centre_group.add(self.detail)
+       
     def display(self):
-        self.stage.add(self.backdrop)
+        self.stage.add(self)
         self.backdrop.show()
         
-        self.stage.add(self.main_group)
-        self.main_group.show_all()
+
         group_x = (self.stage.get_width()/2) - (self.box.get_width()/2)
         group_y = (self.stage.get_height()/2) - (self.box.get_height()/2)
-        self.main_group.set_position(group_x, group_y)
-        self.main_group.show()
+        self.centre_group.set_position(group_x, group_y)
+        self.centre_group.show_all()
+        self.centre_group.show()
         
+        self.show()
+        self.spinner.start()
+
+        
+    def display_elegant(self):
+        self.set_opacity(0)
+        self.stage.add(self)
+        self.show_all()
+        
+        group_x = (self.stage.get_width()/2) - (self.box.get_width()/2)
+        group_y = (self.stage.get_height()/2) - (self.box.get_height()/2)
+        self.centre_group.set_position(group_x, group_y)
+        self.show()
+        
+        timeline_opacity = clutter.Timeline(20, 25)
+        alpha_opacity = clutter.Alpha(timeline_opacity, clutter.ramp_inc_func)
+        self.behaviour_opacity = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha_opacity)
+        self.behaviour_opacity.apply(self)
+        timeline_opacity.start()
         self.spinner.start()
     
     def remove(self):
-        self.stage.remove(self.main_group)
-        self.stage.remove(self.backdrop)
+        self.stage.remove(self)
         self.spinner.stop()
         
         

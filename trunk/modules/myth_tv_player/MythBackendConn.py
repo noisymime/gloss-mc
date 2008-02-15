@@ -5,6 +5,8 @@ import thread
 import os
 
 class MythBackendConnection(threading.Thread):
+    pipe_rfd = None
+    pipe_wfd = None
 
     def __init__(self, videoPlayer, server, port):    
         self.protocolVersion = 31
@@ -111,7 +113,10 @@ class MythBackendConnection(threading.Thread):
         result = self.receive_reply(self.sock)
         if not result == spawn_receive_string:
             print "TV_PLAYER: failed to spawn live tv. Result: "+str(result)
+            
+        self.setup_recording()
         
+    def setup_recording(self):
         #Check the recording
         check_string = "QUERY_RECORDER "+str(self.recorder)+"[]:[]IS_RECORDING"
         self.send_cmd(self.sock, check_string)
@@ -181,9 +186,10 @@ class MythBackendConnection(threading.Thread):
         max_request_size = 270000
         request_size_step = 16384
         
-        #Data is sent through a pipe to GStreamer
-        (pipe_rfd, pipe_wfd) = os.pipe()
-        self.videoPlayer.begin_playback(pipe_rfd)
+        if self.pipe_rfd is None:
+            #Data is sent through a pipe to GStreamer
+            (self.pipe_rfd, self.pipe_wfd) = os.pipe()
+            self.videoPlayer.begin_playback(self.pipe_rfd)
         
         print "BEGINNING PLAYBACK!"
         self.Playing = True
@@ -192,7 +198,7 @@ class MythBackendConnection(threading.Thread):
             self.send_cmd(cmd_sock, transfer_cmd)
             num_bytes = int(self.receive_reply(cmd_sock))
             data = data_sock.recv(num_bytes)
-            os.write(pipe_wfd, data)
+            os.write(self.pipe_wfd, data)
 
             
             #This tries to optimise the request size
@@ -205,8 +211,7 @@ class MythBackendConnection(threading.Thread):
                 
         
         print "Ending playback"
-        os.close(pipe_wfd)
-        os.close(pipe_rfd)
+
         
     def message_socket_mgr(self, msg_socket):
         #Do the protocol version check
@@ -238,21 +243,30 @@ class MythBackendConnection(threading.Thread):
         
     def change_channel(self, chanName):
         if self.Playing:
+            self.Playing = False
             #First check its a valid channel ID
             validate_cmd = "QUERY_RECORDER "+str(self.recorder) +"[]:[]CHECK CHANNEL[]:[]"+str(chanName)
             self.send_cmd(self.sock, validate_cmd)
             result = self.receive_reply(self.sock)
+            print "Recorder Result: " + result
             
             if result == "ok":
-                self.Playing = False
                 
                 change_cmd = "QUERY_RECORDER "+str(self.recorder) +"[]:[]SET CHANNEL[]:[]"+str(chanName)
                 self.send_cmd(self.sock, change_cmd)
                 result = self.receive_reply(self.sock)
                 print "Change result: " + result
                 
+                #Reset the data socket
+                self.data_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.data_socket_id = None
+                self.data_sock.connect((self.server, self.server_port))
+                
                 #Start a recording thread
-                self.buffer_live(self.sock, self.data_sock, self.data_socket_id)
+                self.setup_recording()
+                #self.buffer_live(self.sock, self.data_sock, self.data_socket_id)
+            else:
+                print "TV_PLAYER: Invalid channel selected"
 
     def end_stream(self):
         self.stream = False
@@ -263,6 +277,14 @@ class MythBackendConnection(threading.Thread):
         stop_cmd = "QUERY_RECORDER "+str(self.recorder) +"[]:[]STOP_LIVETV"
         self.send_cmd(self.sock, stop_cmd)
         result = self.receive_reply(self.sock)
+        
+        #Close the pipe
+        if not self.pipe_wfd is None: 
+            os.close(self.pipe_wfd)
+            self.pipe_wfd = None
+        if not self.pipe_rfd is None: 
+            os.close(self.pipe_rfd)
+            self.pipe_rfd = None
         
         if not self.data_socket_id is None:
             end_transfer_cmd = "QUERY_FILETRANSFER "+str(self.data_socket_id) +"[]:[]DONE"

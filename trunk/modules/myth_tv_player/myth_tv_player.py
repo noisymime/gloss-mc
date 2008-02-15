@@ -8,6 +8,7 @@ import gobject
 from clutter import cluttergst
 from modules.myth_tv_player.MythBackendConn import MythBackendConnection
 from modules.myth_tv_player.tv_db_controller import tv_db_controller
+from SplashScr import SplashScr
 #from Menu import Menu
 from VideoController import VideoController
 
@@ -67,10 +68,16 @@ class Module:
     def on_key_press_event (self, stage, event):
         if self.isRunning:
             #Handle up/down presses for OSD
-            if (event.keyval == clutter.keysyms.Up) or (event.keyval == clutter.keysyms.Down) or (event.keyval == clutter.keysyms.Return):
+            if (event.keyval == clutter.keysyms.Up) or (event.keyval == clutter.keysyms.Down):
                 self.osd.on_key_press_event(self.stage, event, self)
             
             self.videoController.on_key_press_event(event)
+            
+            if (event.keyval == clutter.keysyms.Return):
+                if self.osd.on_screen:
+                    self.loading_scr = SplashScr(self.stage)
+                    self.myConn.change_channel(self.currentChannel.name)
+                    
         if event.keyval == clutter.keysyms.Escape:
             return True
         #print event.hardware_keycode
@@ -122,8 +129,6 @@ class osd:
             elif (event.keyval == clutter.keysyms.Down):
                 self.channelOffset -= 1
                 
-            if (event.keyval == clutter.keysyms.Return):
-                tv_player.myConn.change_channel(self.currentChannel.name)
         else:
             stage.add(self.text)
             self.channelOffset = 0

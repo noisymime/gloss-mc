@@ -52,6 +52,10 @@ class SplashScr(clutter.Group):
         self.detail = clutter.Label()
         self.detail.set_font_name(self.font + str(self.detail_font_size))
         self.detail.set_color(clutter.color_parse('White'))
+        self.detail.set_position(\
+                                 self.message.get_x(),\
+                                 self.message.get_y() + self.message.get_height()\
+                                 )
         self.centre_group.add(self.detail)
        
     def display(self):
@@ -68,7 +72,7 @@ class SplashScr(clutter.Group):
         self.show()
         self.spinner.start()
 
-        
+    #Same as above, except fades everything in
     def display_elegant(self):
         self.set_opacity(0)
         self.stage.add(self)
@@ -77,7 +81,8 @@ class SplashScr(clutter.Group):
         group_x = (self.stage.get_width()/2) - (self.box.get_width()/2)
         group_y = (self.stage.get_height()/2) - (self.box.get_height()/2)
         self.centre_group.set_position(group_x, group_y)
-        self.show()
+        self.centre_group.show_all()
+        self.centre_group.show()
         
         timeline_opacity = clutter.Timeline(20, 25)
         alpha_opacity = clutter.Alpha(timeline_opacity, clutter.ramp_inc_func)
@@ -95,7 +100,7 @@ class SplashScr(clutter.Group):
         self.message.set_text(msg)
         
     def set_details(self, detail):
-        self.detail.set_test(detail)
+        self.detail.set_text(detail)
         
         
         

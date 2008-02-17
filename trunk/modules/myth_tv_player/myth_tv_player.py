@@ -41,8 +41,8 @@ class Module:
         self.menuMgr = menuMgr
         #self.buffer_file_reader = open("test.mpg","r")
         menuMgr.get_selector_bar().set_spinner(True)
-        (server, port) = self.dbMgr.get_backend_server()
-        self.myConn = MythBackendConnection(self, server, port)
+        (self.server, self.port) = self.dbMgr.get_backend_server()
+        self.myConn = MythBackendConnection(self, self.server, self.port)
         self.myConn.start()
         #vid.begin(self.stage)
         
@@ -76,7 +76,19 @@ class Module:
             if (event.keyval == clutter.keysyms.Return):
                 if self.osd.on_screen:
                     self.loading_scr = SplashScr(self.stage)
-                    self.myConn.change_channel(self.currentChannel.name)
+                    self.loading_scr.set_msg("Loading Channel ")
+                    self.loading_scr.set_details(self.osd.currentChannel.name)
+                    self.loading_scr.backdrop.set_opacity(180)
+                    self.loading_scr.display_elegant()
+                    self.videoController.pause_video(False)
+                    self.myConn.stop()
+                    self.myConn = None
+                    self.myConn = MythBackendConnection(self, self.server, self.port)
+                    self.myConn.chanNum = self.osd.currentChannel.channum
+                    self.myConn.start()
+                    self.videoController.unpause_video()
+                    #self.loading_scr.remove()                   
+                    #self.myConn.change_channel(self.currentChannel.name)
                     
         if event.keyval == clutter.keysyms.Escape:
             return True
@@ -121,6 +133,7 @@ class osd:
         
         self.on_screen = False
         self.channelOffset = 0 
+        self.input_count = 0
         
     def on_key_press_event(self, stage, event, tv_player):
         if self.on_screen:
@@ -129,6 +142,8 @@ class osd:
             elif (event.keyval == clutter.keysyms.Down):
                 self.channelOffset -= 1
                 
+            #Increment the input counter (Only when this reaches 0 will the osd be removed from screen
+            self.input_count += 1
         else:
             stage.add(self.text)
             self.channelOffset = 0
@@ -141,6 +156,13 @@ class osd:
         self.timeout_id = gobject.timeout_add(3000, self.exit, stage)
         
     def exit(self, stage):
-        stage.remove(self.text)
-        self.on_screen = False
+        #First check the input counter, we only remove the osd from screen if this is 0
+        if self.input_count > 0:
+            self.input_count -= 1
+            return False
+        
+        if self.on_screen:
+            stage.remove(self.text)
+            self.on_screen = False
+            
         return False

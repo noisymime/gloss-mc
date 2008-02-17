@@ -229,43 +229,41 @@ class VideoController:
         
         texture.set_size(width, height)
         
-    def pause_video(self):
-        #Use the overlay to go over show
-        if self.overlay == None:
-            self.overlay = clutter.Texture()
-            pixbuf = gtk.gdk.pixbuf_new_from_file('ui/backdrop.png')
-            self.overlay.set_pixbuf(pixbuf)
-            self.overlay.set_width(self.stage.get_width())
-            self.overlay.set_height(self.stage.get_height())
-            self.stage.add(self.overlay)
-        self.overlay.set_opacity(0)
-        self.overlay.show()
-
-
-        #self.video_texture.lower_actor(self.overlay)
-        #self.overlay.raise_actor(self.video_texture)
-        #Fade the overlay in
-        timeline_overlay = clutter.Timeline(10,30)
-        alpha = clutter.Alpha(timeline_overlay, clutter.ramp_inc_func)
-        overlay_behaviour = clutter.BehaviourOpacity(alpha, 0, 200)
-        #video_behaviour = clutter.BehaviourOpacity(alpha, 255, 80)
-        overlay_behaviour.apply(self.overlay)
-        #video_behaviour.apply(self.video_texture)
-        timeline_overlay.start()
+    def pause_video(self, use_backdrop):
+        if use_backdrop:
+            #Use the overlay to go over show
+            if self.overlay == None:
+                self.overlay = clutter.Rectangle()
+                self.overlay.set_color(clutter.color_parse('Black'))
+                self.overlay.set_size(self.stage.get_width(), self.stage.get_height())
+                self.stage.add(self.overlay)
+            self.overlay.set_opacity(0)
+            self.overlay.show()
+    
+    
+            #self.video_texture.lower_actor(self.overlay)
+            #self.overlay.raise_actor(self.video_texture)
+            #Fade the overlay in
+            timeline_overlay = clutter.Timeline(10,30)
+            alpha = clutter.Alpha(timeline_overlay, clutter.ramp_inc_func)
+            self.overlay_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=200, alpha=alpha)
+            self.overlay_behaviour.apply(self.overlay)
+            #video_behaviour.apply(self.video_texture)
+            timeline_overlay.start()
         
         #Pause the video
         self.video_texture.set_playing(False)
         
     def unpause_video(self):
-        #Fade the backdrop in
-        timeline_unpause = clutter.Timeline(10,30)
-        alpha = clutter.Alpha(timeline_unpause, clutter.ramp_inc_func)
-        overlay_behaviour = clutter.BehaviourOpacity(alpha, 200, 0)
-        #video_behaviour = clutter.BehaviourOpacity(alpha, 80, 255)
-        overlay_behaviour.apply(self.overlay)
-        #video_behaviour.apply(self.video_texture)
-        timeline_unpause.start()
-        
+        if not self.overlay is None:
+            #Fade the backdrop in
+            timeline_unpause = clutter.Timeline(10,30)
+            alpha = clutter.Alpha(timeline_unpause, clutter.ramp_inc_func)
+            self.overlay_behaviour = clutter.BehaviourOpacity(opacity_start=200, opacity_end=0, alpha=alpha)
+            self.overlay_behaviour.apply(self.overlay)
+            #video_behaviour.apply(self.video_texture)
+            timeline_unpause.start()
+            
         #Resume the video
         self.video_texture.set_playing(True)
         

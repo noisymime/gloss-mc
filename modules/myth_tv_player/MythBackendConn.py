@@ -30,6 +30,7 @@ class MythBackendConnection(threading.Thread):
         #self.sock.connect( ("192.168.0.8", 6543) )
         self.connected = False
         self.recorder = None # Mythtv recorder
+        self.chanNum = None
         self.connect(self.server, self.server_port)
         
         threading.Thread.__init__(self)
@@ -102,18 +103,43 @@ class MythBackendConnection(threading.Thread):
         else:
             print "TV_PLAYER: Backend reports no recorders available"
             
+    #Sends the SET CHANNEL commands
+    def set_channel(self):
+        if self.recorder == None:
+            print "TV_PLAYER: Cannot set channel, no recorder available"
+            return
+            
+        #First check its a valid channel name
+        validate_cmd = "QUERY_RECORDER "+str(self.recorder) +"[]:[]CHECK CHANNEL[]:[]"+str(self.chanNum)
+        self.send_cmd(self.sock, validate_cmd)
+        result = self.receive_reply(self.sock)
+        print "Recorder Result: " + result
+        
+        if result == "ok":
+            print "Attempting to change to: " + self.chanNum
+            change_cmd = "QUERY_RECORDER "+str(self.recorder) +"[]:[]SET_CHANNEL[]:[]"+str(self.chanNum)
+            self.send_cmd(self.sock, change_cmd)
+            result = self.receive_reply(self.sock)
+            print "Change result: " + result
+            
     def spawn_live(self):
         if self.recorder == None:
             print "TV_PLAYER: Cannot spawn live tv, no recorder available"
         
         chainID = "live-" + self.localhost_name + "-2007-08-03T21:54:21"#+str(time.clock())
-        spawn_string = "QUERY_RECORDER "+str(self.recorder)+"[]:[]SPAWN_LIVETV[]:[]"+chainID +"[]:[]0"
+        spawn_string = "QUERY_RECORDER "+str(self.recorder)+"[]:[]SPAWN_LIVETV[]:[]"+chainID +"[]:[]0"       
+        
         self.send_cmd(self.sock, spawn_string)
         spawn_receive_string = "ok"
         result = self.receive_reply(self.sock)
         if not result == spawn_receive_string:
             print "TV_PLAYER: failed to spawn live tv. Result: "+str(result)
-            
+        
+        #Set channel if it has been set
+        if not self.chanNum is None: 
+            self.set_channel()
+        
+        
         self.setup_recording()
         
     def setup_recording(self):

@@ -1,14 +1,19 @@
 import socket
-import time
 import threading
 import thread
 import os
+from modules.myth_tv_player.recorder import recorder
 
 class MythBackendConnection(threading.Thread):
     pipe_rfd = None
     pipe_wfd = None
+    connected = False
+    recorder = None # Mythtv recorder
+    chanNum = None
 
     def __init__(self, videoPlayer, server, port):    
+        threading.Thread.__init__(self)  
+        
         self.protocolVersion = 31
         self.localhost_name = "myhost" # Change this later
         self.server = server #"192.168.0.8"
@@ -16,32 +21,28 @@ class MythBackendConnection(threading.Thread):
         self.addr = (self.server, self.server_port)
         self.videoPlayer = videoPlayer
         self.lock = False #Dictakes whether or not we have a signal lock
+
         
-        #3 Sockets, 1 for cmds, 1 for data, 1 for monitoring messages
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.data_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.data_socket_id = None
-        self.data_sock.connect((self.server, self.server_port))
-        self.msg_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.msg_sock.connect((self.server, self.server_port))
+        try:
+            #3 Sockets, 1 for cmds, 1 for data, 1 for monitoring messages
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.data_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.data_socket_id = None
+            self.data_sock.connect((self.server, self.server_port))
+            self.msg_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.msg_sock.connect((self.server, self.server_port))
+        except socket.error, e:
+            print "TV_PLAYER: Error connecting to Myth Backend socket"
+            return
         
         thread.start_new_thread(self.message_socket_mgr,(self.msg_sock,))
-        
-        #self.sock.connect( ("192.168.0.8", 6543) )
-        self.connected = False
-        self.recorder = None # Mythtv recorder
-        self.chanNum = None
-        self.connect(self.server, self.server_port)
-        
-        threading.Thread.__init__(self)
-        
-    #def start(self):
-    #    threading.Thread.start(self)
-         
-        
+        self.connected = self.connect_socket(self.sock)   
+
+      
     def run(self):
         print "Starting thread"
-        self.setup_recorder()
+        self.recorder = recorder(self)
+        #self.setup_recorder()
         self.spawn_live()
         #self.disconnect()
         
@@ -60,14 +61,18 @@ class MythBackendConnection(threading.Thread):
         sock.send(cmd)
         #print "write-->" + cmd  
         
-    def connect(self, host, port):
-        self.sock.connect((host, port))
+    def connect_socket(self, socket):
+        try:
+            socket.connect((self.server, self.server_port))
+        except Exception, (error,message):
+            print "TV_PLAYER: Error connecting to Myth Backend socket"
+            return False
         
         #Do the protocol version check
         protString = "MYTH_PROTO_VERSION "+ str(self.protocolVersion)
-        self.send_cmd(self.sock, protString)
+        self.send_cmd(socket, protString)
         protRecvString = "ACCEPT[]:[]" + str(self.protocolVersion)
-        result = self.receive_reply(self.sock)
+        result = self.receive_reply(socket)
         if self.videoPlayer.glossMgr.debug: print "TV_Player: Protocol version check: " + result
         
         if not result == protRecvString:
@@ -76,87 +81,45 @@ class MythBackendConnection(threading.Thread):
         
         #Perform the mandatory ANN
         ANNstring = "ANN Playback " + self.localhost_name + " 0"
-        self.send_cmd(self.sock, ANNstring)
+        self.send_cmd(socket, ANNstring)
         ANN_recv_string = "OK" #What a successful return should be
-        result = self.receive_reply(self.sock)
+        result = self.receive_reply(socket)
         if not result == ANN_recv_string:
             raise RuntimeError, "Myth: ANN connection failed"
         
-        #All looks good
-        self.connected = True
+        return True
         
     def disconnect(self):
         self.sock.close()
-        
-    def setup_recorder(self):
-        if not self.connected:
-            print "Cannot get recorder, no server connection exists"
-            return None
-            
-        recorder_request_string = "GET_NEXT_FREE_RECORDER[]:[]-1"
-        self.send_cmd(self.sock, recorder_request_string)
-        result = self.receive_reply(self.sock)
-        result_list = result.rsplit("[]:[]")
-        if not result_list[0] == -1:
-            #Then everything worked fine
-            self.recorder = result_list[0]
-        else:
-            print "TV_PLAYER: Backend reports no recorders available"
-            
-    #Sends the SET CHANNEL commands
-    def set_channel(self):
-        if self.recorder == None:
-            print "TV_PLAYER: Cannot set channel, no recorder available"
-            return
-            
-        #First check its a valid channel name
-        validate_cmd = "QUERY_RECORDER "+str(self.recorder) +"[]:[]CHECK CHANNEL[]:[]"+str(self.chanNum)
-        self.send_cmd(self.sock, validate_cmd)
-        result = self.receive_reply(self.sock)
-        print "Recorder Result: " + result
-        
-        if result == "ok":
-            print "Attempting to change to: " + self.chanNum
-            change_cmd = "QUERY_RECORDER "+str(self.recorder) +"[]:[]SET_CHANNEL[]:[]"+str(self.chanNum)
-            self.send_cmd(self.sock, change_cmd)
-            result = self.receive_reply(self.sock)
-            print "Change result: " + result
+    
             
     def spawn_live(self):
         if self.recorder == None:
             print "TV_PLAYER: Cannot spawn live tv, no recorder available"
         
-        chainID = "live-" + self.localhost_name + "-2007-08-03T21:54:21"#+str(time.clock())
-        spawn_string = "QUERY_RECORDER "+str(self.recorder)+"[]:[]SPAWN_LIVETV[]:[]"+chainID +"[]:[]0"       
-        
-        self.send_cmd(self.sock, spawn_string)
-        spawn_receive_string = "ok"
-        result = self.receive_reply(self.sock)
-        if not result == spawn_receive_string:
+        result = self.recorder.spawnLive()
+        if not result == "ok":
             print "TV_PLAYER: failed to spawn live tv. Result: "+str(result)
+            return
         
         #Set channel if it has been set
         if not self.chanNum is None: 
-            self.set_channel()
+            result = self.recorder.checkChannel(self.chanNum)
+            print "Channel change result: " + result
+            if result == "ok":
+                self.recorder.setChannel(self.chanNum)
         
         
         self.setup_recording()
         
     def setup_recording(self):
         #Check the recording
-        check_string = "QUERY_RECORDER "+str(self.recorder)+"[]:[]IS_RECORDING"
-        self.send_cmd(self.sock, check_string)
-        is_recording = self.receive_reply(self.sock)
+        is_recording = self.recorder.isRecording()
 
         #Wait for the recorder to start doing things
-        record_string = "QUERY_RECORDER " +str(self.recorder)+"[]:[]GET_FRAMES_WRITTEN"
-        self.send_cmd(self.sock, record_string)
-        frames = self.receive_reply(self.sock).rsplit("[]:[]")[1]
-        frames = int(frames)
+        frames = self.recorder.getFramesWritten()
         while frames < 2:
-            self.send_cmd(self.sock, record_string)
-            frames = self.receive_reply(self.sock).rsplit("[]:[]")[1]
-            frames = int(frames)
+            frames = self.recorder.getFramesWritten()
             
         #Create a new data socket (For receiving the data stream)
         protString = "MYTH_PROTO_VERSION "+ str(self.protocolVersion)
@@ -165,11 +128,8 @@ class MythBackendConnection(threading.Thread):
         result = self.receive_reply(self.data_sock)
         
         #Get the recording filename
-        filename_string = "QUERY_RECORDER "+str(self.recorder)+"[]:[]GET_CURRENT_RECORDING"
-        self.send_cmd(self.sock, filename_string)
-        filedetails = self.receive_reply(self.sock)
-        if self.videoPlayer.glossMgr.debug: print "TV_Player: Results from GET_CURRENT_RECORDING='%s'" % str(filedetails)
-        detail_list = filedetails.rsplit("[]:[]")
+        detail_list = self.recorder.getCurrentRecording()
+        if self.videoPlayer.glossMgr.debug: print "TV_Player: Results from GET_CURRENT_RECORDING='%s'" % str(detail_list)
 
         #This is an attempt to get the filename (Its meant to be at position 8)
         try:
@@ -193,12 +153,9 @@ class MythBackendConnection(threading.Thread):
         self.data_socket_id = result_list[1]
         
         #Do some housekeeping
-        frontend_ready_cmd = "QUERY_RECORDER "+str(self.recorder) +"[]:[]FRONTEND_READY"
-        self.send_cmd(self.sock, frontend_ready_cmd)
-        result = self.receive_reply(self.sock)
-        input_cmd = "QUERY_RECORDER "+ str(self.recorder) +"[]:[]GET_INPUT"
-        self.send_cmd(self.sock, input_cmd)
-        result = self.receive_reply(self.sock)
+        self.recorder.frontendReady()
+        input = self.recorder.getInput()
+        
         rec_list_cmd = "MESSAGE[]:[]RECORDING_LIST_CHANGE"
         self.send_cmd(self.sock, rec_list_cmd)
         result = self.receive_reply(self.sock)  
@@ -220,13 +177,20 @@ class MythBackendConnection(threading.Thread):
         print "BEGINNING PLAYBACK!"
         self.Playing = True
         while self.Playing:
+            #print "Begin loop"
             transfer_cmd = "QUERY_FILETRANSFER "+ str(socket_id) + "[]:[]REQUEST_BLOCK[]:[]"+str(request_size)
+            #print "Requesting: " + str(request_size)
             self.send_cmd(cmd_sock, transfer_cmd)
             num_bytes = int(self.receive_reply(cmd_sock))
+            #print "Should receive: " + str(num_bytes)
             data = data_sock.recv(num_bytes)
-            os.write(self.pipe_wfd, data)
-
+            #print "Received: " + str(num_bytes)
+            try:
+                os.write(self.pipe_wfd, data)
+            except TypeError, e:
+                pass
             
+            #print "Being Optimisatoin"
             #This tries to optimise the request size
             if (num_bytes == request_size) and (request_size < max_request_size):
                 request_size += request_size_step
@@ -234,10 +198,10 @@ class MythBackendConnection(threading.Thread):
                     request_size = max_request_size
             elif (request_size > request_size_step) and (num_bytes != request_size):
                 request_size -= request_size_step
-                
+            #print "End optimisation"
         
         print "Ending playback"
-
+        self.stop()
         
     def message_socket_mgr(self, msg_socket):
         #Do the protocol version check
@@ -300,9 +264,8 @@ class MythBackendConnection(threading.Thread):
     def stop(self):
         self.Playing = False
         
-        stop_cmd = "QUERY_RECORDER "+str(self.recorder) +"[]:[]STOP_LIVETV"
-        self.send_cmd(self.sock, stop_cmd)
-        result = self.receive_reply(self.sock)
+        if not self.recorder is None:
+            result = self.recorder.stopLive()
         
         #Close the pipe
         if not self.pipe_wfd is None: 

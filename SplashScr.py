@@ -91,10 +91,17 @@ class SplashScr(clutter.Group):
         timeline_opacity.start()
         self.spinner.start()
     
-    def remove(self):
+    def remove(self, data=None):
         self.stage.remove(self)
         self.spinner.stop()
         
+    def remove_elegant(self):
+        timeline_opacity = clutter.Timeline(20, 25)
+        timeline_opacity.connect("completed", self.remove)
+        alpha_opacity = clutter.Alpha(timeline_opacity, clutter.ramp_inc_func)
+        self.behaviour_opacity = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=alpha_opacity)
+        self.behaviour_opacity.apply(self)
+        timeline_opacity.start()       
         
     def set_msg(self, msg):
         self.message.set_text(msg)

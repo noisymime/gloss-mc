@@ -14,6 +14,7 @@ from VideoController import VideoController
 
 class Module:
     title = "TV"
+    myConn = None
 
     def __init__(self, glossMgr, dbMgr):
         self.stage = glossMgr.get_stage()
@@ -75,20 +76,9 @@ class Module:
             
             if (event.keyval == clutter.keysyms.Return):
                 if self.osd.on_screen:
-                    self.loading_scr = SplashScr(self.stage)
-                    self.loading_scr.set_msg("Loading Channel ")
-                    self.loading_scr.set_details(self.osd.currentChannel.name)
-                    self.loading_scr.backdrop.set_opacity(180)
-                    self.loading_scr.display_elegant()
-                    self.videoController.pause_video(False)
-                    self.myConn.stop()
-                    self.myConn = None
-                    self.myConn = MythBackendConnection(self, self.server, self.port)
-                    self.myConn.chanNum = self.osd.currentChannel.channum
-                    self.myConn.start()
-                    self.videoController.unpause_video()
-                    #self.loading_scr.remove()                   
-                    #self.myConn.change_channel(self.currentChannel.name)
+                    chanNum = self.osd.currentChannel.channum
+                    self.set_channel(chanNum)
+                    
                     
         if event.keyval == clutter.keysyms.Escape:
             return True
@@ -121,7 +111,24 @@ class Module:
                 
                 
         return tempMenu
-            
+    
+    def set_channel(self, channum):
+        self.loading_scr = SplashScr(self.stage)
+        self.loading_scr.set_msg("Loading Channel ")
+        self.loading_scr.set_details(self.osd.currentChannel.name)
+        self.loading_scr.backdrop.set_opacity(180)
+        self.loading_scr.display_elegant()
+        self.videoController.pause_video(False)
+        self.myConn.stop()
+        self.myConn = None
+        self.myConn = MythBackendConnection(self, self.server, self.port)
+        self.myConn.chanNum = self.osd.currentChannel.channum
+        self.videoController.connect("playing", self.complete_change)
+        self.myConn.start()
+
+    def complete_change(self, data):
+        self.videoController.unpause_video()
+        self.loading_scr.remove_elegant()                   
             
 class osd:
     

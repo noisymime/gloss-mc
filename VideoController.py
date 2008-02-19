@@ -3,9 +3,18 @@ import threading
 import os
 
 
-class VideoController:
-
+class VideoController(gobject.GObject):
+    
+    #Setup signals
+    __gsignals__ =  { 
+        "playing": (
+            gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, []),
+        "stopped": (
+            gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, [])
+        }
+    
     def __init__(self, glossMgr):
+        gobject.GObject.__init__(self)
         self.stage = glossMgr.stage
         self.overlay = None
         self.blackdrop = None
@@ -72,8 +81,10 @@ class VideoController:
         self.video_texture.set_opacity(255)
         self.video_texture.set_position(0, 0)
         self.video_texture.show()
+        #if self.video_texture.get_parent() is None:
         self.stage.add(self.video_texture)
         
+        self.emit("playing")
         return self.video_texture
 
     #This handles any messages that are sent accross the playbin

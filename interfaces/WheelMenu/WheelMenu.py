@@ -259,6 +259,9 @@ class Interface(clutter.Group):
         return self.itemGroup.get_nth_child(self.selected)
     def getItemGroup(self):
         return self.itemGroup
+    def get_group_y(self):
+        return self.itemGroup.get_y()
+        return int(self.get_current_item().get_y())
     
 class WheelListItem(MenuItem):
 

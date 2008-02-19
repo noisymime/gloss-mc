@@ -113,7 +113,8 @@ class VideoController(gobject.GObject):
             if percent < 100:
                 self.bin.set_state(gst.STATE_PAUSED)
             else:
-                self.bin.set_state(gst.STATE_PLAYING)
+                if not self.bin.get_state() == gst.STATE_PLAYING:
+                    self.bin.set_state(gst.STATE_PLAYING)
         elif t == gst.MESSAGE_STATE_CHANGED:
             prev, current, next = message.parse_state_changed()
             #print "State Changed. Previous state: " + str(prev)

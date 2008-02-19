@@ -99,6 +99,7 @@ class Module:
             return False
     
     def begin(self, glossMgr):
+        
         self.stage = self.glossMgr.get_stage()
         self.currentTexture = clutter.Texture()
         
@@ -115,7 +116,19 @@ class Module:
         #Then load them back up
         slideName = self.baseDir + "/" + self.menu.get_current_item().get_data() #self.glossMgr.get_current_menu().get_current_item().get_data()
         self.loadDir(slideName, True)
-        #self.MenuMgr.get_selector_bar().set_spinner(False)
+        
+        #Check if there actually are any images, quit if there aren't
+        if len(self.textures) == 0:
+            glossMgr.display_msg("Slideshow", "Directory is empty")
+            if glossMgr.currentMenu.get_opacity() > 0:
+                self.timeline_stop = clutter.Timeline(10,30)
+                alpha = clutter.Alpha(self.timeline_stop, clutter.ramp_inc_func)
+                self.stop_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
+                self.stop_behaviour.apply(glossMgr.currentMenu)
+                glossMgr.currentMenu.show()
+                self.timeline_stop.start()
+            glossMgr.currentPlugin = None
+            return
         
         if self.backdrop == None:
             #Create a rectangle that serves as the backdrop for the slideshow

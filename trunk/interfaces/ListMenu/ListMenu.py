@@ -327,7 +327,7 @@ class Interface(clutter.Group):
     def get_current_item(self):
         return self.menuItems[self.selected]
     def get_group_y(self):
-        int(self.menuItems[self.displayMin].get_y())
+        return int(self.menuItems[self.displayMin].get_y())
             
     
 class MenuListItem (MenuItem):

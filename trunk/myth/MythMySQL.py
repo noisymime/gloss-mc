@@ -49,14 +49,14 @@ class mythDB():
     
     def run_sql(self, sql):
         if not self.connected:
-            print "Unable to start video, could not establish connection to SQL server"
+            print "Unable to perform lookup, could not establish connection to SQL server"
             return None
     
         self.cursor.execute(sql)
         # get the resultset as a tuple
         result = self.cursor.fetchall()
         return result
-            
+        
     #Gets an arbitary setting from the settings table
     def get_setting(self, setting_name):
         if not self.connected:

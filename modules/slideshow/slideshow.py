@@ -363,6 +363,7 @@ class Module:
         tempMenu = self.glossMgr.create_menu() #Menu(self.glossMgr)
 
         self.menu = tempMenu
+        
         #print self.baseDir
         #This occurs when there are not slideshows or we could not connect to the db to establish baseDir
         if self.baseDir is None:
@@ -398,6 +399,6 @@ class Module:
                     tempItem.add_image_from_path(imgPath, 0, 0)
                 
                 tempItem.setAction(self)
-                
+
         return tempMenu
         

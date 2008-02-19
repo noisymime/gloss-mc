@@ -307,6 +307,7 @@ class message():
     def __init__(self, stage):
         self.stage = stage
         self.active = False
+        self.msgQueue = []
         
         self.backdrop = clutter.Rectangle()
         self.backdrop.set_color(clutter.color_parse('Black'))
@@ -352,8 +353,10 @@ class message():
         self.main_group.set_position(group_x, group_y)
 
     def display_msg(self, title, text):
-        self.active = True
-        
+        if self.active:
+            self.msgQueue.append((title, text))
+            return
+       
         self.message.set_text(title)
         self.detail.set_text(text)
         width = int(self.box.get_width() * 0.80) #Width is 80% of the box, giving 10% gap each side
@@ -375,17 +378,29 @@ class message():
         self.behaviour_group.apply(self.main_group)
         self.behaviour_backdrop.apply(self.backdrop)
         self.timeline.start()
+
+        self.active = True
         
     def hide_msg(self):
         self.active = False
         
         self.timeline = clutter.Timeline(10,30)
+        self.timeline.connect("completed", self.remove_from_stage)
         alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
         self.behaviour_group = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=alpha)
         self.behaviour_backdrop = clutter.BehaviourOpacity(opacity_start=180, opacity_end=0, alpha=alpha)
         self.behaviour_group.apply(self.main_group)
         self.behaviour_backdrop.apply(self.backdrop)
         self.timeline.start()
+        
+    def remove_from_stage(self, timeline):
+        self.stage.remove(self.backdrop)
+        self.stage.remove(self.main_group)
+        
+        #if there's messages in the queue, run through them
+        if len(self.msgQueue) > 0:
+            (title, text) = self.msgQueue.pop()
+            self.display_msg(title, text)
         
     def on_key_press_event (self, stage, event):
         self.hide_msg()

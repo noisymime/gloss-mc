@@ -106,8 +106,8 @@ class MythBackendConnection(threading.Thread):
         if not self.chanNum is None: 
             result = self.recorder.checkChannel(self.chanNum)
             print "Channel change result: " + result
-            if result == "ok":
-                self.recorder.setChannel(self.chanNum)
+            #if result == "ok":
+            self.recorder.setChannel(self.chanNum)
         
         
         self.setup_recording()
@@ -118,7 +118,7 @@ class MythBackendConnection(threading.Thread):
 
         #Wait for the recorder to start doing things
         frames = self.recorder.getFramesWritten()
-        while frames < 2:
+        while frames < 35:
             frames = self.recorder.getFramesWritten()
             
         #Create a new data socket (For receiving the data stream)
@@ -166,7 +166,7 @@ class MythBackendConnection(threading.Thread):
     def buffer_live(self, cmd_sock, data_sock, socket_id):
         request_size = 32768
         #max_request_size = 135000
-        max_request_size = 270000
+        max_request_size = 128000#270000
         request_size_step = 16384
         
         if self.pipe_rfd is None:
@@ -198,6 +198,8 @@ class MythBackendConnection(threading.Thread):
                     request_size = max_request_size
             elif (request_size > request_size_step) and (num_bytes != request_size):
                 request_size -= request_size_step
+                if num_bytes < request_size:
+                    print "TV_PLAYER: Failed to receive full allocation"
             #print "End optimisation"
         
         print "Ending playback"

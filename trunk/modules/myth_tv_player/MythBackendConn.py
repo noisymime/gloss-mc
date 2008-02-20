@@ -198,7 +198,7 @@ class MythBackendConnection(threading.Thread):
                     request_size = max_request_size
             elif (request_size > request_size_step) and (num_bytes != request_size):
                 request_size -= request_size_step
-                if num_bytes < request_size:
+                if num_bytes < request_size and self.videoPlayer.glossMgr.debug:
                     print "TV_PLAYER: Failed to receive full allocation"
             #print "End optimisation"
         

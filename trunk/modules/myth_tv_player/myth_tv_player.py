@@ -132,10 +132,12 @@ class Module:
             
 class osd_channel(clutter.Group):
     font = "Lucida Grande "
-    name_font_size = 30
-    prog_title_font_size = 22
-    detail_font_size = 18
+    name_font_size = 26
+    prog_title_font_size = 20
+    detail_font_size = 14
     
+    timeline = clutter.Timeline()
+    fps = 20
     
     def __init__(self, stage):
         clutter.Group.__init__(self)
@@ -149,11 +151,11 @@ class osd_channel(clutter.Group):
         self.add(self.box)
        
         self.logo = clutter.Texture()
-        height = int(self.box.get_height() * 0.90)
-        height = height + (height % 2) # Make sure that the dimension is even
+        height = int(self.box.get_height() * 0.80)
         self.logo.set_height(height)
         self.logo.set_width(height)
-        self.logo.set_position(5, int(self.box.get_height() * 0.05 ) )
+        pos_y = int(self.box.get_height() - height)/2
+        self.logo.set_position(20, pos_y )
         self.add(self.logo)
 
         self.name = clutter.Label()
@@ -181,27 +183,45 @@ class osd_channel(clutter.Group):
                                  self.prog_title.get_x(),\
                                  self.prog_title.get_y() + self.prog_title.get_height()\
                                  )
+        self.detail.set_width( (self.box.get_width() - self.prog_title.get_x()) )
         self.add(self.detail)
         
         pos_x = (self.stage.get_width() - self.box.get_width()) / 2
         pos_y = int(self.stage.get_height() * 0.66)
         self.set_position(pos_x, pos_y)
         
+        self.set_opacity(0)
         self.on_screen = False
         self.channelOffset = 0 
         self.input_count = 0
         
     def on_key_press_event(self, event, tv_player):
+        #Check if the timeline is running, if so reverse it
+        if self.timeline.is_playing():
+            self.timeline.disconnect(self.timeout_id)
+            self.timeline.set_direction(clutter.TIMELINE_BACKWARD)
+            self.timeout_id = gobject.timeout_add(3000, self.exit)
+            
         if self.on_screen:
             if (event.keyval == clutter.keysyms.Up):
-                self.channelOffset += 1
+                if self.channelOffset < len(tv_player.channels)-1:
+                    self.channelOffset += 1
+                else:
+                    self.channelOffset = 0
             elif (event.keyval == clutter.keysyms.Down):
-                self.channelOffset -= 1
+                #If not at the end of the list, move down a channel
+                if self.channelOffset > -len(tv_player.channels)+1:
+                    self.channelOffset -= 1
+                else:
+                    self.channelOffset = 0
                 
             #Increment the input counter (Only when this reaches 0 will the osd be removed from screen
             self.input_count += 1
         else:
             self.stage.add(self)
+            fade_template = clutter.EffectTemplate( clutter.Timeline(20, self.fps), clutter.ramp_inc_func)
+            effect = clutter.effect_fade(template=fade_template, actor=self, opacity_end=255)
+            effect.start()
             self.channelOffset = 0
             
         self.currentChannel = tv_player.channels[tv_player.currentChannel+self.channelOffset]
@@ -232,7 +252,21 @@ class osd_channel(clutter.Group):
             return False
         
         if self.on_screen:
-            self.stage.remove(self)
-            self.on_screen = False
+            self.timeline = clutter.Timeline(20, self.fps)
+            self.timeout_id = self.timeline.connect('completed', self.destroy)
+            self.behaviour_opacity = clutter.BehaviourOpacity(\
+                                                              opacity_start=255,\
+                                                              opacity_end=0,\
+                                                              alpha=clutter.Alpha(self.timeline, clutter.ramp_inc_func))
+            
+            self.behaviour_opacity.apply(self)
+            self.timeline.start()
+            #fade_template = clutter.EffectTemplate( self.timeline, clutter.ramp_inc_func)
+            #effect = clutter.effect_fade(template=self.fade_template, actor=self, opacity_end=0)
+            #effect.start()
             
         return False
+
+    def destroy(self, data):
+        self.stage.remove(self)
+        self.on_screen = False

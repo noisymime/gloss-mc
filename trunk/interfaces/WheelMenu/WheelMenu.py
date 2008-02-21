@@ -171,7 +171,7 @@ class Interface(clutter.Group):
                 tmpTexturesGroup.behaviour_opacity.set_property("opacity_start", 0x66)
                 tmpTexturesGroup.behaviour_opacity.set_property("opacity_end", 0xff)
 
-        tmpItem.show()
+                tmpItem.show()
         self.timeline.start()
         
     def selectPrevious(self):

@@ -42,15 +42,22 @@ class Module:
         self.menuMgr = menuMgr
         #self.buffer_file_reader = open("test.mpg","r")
         menuMgr.get_selector_bar().set_spinner(True)
+        self.loading_scr = SplashScr(self.stage)
+        self.loading_scr.set_msg("Starting TV...")
+        self.loading_scr.backdrop.set_opacity(180)
+        self.loading_scr.display_elegant()
+
+        
         (self.server, self.port) = self.dbMgr.get_backend_server()
         self.myConn = MythBackendConnection(self, self.server, self.port)
+        self.videoController.connect("playing", self.complete_change)
         self.myConn.start()
-        #vid.begin(self.stage)
         
         self.isRunning = True
         
     def begin_playback(self, fd):#buffer_file):
         self.menuMgr.get_selector_bar().set_spinner(False)
+        
         #uri = "file://" + os.getcwd() +"/" + buffer_file
         #f = open(os.getcwd() +"/" + buffer_file, 'r')
         uri = "fd://" + str(fd)
@@ -130,6 +137,7 @@ class Module:
         self.videoController.unpause_video()
         self.loading_scr.remove_elegant()                   
             
+import pango
 class osd_channel(clutter.Group):
     font = "Lucida Grande "
     name_font_size = 26
@@ -184,6 +192,9 @@ class osd_channel(clutter.Group):
                                  self.prog_title.get_y() + self.prog_title.get_height()\
                                  )
         self.detail.set_width( (self.box.get_width() - self.prog_title.get_x()) )
+        self.detail.set_height( (self.box.get_width() - self.prog_title.get_y()-self.prog_title.get_height()) )
+        self.detail.set_line_wrap(False)
+        self.detail.set_ellipsize(pango.ELLIPSIZE_END)
         self.add(self.detail)
         
         pos_x = (self.stage.get_width() - self.box.get_width()) / 2

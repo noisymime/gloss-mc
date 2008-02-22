@@ -46,8 +46,8 @@ class Transition:
         knots_entering = (\
                 #(toMenu.get_x(), toMenu.get_y()),\
                 (start_x, start_y),\
-                #(-oldGroup.get_x(), int(fromMenu.getStage().get_height()/2))
-                (end_x, fromMenu.get_group_y()) \
+                (end_x, int(fromMenu.get_y()))
+                #(end_x, fromMenu.get_group_y()) \
                 #toMenu.get_display_position()
                 )
         self.entrance_behaviour_path = clutter.BehaviourPath(self.alpha, knots_entering)

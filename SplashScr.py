@@ -70,6 +70,9 @@ class SplashScr(clutter.Group):
         self.centre_group.show()
         
         self.show()
+        self.show_all()
+        self.set_opacity(255)
+        self.centre_group.set_opacity(255)
         self.spinner.start()
 
     #Same as above, except fades everything in

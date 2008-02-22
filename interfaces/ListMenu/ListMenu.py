@@ -15,7 +15,7 @@ class Interface(clutter.Group):
     menu_item_transition = None
     zoomLevel = 0.5
     opacityStep = 120
-    
+    position_0 = None
     
     def __init__ (self, glossMgr):
         clutter.Group.__init__(self)
@@ -327,7 +327,10 @@ class Interface(clutter.Group):
     def get_current_item(self):
         return self.menuItems[self.selected]
     def get_group_y(self):
-        return int(self.menuItems[self.displayMin].get_y())
+        (abx_x, abs_y) = self.itemGroup.get_position()
+        height = self.get_y() + self.menuItems[1].get_y() * (self.displayMin)
+        return height
+        #return int(self.menuItems[self.displayMin].get_y())
             
     
 class MenuListItem (MenuItem):

@@ -1,5 +1,22 @@
+"""
+This file is part of the Gloss Mythtv Frontend.
+
+    Gloss is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Gloss is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gloss.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
 import sys
-import clutter
+import clutter 
 #import gobject
 import pygtk
 import gtk
@@ -38,12 +55,6 @@ class MainApp:
         #hide the cursor
         self.stage.hide_cursor()
         
-        #clutter.threads_enter()
-        gobject.timeout_add(500, self.loadGloss)
-        #clutter.threads_leave()
-        #clutter.threads_add_timeout(500, self.loadGloss())
-    
-    def loadGloss(self):
         #Create a master mySQL connection
         self.dbMgr = mythDB()
         if not self.dbMgr.connected:
@@ -59,12 +70,20 @@ class MainApp:
         else:
             self.stage.set_size(width, height)
         
-        #now that the size is set, we can show the stage
+        #now that the size is set, we can show the stage    
         self.stage.show()
+        
         #Display a loading / splash screen
         self.splashScreen = SplashScr(self.stage)
         self.splashScreen.display()
-        #And create the Gloss Manager
+        
+        #clutter.threads_enter()
+        gobject.timeout_add(500, self.loadGloss)
+        #clutter.threads_leave()
+        #clutter.threads_add_timeout(500, self.loadGloss())
+    
+    def loadGloss(self):
+        #Create the Gloss Manager
         self.glossMgr = GlossMgr(self.stage)
 
         
@@ -93,7 +112,7 @@ class MainApp:
             temp_menu_item.add_image_from_texture(tempMod.menu_image)
             temp_menu_item.setAction(tempMod.action())
          
-        self.splashScreen.remove()
+        self.splashScreen.remove_elegant()
         self.stage.connect('key-press-event', self.glossMgr.on_key_press_event)
         MainMenu.display()
 

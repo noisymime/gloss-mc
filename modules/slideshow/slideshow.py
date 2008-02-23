@@ -258,8 +258,8 @@ class Module:
         self.nextImage(self.currentTexture)
         
     def get_random_coords(self, texture):
-        x_pos = random.randint(texture.get_width()/2, abs(self.stage.get_width() - texture.get_width()/2) ) #Somewhere between 0 and (stage_width-image_width)
-        y_pos = random.randint(texture.get_height()/2, abs(self.stage.get_height() - texture.get_height()/2)  )
+        x_pos = random.randint(texture.get_width()/2, (self.stage.get_width() - texture.get_width()) ) #Somewhere between 0 and (stage_width-image_width)
+        y_pos = random.randint(texture.get_height()/2, (self.stage.get_height() - texture.get_height())  )
         
         return (x_pos, y_pos)
         

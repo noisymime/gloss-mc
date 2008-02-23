@@ -36,6 +36,11 @@ class Module:
     def setup_ui(self):
         self.menu_image = self.glossMgr.themeMgr.get_texture("slideshow_menu_image", None, None)
         
+        #Need to get/set the size of the preview images
+        element = self.glossMgr.themeMgr.search_docs("preview_image", "main").childNodes
+        (self.preview_width, self.preview_height) = self.glossMgr.themeMgr.get_dimensions(element, self.glossMgr.stage)
+        
+        
     def action(self):
         return self.generateMenu()
         
@@ -400,6 +405,10 @@ class Module:
                 img_list = os.listdir(subdir)
                 img_list = filter(self.filterImageFile, img_list)
                 img_previewer = image_previewer(self.glossMgr.stage)
+                #Set the max preview img sizes (These come from the slideshow.xml theme file
+                if (not self.preview_width is None) and (not self.preview_height is None):
+                    img_previewer.set_max_img_dimensions(self.preview_width, self.preview_height)
+                    
                 for img in img_list:
                     imgPath = subdir + "/" + img #os.listdir(subdir)[0]
                     img_previewer.add_texture(imgPath)

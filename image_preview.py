@@ -18,6 +18,10 @@ class image_previewer(clutter.Group):
     seconds = 8
     fps = 25
     
+    #These are just defaults incase whatever uses image previewer forgets to set them
+    max_img_width = 400
+    max_img_height = 400
+    
     def __init__(self, stage):
         clutter.Group.__init__(self)
         self.textures = []
@@ -50,7 +54,11 @@ class image_previewer(clutter.Group):
         self.behaviour_depth2 = clutter.BehaviourDepth(depth_start=-800, depth_end=200, alpha=self.alpha2)
         self.behaviour_depth3 = clutter.BehaviourDepth(depth_start=-800, depth_end=200, alpha=self.alpha3)
         
-        
+    #This max boundaries for the preview image size
+    def set_max_img_dimensions(self, width, height):
+        self.max_img_width = width
+        self.max_img_height = height
+    
     def add_texture(self, texture_src):
         self.textures.append(texture_src)
     
@@ -141,12 +149,22 @@ class image_previewer(clutter.Group):
     def get_rand_tex(self):
         rand = random.randint(0, len(self.textures)-1)
         
+        
         texture = clutter.Texture()
         pixbuf = gtk.gdk.pixbuf_new_from_file(self.textures[rand])
         texture.set_pixbuf(pixbuf)
+        
+        #Set the image size based on the max bounds
         xy_ratio = float(texture.get_width()) / texture.get_height()
-        #texture.set_height(self.get_height())
-        width = int(texture.get_height() * xy_ratio)
+        if texture.get_width() > texture.get_height():
+            texture.set_width(self.max_img_width)
+            height = int(self.max_img_width / xy_ratio)
+            texture.set_height(height)
+        else:
+            texture.set_height(self.max_img_height)
+            width = int(xy_ratio * self.max_img_height)
+            texture.set_width(width)
+            
         reflectionTexture = Texture_Reflection(texture)
         
         textureGroup = clutter.Group()
@@ -174,6 +192,9 @@ class image_previewer(clutter.Group):
             self.behave1.apply(self.tex1)
             self.behaviour_depth1.apply(self.tex1)
             self.behaviour_rotate1.apply(self.tex1)
+            
+            self.frontTex.unrealize()
+            self.frontTex.destroy()
             self.frontTex = self.tex2
             
         elif self.frontTex == self.tex2:
@@ -182,6 +203,9 @@ class image_previewer(clutter.Group):
             self.behave2.apply(self.tex2)
             self.behaviour_depth2.apply(self.tex2)
             self.behaviour_rotate2.apply(self.tex2)
+            
+            self.frontTex.unrealize()
+            self.frontTex.destroy()
             self.frontTex = self.tex3
             
         elif self.frontTex == self.tex3:
@@ -190,6 +214,9 @@ class image_previewer(clutter.Group):
             self.behave3.apply(self.tex3)
             self.behaviour_depth3.apply(self.tex3)
             self.behaviour_rotate3.apply(self.tex3)
+            
+            self.frontTex.unrealize()
+            self.frontTex.destroy()
             self.frontTex = self.tex1
             
             #texture.lower(self.tex1)

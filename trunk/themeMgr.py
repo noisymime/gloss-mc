@@ -5,6 +5,8 @@ import gtk
 from xml.dom import minidom
 
 class ThemeMgr:
+	theme_dir = "themes/"
+	
 	defaultTheme = "default"
 	currentTheme = "default"
 	currentTheme = "Pear"
@@ -16,14 +18,14 @@ class ThemeMgr:
 		self.docs = []
 		self.default_docs = []
 		
-		theme_dir = "ui/" + self.currentTheme
-		self.importDocs(theme_dir, self.docs)
+		current_theme_dir = self.theme_dir + self.currentTheme
+		self.importDocs(current_theme_dir, self.docs)
 		#If the current theme is the default theme, we just use the one list, else create a second one
 		if self.currentTheme == self.defaultTheme:
 			self.default_docs = self.docs
 		else:
-			theme_dir = "ui/" + self.defaultTheme
-			self.importDocs(theme_dir, self.default_docs)
+			current_theme_dir = self.theme_dir + self.defaultTheme
+			self.importDocs(current_theme_dir, self.default_docs)
 
 	def importDocs(self, dir, docs):
 		file_list = os.listdir(dir)
@@ -274,7 +276,7 @@ class ThemeMgr:
 		if src == "None":
 			return texture
 		
-		src = "ui/" + self.currentTheme + "/" + src
+		src = self.theme_dir + self.currentTheme + "/" + src
 		pixbuf = gtk.gdk.pixbuf_new_from_file(src)
 		texture.set_pixbuf(pixbuf)
 		

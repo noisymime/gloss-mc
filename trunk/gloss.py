@@ -49,7 +49,7 @@ class MainApp:
     
         self.args = args
     
-        self.stage = clutter.stage_get_default()
+        self.stage = clutter.Stage()
         self.stage.set_color(clutter.color_parse('Black'))
         self.stage.connect('button-press-event', self.on_button_press_event)
         #hide the cursor

@@ -25,7 +25,8 @@ class SplashScr(clutter.Group):
         self.centre_group = clutter.Group()
         self.add(self.centre_group)
         
-        pixbuf = gtk.gdk.pixbuf_new_from_file("ui/splash_box.png")
+        #THIS NEEDS THEMING!!!
+        pixbuf = gtk.gdk.pixbuf_new_from_file("themes/splash_box.png")
         self.box = clutter.Texture()
         self.box.set_pixbuf(pixbuf)
         self.box.set_opacity(int(255 * 0.75))

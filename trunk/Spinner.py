@@ -6,8 +6,8 @@ class Spinner (clutter.Texture):
     def __init__(self):
         clutter.Texture.__init__ (self)
         
-        #self.texture = clutter.Texture()
-        pixbuf = gtk.gdk.pixbuf_new_from_file("ui/spinner.svg")
+        #Theme me please
+        pixbuf = gtk.gdk.pixbuf_new_from_file("themes/spinner.svg")
         self.set_pixbuf(pixbuf)
      
     def start(self):  

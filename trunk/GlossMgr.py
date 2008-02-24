@@ -1,6 +1,6 @@
 import clutter
 from themeMgr import ThemeMgr
-from Spinner import Spinner
+from ui_elements.Spinner import Spinner
 import pygtk
 import gtk
 import pango
@@ -49,12 +49,8 @@ class GlossMgr:
         if self.currentMenu == None:
             self.currentMenu = newMenu
             self.menuHistory.append(newMenu)
-            #self.currentMenu.getItemGroup().show_all()
             self.currentMenu.show_all()
             self.currentMenu.show()
-            
-            #self.stage.add(self.currentMenu)
-            #self.stage.add(self.currentMenu.getItemGroup())
             
             #This is a bit hacky, but we set the selector bar size based on the font size
             tmpLabel = clutter.Label()
@@ -269,8 +265,6 @@ class MenuSelector(clutter.Texture):
         else:
             self.behaviour = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=self.alpha)
             self.timeline.connect('completed', self.spinner_end_event)
-            #self.menuMgr.get_stage().remove(self.spinner)
-            #self.spinner = None
         
         self.behaviour.apply(self.spinner)
         self.timeline.start()

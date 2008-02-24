@@ -1,8 +1,6 @@
 import clutter
 from clutter import cluttergst
-#__import__("../../Menu", "Menu")
-#from Menu import Menu
-from image_preview import image_previewer
+from ui_elements.image_preview import image_previewer
 import time
 import os.path
 import pygtk

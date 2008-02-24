@@ -7,7 +7,7 @@ import pango
 import copy
 
 class GlossMgr:
-    theme_dir = "themes"
+    theme_dir = "themes/"
 
     def __init__ (self, stage):
         self.stage = stage
@@ -267,7 +267,7 @@ class MenuSelector(clutter.Texture):
             self.behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=self.alpha)
             self.spinner.start()
         else:
-            self.behaviour = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=self.alpha)
+            self.behaviour = clutter.Behaviourtv_osd_boxOpacity(opacity_start=255, opacity_end=0, alpha=self.alpha)
             self.timeline.connect('completed', self.spinner_end_event)
             #self.menuMgr.get_stage().remove(self.spinner)
             #self.spinner = None

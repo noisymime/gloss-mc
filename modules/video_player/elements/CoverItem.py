@@ -18,7 +18,7 @@ class cover_item(clutter.Group):
         #Set whether or not this is a folder or a video cover
         if not folder_name is None:
             element = glossMgr.themeMgr.search_docs("video_cover_viewer", "main").childNodes
-            imagePath = "ui/" + glossMgr.themeMgr.currentTheme + "/" + glossMgr.themeMgr.find_child_value(element, "folder_img_src")
+            imagePath = glossMgr.theme_dir + glossMgr.themeMgr.currentTheme + "/" + glossMgr.themeMgr.find_child_value(element, "folder_img_src")
             pixbuf = gtk.gdk.pixbuf_new_from_file(imagePath)
             self.isFolder = True
         else:
@@ -27,7 +27,7 @@ class cover_item(clutter.Group):
             # In the future this will change so that the video is still included with a blank image
             if not os.path.exists(imagePath):
                 element = glossMgr.themeMgr.search_docs("video_cover_viewer", "main").childNodes
-                imagePath = "ui/" + glossMgr.themeMgr.currentTheme + "/" + glossMgr.themeMgr.find_child_value(element, "video_default_src")
+                imagePath = glossMgr.theme_dir + glossMgr.themeMgr.currentTheme + "/" + glossMgr.themeMgr.find_child_value(element, "video_default_src")
                 
             pixbuf = gtk.gdk.pixbuf_new_from_file(imagePath)
             self.isFolder = False

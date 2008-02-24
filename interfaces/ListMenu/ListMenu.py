@@ -4,10 +4,9 @@ import gtk
 import pango
 import time
 import math
-from ReflectionTexture import Texture_Reflection
+from ui_elements.ReflectionTexture import Texture_Reflection
 from interfaces.MenuItem import MenuItem
 from InputQueue import InputQueue
-#from interfaces.ListMenu import themeLoad
 
 class Interface(clutter.Group):
     usePreviewEffects = True # Tells the modules to use any image preview effects where available

@@ -5,7 +5,7 @@ import gst
 import gobject
 import pango
 import clutter
-from Spinner import Spinner
+from ui_elements.Spinner import Spinner
 
 class SplashScr(clutter.Group):
     font = "Lucida Grande "

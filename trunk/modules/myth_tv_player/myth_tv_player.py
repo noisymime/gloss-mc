@@ -22,7 +22,7 @@ class Module:
         self.dbMgr = dbMgr
         self.setup_ui()
         
-        self.osd = osd_channel(self.stage)
+        self.osd = osd_channel(self.glossMgr)
         self.videoController = VideoController(glossMgr)
         self.dbController = tv_db_controller(dbMgr)
         #self.dbController.get_current_show(1033)
@@ -147,15 +147,19 @@ class osd_channel(clutter.Group):
     timeline = clutter.Timeline()
     fps = 20
     
-    def __init__(self, stage):
+    def __init__(self, glossMgr):
         clutter.Group.__init__(self)
-        self.stage = stage
+        self.glossMgr = glossMgr
+        self.stage = glossMgr.stage
         
+        self.box = self.glossMgr.themeMgr.get_texture("tv_osd_box", self.stage, None)
+        """
         pixbuf = gtk.gdk.pixbuf_new_from_file("ui/splash_box.png")
         self.box = clutter.Texture()
         self.box.set_pixbuf(pixbuf)
         self.box.set_opacity(int(255 * 0.75))
         self.box.set_height(int(self.stage.get_height()* 0.15))
+        """
         self.add(self.box)
        
         self.logo = clutter.Texture()

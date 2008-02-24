@@ -7,6 +7,7 @@ import pango
 import copy
 
 class GlossMgr:
+    theme_dir = "themes"
 
     def __init__ (self, stage):
         self.stage = stage
@@ -29,30 +30,12 @@ class GlossMgr:
         #The background is a bit messy due to the depth issues :(
         background = self.themeMgr.get_texture("background", None, None)
         background.set_size(self.stage.get_width(), self.stage.get_height())
-        """
-        (width, height) = background.get_abs_size()
-        print background.get_abs_size()
-        #background.set_anchor_point_from_gravity(clutter.GRAVITY_NORTH_WEST)
-        background.set_anchor_point(int(background.get_width()/3.5), int(background.get_height()/3.5))    
-        #background.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
-        background.set_depth(-self.stage.get_width())
-        print background.get_abs_size()
-        #
-        (width_new, height_new) = background.get_abs_size()
-        #width = self.stage.get_width()
-        #height = self.stage.get_height()
-        scale_x = float(width)/float(width_new)
-        scale_y = float(height)/float(height_new)
-        background.set_scale(scale_x, scale_y)
-        print background.get_abs_size()
-        #background.set_width(width)
-        #background.set_height(height)
-        """
+
         background.show()
         
         self.stage.add(background)
         
-        #Setip the selector bar
+        #Setup the selector bar
         self.selector_bar = MenuSelector(self)
         self.selector_bar.show_all()        
         self.stage.add(self.selector_bar)
@@ -300,6 +283,8 @@ class MenuSelector(clutter.Texture):
         return self.x_offset
         
 class message():
+    theme_dir = "themes"
+    
     font = "Lucida Grande "
     message_font_size = 30
     detail_font_size = 22
@@ -317,7 +302,7 @@ class message():
         
         self.main_group = clutter.Group()
         
-        pixbuf = gtk.gdk.pixbuf_new_from_file("ui/splash_box.png")
+        pixbuf = gtk.gdk.pixbuf_new_from_file(self.theme_dir + "/splash_box.png")
         self.box = clutter.Texture()
         self.box.set_pixbuf(pixbuf)
         self.box.set_opacity(int(255 * 0.75))

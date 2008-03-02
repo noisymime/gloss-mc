@@ -1,7 +1,8 @@
 import pygtk
 import gtk
 import clutter
-import eyeD3
+from modules.music_player.music_objects.song import song
+from ui_elements.image_row import ImageRow
 
 class Module():
     title = "Music"
@@ -9,10 +10,16 @@ class Module():
     def __init__(self, glossMgr, dbMgr):
         self.stage = glossMgr.get_stage()
         self.glossMgr = glossMgr
+        self.dbMgr = dbMgr
         self.setup_ui()
-        self.cover_viewer = coverViewer(self.stage) 
+        self.albums = []
+        self.songs = []
+        
+        self.base_dir = self.dbMgr.get_setting("MusicLocation")
+        print "Music Base Dir: " + self.base_dir
         
         self.is_playing = False
+        #self.load_albums()
         
     def setup_ui(self):
         self.menu_image = self.glossMgr.themeMgr.get_texture("music_menu_image", None, None)
@@ -53,42 +60,60 @@ class Module():
         
     def unpause(self):
         pass
+    
+    def load_albums(self):
+        """
+        if not os.path.isdir(dirPath):
+            print "ERROR VideoPlayer: Invalid video path"
+            return None
         
-        
-class coverViewer(clutter.Group):
+        final_file_list = []
+        new_file_list = os.listdir(dirPath)
 
-    def __init__(self, stage):
-        clutter.Group.__init__(self)
-        self.stage = stage
-        self.covers = []
-        self.num_covers = 0
-        self.cover_size = 50 #A cover will be cover_size * cover_size (X * Y)
-        self.cover_gap = 10
+        #Videos and Directories
+        for dir_entry in new_file_list:
+            if os.path.isdir(dirPath + "/" + dir_entry) and not ( dir_entry[0] == "."):
+                cover_viewer.add_folder(dir_entry)
+                #print dir_entry
+            else:
+                final_file_list.append(dir_entry)
+                
+        #Check if we're empty
+        if len(final_file_list) == 0:
+            return
+                
+        #Make sure the dirPath ends in "/"
+        if not dirPath[-1] == "/":
+            dirPath = dirPath + "/"
+        """
+        #Generate some SQL to retrieve videos that were in the final_file_list
+        #Load the videos into the cover viewer
+        sql = "SELECT * FROM music_songs" # WHERE filename IN ("
+        """
+        for filename in final_file_list:
+            filename = dirPath + filename
+            sql = sql + "\"" + filename + "\", "
+        sqlLength = int(len(sql) - 2)
+        sql = sql[:sqlLength]
+        sql = sql + ")"
+        """
+        if self.glossMgr.debug: print "Music SQL: " + sql
+            
+        results = self.dbMgr.run_sql(sql)
         
-        self.num_rows = 2
-        self.num_columns = int(self.stage.get_width() / self.cover_size)
+        #Check for null return
+        if results == None:
+            print "MusicPlayer: No connection to DB or no songs found in DB"
+            return None
         
-    def add_image(self, imagePath):
-        tempTexture = clutter.Texture()
-        pixbuf = gtk.gdk.pixbuf_new_from_file(imagePath)
-        tempTexture.set_pixbuf(pixbuf)
-        xy_ratio = tempTexture.get_width() / tempTexture.get_height()
-        
-        height = int(self.cover_size * xy_ratio)
-        tempTexture.set_width(self.cover_size)
-        tempTexture.set_height(height)
-        
-        self.add(tempTexture)
-        self.num_covers = self.num_covers +1
-        
-        #Redo positioning on all textures to add new one :(
-        """for i = 0 to self.num_covers:
-            tempTexture = self.get_nth_child(i)
-            x = (self.cover_gap + self.cover_size) * i
-            y = (i % self.num_rows) * self.cover_size 
-            tempTexture.set_position(x, y)"""
-        
-
+        #Else add the entries in    
+        for record in results:
+            tempSong = song()
+            tempSong.import_from_mythObject(record)
+            self.songs.append(tempSong)
+            filename = self.base_dir + "/" + tempSong.filename
+            #print filename
+            #tempSong.set_file(filename)
         
         
         

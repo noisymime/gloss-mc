@@ -9,17 +9,18 @@ import os
 from modules.video_player.elements.CoverItem import cover_item
 from InputQueue import InputQueue
 
-class ImageGrid(clutter.Group):
+class ImageRow(clutter.Group):
+    DIRECTION_LEFT, DIRECTION_RIGHT = range(2)
+    
     scaleFactor = 1.4
     inactiveOpacity = 150
     images_size_percent = 0.90 #This is the percentage of the total group size that the covers will take
     
 
-    def __init__(self, glossMgr, width, height, rows, columns):
+    def __init__(self, glossMgr, width, height, columns):
         clutter.Group.__init__(self)
         self.glossMgr = glossMgr
         self.stage = glossMgr.stage
-        self.itemLibrary = []
         self.textureLibrary = []
         
         self.images_group = clutter.Group()
@@ -44,21 +45,19 @@ class ImageGrid(clutter.Group):
         
         
         #self.current_video_details = video_details_group(self.covers_width)
-        self.num_covers = 0
-        self.cover_gap = 1
+        self.num_images = 0
+        self.image_gap = 1
         
         
         #Setup input queue controller
         self.input_queue = InputQueue()
-        self.input_queue.set_action(InputQueue.NORTH, self.move_up)
-        self.input_queue.set_action(InputQueue.SOUTH, self.move_down)
         self.input_queue.set_action(InputQueue.EAST, self.move_right)
         self.input_queue.set_action(InputQueue.WEST, self.move_left)
         
         
         #Setup the current min and max viewable rows
-        self.min_visible_rows = 0
-        self.max_visible_rows = self.num_visible_rows
+        self.min_visible_columns = 0
+        self.max_visible_columns = self.num_visible_columns
         
         self.currentSelection = 0
         
@@ -79,11 +78,8 @@ class ImageGrid(clutter.Group):
         
         self.textureLibrary.append(tempGroup)
 
-        x = (self.num_covers % self.num_columns) * self.image_size + ( (self.num_covers % self.num_columns) * self.cover_gap)
-        y = (self.cover_gap + self.image_size) * (self.num_covers/self.num_columns)
-        
-        #x = (self.num_covers % self.num_columns) * (self.image_size * 1.5) + ( (self.num_covers % self.num_columns) * self.cover_gap)
-        #y = (self.cover_gap + (self.image_size*1.5)) * (self.num_covers/self.num_columns)
+        x = self.num_covers * self.image_size + ( self.num_covers * self.cover_gap)
+        y = 0#(self.cover_gap + self.image_size) * (self.num_covers/self.num_columns)
         
         tempGroup.set_position(x, y)
         
@@ -103,11 +99,11 @@ class ImageGrid(clutter.Group):
         
         #Check if the cover is currently not visible
         rolling = False
-        if incomingItem > (self.num_columns * self.max_visible_rows-1):
-            self.rollViewer(True, self.timeline)
+        if incomingItem > (self.max_visible_columns-1):
+            self.rollViewer(self.DIRECTION_LEFT, self.timeline)
             rolling = True
-        if incomingItem < (self.num_columns * self.min_visible_rows):
-            self.rollViewer(False, self.timeline)
+        if incomingItem < (self.min_visible_columns):
+            self.rollViewer(self.DIRECTION_RIGHT, self.timeline)
             rolling = True
     
         outgoingTexture = self.textureLibrary[outgoingItem]
@@ -201,40 +197,36 @@ class ImageGrid(clutter.Group):
         
     #This moves the visible row of covers up and down
     # moveUp: True if the covers are to come up, false if they're to go down
-    def rollViewer(self, moveUp, timeline):
-        if moveUp:
+    def rollViewer(self, direction, timeline):
+        if direction == self.DIRECTION_LEFT:
             new_y = self.images_group.get_y() - self.image_size
-            self.max_visible_rows = self.max_visible_rows + 1
-            self.min_visible_rows = self.min_visible_rows + 1
+            self.max_visible_column += 1
+            self.min_visible_column += 1
             
-            #Define the row of covers that now needs to disapear / appear
-            min_outgoing = (self.min_visible_rows-1) * self.num_columns
-            max_outgoing = min_outgoing + self.num_columns
-            min_incoming = (self.max_visible_rows-1) * self.num_columns
-            max_incoming = min_incoming + self.num_columns
+            #Define the row of image that now needs to disapear / appear
+            outgoing = self.min_visible_column - 1
+            incoming = self.max_visible_column - 1
             
             #Quick check to make sure that max_incoming isn't greater than the max number of images (This occurs when the final row is incomplete)
-            if max_incoming > self.num_covers:
-                max_incoming = min_incoming + (self.num_covers % self.num_columns)
-        else:
+            if incoming > self.num_covers:
+                return None
+        elif direction == self.DIRECTION_RIGHT:
             new_y = self.images_group.get_y() + self.image_size
-            self.max_visible_rows = self.max_visible_rows - 1
-            self.min_visible_rows = self.min_visible_rows - 1
+            self.max_visible_column -= 1
+            self.min_visible_column -= 1
 
             #Define the row of covers that now needs to disapear / appear
-            min_incoming = (self.min_visible_rows) * self.num_columns
-            max_incoming = min_incoming + self.num_columns
-            min_outgoing = (self.max_visible_rows) * self.num_columns
-            max_outgoing = min_outgoing + self.num_columns   
+            outgoing = self.min_visible_column + 1
+            incoming = self.max_visible_column + 1 
             
             #Quick check to make sure that max_outgoing isn't greater than the max number of images (This occurs when the final row is incomplete)
-            if max_outgoing > self.num_covers:
-                max_outgoing = min_outgoing + (self.num_covers % self.num_columns)         
+            if outgoing > self.num_images:
+                return None         
         
         #Need to add the new row to the group
-        self.addIncomingRow(min_incoming, max_incoming)
+        self.images_group.add(self.textureLibrary[incoming])
         #And set the outgoing row to remove after the timeline finishes
-        self.timeline.connect('completed', self.removeOutgoingRow, min_outgoing, max_outgoing)
+        self.timeline.connect('completed', self.removeItem, outgoing)
         
         
         knots = (\
@@ -248,23 +240,13 @@ class ImageGrid(clutter.Group):
         self.behaviour_outgoing = clutter.BehaviourOpacity(opacity_start=self.inactiveOpacity, opacity_end=0, alpha=alpha)
         
         self.behaviour_path.apply(self.images_group)
-        #Also need to change a few opacities - This is really messy, but works
-        for i in range(min_outgoing, max_outgoing):
-            self.behaviour_outgoing.apply(self.textureLibrary[i])
-        for i in range(min_incoming, max_incoming):
-            self.behaviour_incoming.apply(self.textureLibrary[i])
+        self.behaviour_outgoing.apply(self.textureLibrary[incoming])
+        self.behaviour_incoming.apply(self.textureLibrary[outgoing])
+        
+    def remove_item(self, itemNo):
+        self.images_group.remove(self.textureLibrary[itemNo])
     
-    #These next two functions add and remove visible rows when the viewer rolls        
-    def removeOutgoingRow(self, timeline, min, max):
-        for i in range(min, max):
-            self.images_group.remove(self.textureLibrary[i])
-            
-    def addIncomingRow(self, min, max):
-        for i in range(min, max):
-            self.images_group.add(self.textureLibrary[i])
-            self.textureLibrary[i].set_opacity(0)
-            self.textureLibrary[i].show()
-    
+
     def get_current_texture(self):
         return self.textureLibrary[self.currentSelection]
     
@@ -298,16 +280,6 @@ class ImageGrid(clutter.Group):
         if not self.currentSelection == (self.num_covers-1):
             newItem = self.currentSelection + 1
             self.move_common(newItem)
-    def move_up(self):
-        #Check if we're already on the top row
-        if not (self.currentSelection < self.num_columns):
-            newItem = self.currentSelection - self.num_columns
-            self.move_common(newItem)
-    def move_down(self):
-        #Check if we're already on the bottom row
-        if not (self.currentSelection > (len(self.textureLibrary)-1 - self.num_columns)):
-            newItem = self.currentSelection + self.num_columns
-            self.move_common(newItem)
     def move_common(self, newItem):
         #Final sanity check
         if (newItem < 0) and (not newItem == None):
@@ -316,13 +288,3 @@ class ImageGrid(clutter.Group):
         #If there is movement, make the scale happen
         if not newItem == None:
             self.select_item(newItem, self.currentSelection)
-        
-          
-        if self.update_details:
-            if not self.textureLibrary[self.currentSelection].isFolder:
-                self.details_group.set_video_bare(self.videoLibrary[self.currentSelection])
-                self.update_details = False
-            else:
-                self.details_group.set_folder(self.folderLibrary[(self.currentSelection-len(self.folderLibrary))])
-                #self.details_group.clear()
-        

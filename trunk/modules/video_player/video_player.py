@@ -1,5 +1,3 @@
-import pygtk
-import gtk
 import pygst
 import gst
 import gobject

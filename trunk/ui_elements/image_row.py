@@ -195,8 +195,7 @@ class ImageRow(clutter.Group):
         
         self.timeline.start()
         
-    #This moves the visible row of covers up and down
-    # moveUp: True if the covers are to come up, false if they're to go down
+    #This moves the visible row of covers left and right
     def rollViewer(self, direction, timeline):
         if direction == self.DIRECTION_LEFT:
             new_y = self.images_group.get_y() - self.image_size
@@ -210,6 +209,7 @@ class ImageRow(clutter.Group):
             #Quick check to make sure that max_incoming isn't greater than the max number of images (This occurs when the final row is incomplete)
             if incoming > self.num_covers:
                 return None
+            
         elif direction == self.DIRECTION_RIGHT:
             new_y = self.images_group.get_y() + self.image_size
             self.max_visible_column -= 1
@@ -223,7 +223,7 @@ class ImageRow(clutter.Group):
             if outgoing > self.num_images:
                 return None         
         
-        #Need to add the new row to the group
+        #Need to add the new image to the group
         self.images_group.add(self.textureLibrary[incoming])
         #And set the outgoing row to remove after the timeline finishes
         self.timeline.connect('completed', self.removeItem, outgoing)

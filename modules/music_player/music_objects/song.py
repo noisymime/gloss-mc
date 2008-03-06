@@ -1,10 +1,12 @@
 import eyeD3
+import os
 
 class song:
     filename = None
     
-    def __init__(self):
-        pass
+    def __init__(self, music_player):
+        self.music_player = music_player
+        self.base_dir = music_player.base_dir
     
     def import_from_mythObject(self, mythObject):
         try:
@@ -40,13 +42,23 @@ class song:
             
         except IndexError, e:
             print "Music_Player: Found difference in DB structure for songs. Attempting to continue."
-            
+    
     def get_image(self):
+        return self.get_image_from_ID3()
+    
+    def get_image_from_ID3(self):
         #Basic check first up to make sure the filename is set
         if self.filename is None:
             return None
         
         tag = eyeD3.Tag()
+        filename = self.base_dir + "/" + self.filename
+        print filename
+        
+        #Make sure the file exists and we can read it
+        if not os.access(filename, os.R_OK):
+            return None
+        
         tag.link(filename)
         """
         print tag.getArtist()
@@ -62,4 +74,6 @@ class song:
                     
             print "Image Mine Type: " + str(img.mimeType)
             data = img.imageData
+            return data
+            
             

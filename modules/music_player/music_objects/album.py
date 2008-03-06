@@ -1,7 +1,7 @@
 class album:
     
-    def __init__(self):
-        pass
+    def __init__(self, music_player):
+        self.music_player = music_player
     
     def import_from_mythObject(self, mythObject):
         try:

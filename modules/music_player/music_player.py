@@ -2,6 +2,7 @@ import pygtk
 import gtk
 import clutter
 from modules.music_player.music_objects.song import song
+from modules.music_player.lastFM_interface import lastFM_interface
 from ui_elements.image_row import ImageRow
 
 class Module():
@@ -19,7 +20,10 @@ class Module():
         print "Music Base Dir: " + self.base_dir
         
         self.is_playing = False
-        #self.load_albums()
+        self.load_albums()
+        
+        self.lastFM = lastFM_interface()
+        #lastFM.get_artist_image("Jason Marazdsgds")
         
     def setup_ui(self):
         self.menu_image = self.glossMgr.themeMgr.get_texture("music_menu_image", None, None)
@@ -37,10 +41,10 @@ class Module():
         if event.keyval == clutter.keysyms.q:
             clutter.main_quit()
         
-    def begin(self, MenuMgr):
+    def begin(self, glossMgr):
         
         #Create a backdrop for the player. In this case we just use the same background as the menus
-        self.backdrop = clutter.CloneTexture(MenuMgr.get_skinMgr().get_Background())
+        self.backdrop = glossMgr.get_themeMgr().get_texture("background", None, None)
         self.backdrop.set_size(self.stage.get_width(), self.stage.get_height())
         self.backdrop.set_opacity(0)
         self.backdrop.show()
@@ -48,9 +52,12 @@ class Module():
         #Fade the backdrop in
         timeline_backdrop = clutter.Timeline(10,40)
         alpha = clutter.Alpha(timeline_backdrop, clutter.ramp_inc_func)
-        backdrop_behaviour = clutter.BehaviourOpacity(alpha, 0, 255)
-        backdrop_behaviour.apply(self.backdrop)
+        self.backdrop_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
+        self.backdrop_behaviour.apply(self.backdrop)
         timeline_backdrop.start()
+        
+        self.stage.add(self.tmpImage)
+        self.tmpImage.show()
         
     def stop(self):
         pass
@@ -106,15 +113,26 @@ class Module():
             print "MusicPlayer: No connection to DB or no songs found in DB"
             return None
         
+        pixbuf = None
         #Else add the entries in    
         for record in results:
-            tempSong = song()
+            tempSong = song(self)
             tempSong.import_from_mythObject(record)
             self.songs.append(tempSong)
-            filename = self.base_dir + "/" + tempSong.filename
+            
+            
+            if not tempSong.get_image()is None:
+                pixbuf = tempSong.get_image()
+                break
             #print filename
             #tempSong.set_file(filename)
         
-        
+        if not pixbuf is None:
+            loader = gtk.gdk.PixbufLoader()
+            loader.write(pixbuf)
+            loader.close()
+            pixbuf = loader.get_pixbuf()
+            self.tmpImage = clutter.Texture()
+            self.tmpImage.set_pixbuf(pixbuf)
         
     

@@ -2,6 +2,8 @@ import pygtk
 import gtk
 import clutter
 from modules.music_player.music_objects.song import song
+from modules.music_player.music_objects.artist import artist
+from modules.music_player.music_objects.album import album
 from modules.music_player.lastFM_interface import lastFM_interface
 from ui_elements.image_row import ImageRow
 
@@ -14,20 +16,38 @@ class Module():
         self.dbMgr = dbMgr
         self.setup_ui()
         self.albums = []
+        self.artists = []
         self.songs = []
         
+        self.imageRow = ImageRow(self.glossMgr, self.stage.get_width(), 100, 10)
+        
+        self.lastFM = lastFM_interface()
         self.base_dir = self.dbMgr.get_setting("MusicLocation")
+        self.images_dir = self.get_images_dir()
         print "Music Base Dir: " + self.base_dir
         
         self.is_playing = False
-        self.load_albums()
+        #self.load_albums()
+        self.load_artists()
         
-        self.lastFM = lastFM_interface()
-        #lastFM.get_artist_image("Jason Marazdsgds")
         
     def setup_ui(self):
         self.menu_image = self.glossMgr.themeMgr.get_texture("music_menu_image", None, None)
+    
+    #Get the images dir setting our of the DB
+    #But also creates the setting if it doesn't already exist
+    def get_images_dir(self):
+        images_dir = self.dbMgr.get_setting("GlossMusicImgLocation")
         
+        if images_dir is None:
+            #We need to create the setting
+            #Default value is the same as the music base_dir + covers
+            images_dir = self.base_dir + "/.images/"
+            images_dir = images_dir.replace("//", "/") #Just a silly little check
+            self.dbMgr.set_setting("GlossMusicImgLocation", images_dir)
+            
+        return images_dir
+    
     #Action to take when menu item is selected
     def action(self):
         return self
@@ -56,8 +76,16 @@ class Module():
         self.backdrop_behaviour.apply(self.backdrop)
         timeline_backdrop.start()
         
-        self.stage.add(self.tmpImage)
-        self.tmpImage.show()
+        for artist in self.artists:
+            pixbuf = artist.get_image()
+            if not pixbuf is None:
+                tmpImage = clutter.Texture()
+                tmpImage.set_pixbuf(pixbuf)
+                self.imageRow.add_texture_group(tmpImage)
+            
+        
+        self.stage.add(self.imageRow)
+        self.imageRow.show()
         
     def stop(self):
         pass
@@ -69,41 +97,9 @@ class Module():
         pass
     
     def load_albums(self):
-        """
-        if not os.path.isdir(dirPath):
-            print "ERROR VideoPlayer: Invalid video path"
-            return None
-        
-        final_file_list = []
-        new_file_list = os.listdir(dirPath)
-
-        #Videos and Directories
-        for dir_entry in new_file_list:
-            if os.path.isdir(dirPath + "/" + dir_entry) and not ( dir_entry[0] == "."):
-                cover_viewer.add_folder(dir_entry)
-                #print dir_entry
-            else:
-                final_file_list.append(dir_entry)
-                
-        #Check if we're empty
-        if len(final_file_list) == 0:
-            return
-                
-        #Make sure the dirPath ends in "/"
-        if not dirPath[-1] == "/":
-            dirPath = dirPath + "/"
-        """
         #Generate some SQL to retrieve videos that were in the final_file_list
         #Load the videos into the cover viewer
         sql = "SELECT * FROM music_songs" # WHERE filename IN ("
-        """
-        for filename in final_file_list:
-            filename = dirPath + filename
-            sql = sql + "\"" + filename + "\", "
-        sqlLength = int(len(sql) - 2)
-        sql = sql[:sqlLength]
-        sql = sql + ")"
-        """
         if self.glossMgr.debug: print "Music SQL: " + sql
             
         results = self.dbMgr.run_sql(sql)
@@ -135,4 +131,35 @@ class Module():
             self.tmpImage = clutter.Texture()
             self.tmpImage.set_pixbuf(pixbuf)
         
-    
+    def load_artists(self):
+        #Generate some SQL to retrieve videos that were in the final_file_list
+        #Load the videos into the cover viewer
+        sql = "SELECT * FROM music_artists" # WHERE filename IN ("
+        if self.glossMgr.debug: print "Music Artist SQL: " + sql
+            
+        results = self.dbMgr.run_sql(sql)
+        
+        #Check for null return
+        if results == None:
+            print "MusicPlayer: No connection to DB or no artists found in DB"
+            return None
+        
+        pixbuf = None
+        #Else add the entries in    
+        for record in results:
+            tempArtist = artist(self)
+            tempArtist.import_from_mythObject(record)
+            self.artists.append(tempArtist)
+            
+            """
+            if not tempArtist.get_image()is None:
+                pixbuf = tempArtist.get_image()
+                break
+            """
+            #print filename
+            #tempSong.set_file(filename)
+        """
+        if not pixbuf is None:
+            self.tmpImage = clutter.Texture()
+            self.tmpImage.set_pixbuf(pixbuf)
+        """

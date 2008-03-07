@@ -1,4 +1,5 @@
 import urllib
+import xml
 from xml.dom import minidom
 import pygtk
 import gtk
@@ -20,34 +21,43 @@ class lastFM_interface:
         filehandle = urllib.urlopen(similar_uri)
         
         #We only need the first 2 lines of this file
-        xml = ""
+        xml_string = ""
         for x in range(2):
-            xml += filehandle.readline()
+            xml_string += filehandle.readline()
         filehandle.close()
             
         #Check to see if the artist name was found
-        error_string = "No artist exists with this name: '%s'" % artist
+        error_string = "No artist exists with this name"
         #print "Error String: " + error_string
         #print "XML: " + xml
-        if xml == error_string:
+        if xml_string[0:len(error_string)] == error_string:
             return None
         
+        #We make a little manual change to the url, so that we get the BIG pic off last.FM rather than the 160x160 one
+        xml_string = xml_string.replace("/160/", "/_/")
+        
         #Because we only read in 2 lines, we need to manually close the block
-        xml += "</similarartists>"
-
-        dom = minidom.parseString(xml)
-        element = dom.getElementsByTagName("similarartists")[0]
-        pic_url = element.getAttribute("picture")
+        xml_string += "</similarartists>"
+        
+        try:
+            dom = minidom.parseString(xml_string)
+            element = dom.getElementsByTagName("similarartists")[0]
+            pic_url = element.getAttribute("picture")
+        except xml.parsers.expat.ExpatError, e:
+            print "LastFM Error: Could not parse XML '%s'" % (xml_string)
+            return None
         
         return self.get_pixbuf_from_url(pic_url)
         
         
     def get_pixbuf_from_url(self, pic_url):
+        print pic_url
         img_handle = urllib.urlopen(pic_url)
         img_data = img_handle.read()
+        img_handle.close()
         
         loader = gtk.gdk.PixbufLoader()
         loader.write(img_data)
-        loader.close()
+        #loader.close()
         return loader.get_pixbuf()
         

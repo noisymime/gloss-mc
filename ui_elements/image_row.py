@@ -27,7 +27,6 @@ class ImageRow(clutter.Group):
         self.images_width = int(width * self.images_size_percent)
         self.images_height = int(height * self.images_size_percent)
         
-        self.num_visible_rows = rows
         self.num_columns = columns
         self.image_size = int(self.images_width / self.num_columns) #A cover will be cover_size * cover_size (X * Y)
         
@@ -40,7 +39,7 @@ class ImageRow(clutter.Group):
         #And setup the clip size and position
         scale_amount = int(self.image_size * self.scaleFactor - self.image_size)
         clip_width = (self.image_size*columns) + scale_amount #Width is the cover size by the number of colums, plus the additional amount required for scaling
-        clip_height = (self.image_size*rows) + scale_amount
+        clip_height = (height) + scale_amount
         self.images_group_clip.set_clip(-(scale_amount/2), -(scale_amount/2), clip_width, clip_height)
         
         
@@ -57,13 +56,13 @@ class ImageRow(clutter.Group):
         
         #Setup the current min and max viewable rows
         self.min_visible_columns = 0
-        self.max_visible_columns = self.num_visible_columns
+        self.max_visible_columns = columns
         
         self.currentSelection = 0
         
         self.add(self.images_group_clip)
-        covers_x = int(width * (1-self.covers_size_percent)/2)
-        covers_y = int(height * (1-self.covers_size_percent)/2)
+        covers_x = int(width * (1-self.images_size_percent)/2)
+        covers_y = int(height * (1-self.images_size_percent)/2)
         #self.images_group.set_position(covers_x, covers_y)
         #self.images_group.set_depth(1) #self.image_size)
         self.images_group.show()
@@ -78,19 +77,19 @@ class ImageRow(clutter.Group):
         
         self.textureLibrary.append(tempGroup)
 
-        x = self.num_covers * self.image_size + ( self.num_covers * self.cover_gap)
+        x = self.num_images * self.image_size + ( self.num_images * self.image_gap)
         y = 0#(self.cover_gap + self.image_size) * (self.num_covers/self.num_columns)
         
         tempGroup.set_position(x, y)
         
         #If we're past the maximum rows, make the pics invistible
-        if self.num_covers > (self.num_columns * self.num_visible_rows)-1:
+        if self.num_images > (self.num_columns-1):
             tempGroup.set_opacity(0)
         else:
             self.images_group.add(tempGroup)
         
         tempGroup.show()
-        self.num_covers = self.num_covers +1
+        self.num_images += 1
             
         
     def select_item(self, incomingItem, outgoingItem):

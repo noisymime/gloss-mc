@@ -78,7 +78,14 @@ class mythDB():
         
         # get the resultset as a tuple
         return data[0][1]
+    
+    def set_setting(self, setting, value):
+        if not self.connected:
+            print "Error: Could not establish connection to SQL server. Unable to obtain setting '" + setting_name + "'"
+            return None
         
+        sql = "INSERT INTO settings VALUES('%s', '%s', '%s')" % (setting, value, self.localHost)
+        self.cursor.execute(sql)
     
     #Gets the backend server details, which, in theory, can be different from the SQL server details and/or default port
     def get_backend_server(self):

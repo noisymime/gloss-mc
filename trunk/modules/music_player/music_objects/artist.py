@@ -9,7 +9,7 @@ class album:
     
     def import_from_mythObject(self, mythObject):
         try:
-            self.artistID = mythObject[0]
+            self.artistID = mythObject[0]['artist_id']
             self.name = mythObject[1]
             self.image = mythObject[2]
                 

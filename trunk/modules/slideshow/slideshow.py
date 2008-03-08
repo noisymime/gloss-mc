@@ -17,6 +17,8 @@ class Module:
     sound_file_types = ["mp3", "wav", "ogg"] #possibly more supported by default?
     imageDuration = 7 # In seconds
     effect_FPS = 50
+    
+    max_percent_of_stage = 0.75 # The maximum percentage of the stage size that images can be
 
     def __init__(self, glossMgr, dbMgr):
         self.glossMgr = glossMgr
@@ -106,6 +108,10 @@ class Module:
         self.stage = self.glossMgr.get_stage()
         self.currentTexture = clutter.Texture()
         
+        #Set the maximum sizes of the images
+        self.max_height = int(self.stage.get_height() * self.max_percent_of_stage)
+        self.max_width = int(self.stage.get_width() * self.max_percent_of_stage)
+        
         #Check for an empty baseDir, this means there are no slideshows or no db connection. We simply tell the menuMgr to go back a menu level when this occurs
         if self.baseDir is None:
             MenuMgr.go_up_x_levels(1)
@@ -155,10 +161,8 @@ class Module:
         
         #print "No of children: " + str(self.image_texture_group.get_n_children())
         #Get a random texture
-        self.rand1 = random.randint(0, len(self.textures)-1)
-        self.currentFilename = self.textures[self.rand1]
-        pixbuf = gtk.gdk.pixbuf_new_from_file(self.currentFilename)
-        self.currentTexture.set_pixbuf(pixbuf)
+        self.currentFilename = ""
+        self.currentTexture = self.get_rand_texture()
         
         (x_pos, y_pos) = self.get_random_coords(self.currentTexture)
         self.currentTexture.set_position(x_pos, y_pos)
@@ -191,17 +195,8 @@ class Module:
         self.alpha = clutter.Alpha(self.timeline_main, clutter.ramp_inc_func)
         
         #Decide on the next texture to use
-        self.nextTexture = None
-        while (self.nextTexture == None):
-            self.rand1 = random.randint(0, len(self.textures)-1 )
-            self.nextTexture = clutter.Texture()
-            self.newFilename = self.textures[self.rand1]
-            pixbuf = gtk.gdk.pixbuf_new_from_file(self.newFilename)
-            self.nextTexture.set_pixbuf(pixbuf)
-            #self.nextTexture.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
-            #Make sure we don't show the same photo twice
-            if (self.newFilename == self.currentFilename) and (len(self.textures) > 1):
-                self.nextTexture = None
+        self.nextTexture = self.get_rand_texture()
+
             
         #Make sure its not visible initially (Prevents a nasty flicker the first time a photo is shown)
         self.nextTexture.set_opacity(0)
@@ -226,8 +221,38 @@ class Module:
         #Start and run the Ken Burns effect
         self.behaviour1.apply(self.currentTexture)
         self.behaviour2.apply(self.currentTexture)
-        self.timeline_main.start()       
+        self.timeline_main.start()   
+        
+    #Just gets a random texture
+    def get_rand_texture(self): 
+        self.nextTexture = None   
+        while (self.nextTexture == None):
+            self.rand1 = random.randint(0, len(self.textures)-1 )
+            self.newFilename = self.textures[self.rand1]
+            #Make sure we don't show the same photo twice
+            if (self.newFilename == self.currentFilename) and (len(self.textures) > 1):
+                self.nextTexture = None
+            else:
+                self.nextTexture = clutter.Texture()
+                pixbuf = gtk.gdk.pixbuf_new_from_file(self.newFilename)
+                self.currentFilename = self.newFilename
+                
+                #Do a check on the size of the image
+                if (pixbuf.get_width() > self.max_width) or (pixbuf.get_height() > self.max_height):
+                    #Resize as necesary
+                    xy_ratio = float(pixbuf.get_width()) / pixbuf.get_height()
+                    if pixbuf.get_width() > pixbuf.get_height():
+                        width = self.max_width
+                        height = int(width / xy_ratio)
+                    else:
+                        height = self.max_height
+                        width = int(xy_ratio * height)
+        
+                    pixbuf = pixbuf.scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
+                
+                self.nextTexture.set_pixbuf(pixbuf)
 
+        return self.nextTexture
         
     def image_timeline_end_event(self, data):
         #Add the timeline for the dissolve at the end
@@ -261,8 +286,8 @@ class Module:
         self.nextImage(self.currentTexture)
         
     def get_random_coords(self, texture):
-        x_pos = random.randint(texture.get_width()/2, (self.stage.get_width() - texture.get_width()) ) #Somewhere between 0 and (stage_width-image_width)
-        y_pos = random.randint(texture.get_height()/2, (self.stage.get_height() - texture.get_height())  )
+        x_pos = random.randint(texture.get_width()/2, (self.stage.get_width() - texture.get_width()/2) ) #Somewhere between 0 and (stage_width-image_width)
+        y_pos = random.randint(texture.get_height()/2, (self.stage.get_height() - texture.get_height()/2)  )
         
         return (x_pos, y_pos)
         

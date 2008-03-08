@@ -34,26 +34,25 @@ class cover_item(clutter.Group):
             self.video = video
         
         self.main_pic = clutter.Texture()
-        self.main_pic.set_pixbuf(pixbuf)
-        
-        
-        self.main_pic.show()
+
+        #New method of resizing changes size of pixbuf rather than texture.... MUCH better performance :)
         (x, y) = (0, 0)
-        if self.main_pic.get_height() > self.main_pic.get_width():
-            xy_ratio = float(self.main_pic.get_width()) / self.main_pic.get_height()
-            self.main_pic.set_height(cover_size)
+        if pixbuf.get_height() > pixbuf.get_width():
+            xy_ratio = float(pixbuf.get_width()) / pixbuf.get_height()
+            height = cover_size
             width = int(cover_size * xy_ratio)
-            self.main_pic.set_width(width)
             x = (cover_size - width)/2
             #x = int(cover_size / 2)
             #x = x + (cover_size - width)
         else:
-            xy_ratio = float(self.main_pic.get_height()) / float(self.main_pic.get_width())
-            self.main_pic.set_width(cover_size)
+            xy_ratio = float(pixbuf.get_height()) / float(pixbuf.get_width())
+            width = cover_size
             height = int(cover_size * xy_ratio)
-            self.main_pic.set_height(height)
             y = (cover_size - height)/2
             #y = y + (cover_size - height)
+        pixbuf = pixbuf.scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
+        self.main_pic.set_pixbuf(pixbuf)
+        self.main_pic.show()        
         
 
             

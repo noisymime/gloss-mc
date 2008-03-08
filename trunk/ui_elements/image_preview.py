@@ -152,19 +152,20 @@ class image_previewer(clutter.Group):
         
         texture = clutter.Texture()
         pixbuf = gtk.gdk.pixbuf_new_from_file(self.textures[rand])
-        texture.set_pixbuf(pixbuf)
+        
         
         #Set the image size based on the max bounds
-        xy_ratio = float(texture.get_width()) / texture.get_height()
-        if texture.get_width() > texture.get_height():
-            texture.set_width(self.max_img_width)
+        xy_ratio = float(pixbuf.get_width()) / pixbuf.get_height()
+        if pixbuf.get_width() > pixbuf.get_height():
+            width = self.max_img_width
             height = int(self.max_img_width / xy_ratio)
-            texture.set_height(height)
         else:
-            texture.set_height(self.max_img_height)
+            height = self.max_img_height
             width = int(xy_ratio * self.max_img_height)
-            texture.set_width(width)
-            
+        
+        pixbuf = pixbuf.scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
+
+        texture.set_pixbuf(pixbuf) 
         reflectionTexture = Texture_Reflection(texture)
         
         textureGroup = clutter.Group()
@@ -172,7 +173,6 @@ class image_previewer(clutter.Group):
         textureGroup.add(reflectionTexture)
         texture.show()
         reflectionTexture.show()
-        #texture.set_width(width)
         return textureGroup
         
     def next_image(self, data):

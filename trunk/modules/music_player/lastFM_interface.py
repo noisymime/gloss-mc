@@ -3,6 +3,8 @@ import xml
 from xml.dom import minidom
 import pygtk
 import gtk
+import gobject
+from itertools import izip, repeat, chain
 
 class lastFM_interface:
     lastFM_base_xml_uri = "http://ws.audioscrobbler.com/1.0/"
@@ -17,6 +19,7 @@ class lastFM_interface:
     #Returns None if it is unable to get an image
     def get_artist_image(self, artist):
         artist_clean = artist.replace(" ", "+")
+        artist_clean = artist_clean.replace("/", "+")
         similar_uri = self.lastFM_artist_xml_uri + artist_clean +"/similar.xml"
         filehandle = urllib.urlopen(similar_uri)
         
@@ -45,19 +48,34 @@ class lastFM_interface:
             pic_url = element.getAttribute("picture")
         except xml.parsers.expat.ExpatError, e:
             print "LastFM Error: Could not parse XML '%s'" % (xml_string)
+            print "LastFM Error: URI Attempted '%s'" % (similar_uri)
             return None
         
         return self.get_pixbuf_from_url(pic_url)
         
-        
+
     def get_pixbuf_from_url(self, pic_url):
-        print pic_url
+        chunk_size = 32768
+        
         img_handle = urllib.urlopen(pic_url)
-        img_data = img_handle.read()
+        img_size = int(img_handle.info().getheader("Content-Length"))
+        img_data = img_handle.read(img_size)
         img_handle.close()
         
+        #print pic_url
+        #print "Img Size: " + str(img_size)
+        #print "Read size: " + str(len(img_data))
+        
         loader = gtk.gdk.PixbufLoader()
-        loader.write(img_data)
-        #loader.close()
+        try:
+            #This is a nasty hack to get over GDK Bug: http://bugzilla.gnome.org/show_bug.cgi?id=494667
+            for chunk in izip(*[chain(img_data, repeat('', chunk_size-1))] * chunk_size):
+                loader.write(''.join(chunk))
+                
+            loader.close()
+        except gobject.GError, e:
+            print "Last.FM: '%s'" % (e)
+            #print "Last.FM: Received invalid image file: '%s' " % (pic_url)
+        
         return loader.get_pixbuf()
         

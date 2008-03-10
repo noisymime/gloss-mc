@@ -2,13 +2,18 @@ import pygtk
 import gtk
 import gobject
 import os
+import thread
+from modules.music_player.music_objects.music_object import MusicObject
 
-class artist:
+class artist(MusicObject):
+    PENDING_DOWNLOAD = range(1)
+    
     artistID = None
     name = None
     image = None
     
     def __init__(self, music_player):
+        MusicObject.__init__(self)
         self.music_player = music_player
     
     def import_from_mythObject(self, mythObject):
@@ -45,17 +50,20 @@ class artist:
                 pixbuf = gtk.gdk.pixbuf_new_from_file(filename)
             except gobject.GError, e:
                 print "Music_Player: Attempted to open file '%s', but it does not exist" % (filename)
-                return
+                return None
             
             return pixbuf
         #If self.image is a eqaul to 'unset', means the column exists but that the image entry is blank, we should try to find one
         else:
-            pixbuf = self.get_image_from_lastFM()
-            if not pixbuf is None: self.save_image(pixbuf)
-            return pixbuf
+            #We send a request off to LastFM to grab an image.
+            #This will emit the "image-found" signal when and if it was successful
+            thread.start_new_thread(self.get_image_from_lastFM, (None,))
+            #pixbuf = self.get_image_from_lastFM()
+            return self.PENDING_DOWNLOAD
         
-    def get_image_from_lastFM(self):
+    def get_image_from_lastFM(self, thread_data):
         pixbuf = self.music_player.lastFM.get_artist_image(self.name)
+        if not pixbuf is None: self.save_image(pixbuf)
         return pixbuf
     
     #Saves an image (pixbuf) to file and updates the Myth db
@@ -82,3 +90,7 @@ class artist:
         sql = "UPDATE music_artists SET artist_image = '%s' WHERE artist_id = '%s'" % (filename_short, self.artistID)
         self.music_player.dbMgr.run_sql(sql)
         
+        self.image = filename_short
+        
+        #Let off a signal to say the image is ready
+        self.emit("image-found")

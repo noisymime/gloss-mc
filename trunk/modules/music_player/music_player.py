@@ -1,14 +1,17 @@
 import pygtk
 import gtk
 import clutter
+import thread
 from modules.music_player.music_objects.song import song
 from modules.music_player.music_objects.artist import artist
 from modules.music_player.music_objects.album import album
 from modules.music_player.lastFM_interface import lastFM_interface
 from ui_elements.image_row import ImageRow
+from ui_elements.image_frame import ImageFrame
 
 class Module():
     title = "Music"
+    num_columns = 6
 
     def __init__(self, glossMgr, dbMgr):
         self.stage = glossMgr.get_stage()
@@ -19,12 +22,12 @@ class Module():
         self.artists = []
         self.songs = []
         
-        self.imageRow = ImageRow(self.glossMgr, self.stage.get_width(), 100, 10)
+        self.imageRow = ImageRow(self.glossMgr, self.stage.get_width(), 200, self.num_columns)
         
         self.lastFM = lastFM_interface()
         self.base_dir = self.dbMgr.get_setting("MusicLocation")
         self.images_dir = self.get_images_dir()
-        print "Music Base Dir: " + self.base_dir
+        #print "Music Base Dir: " + self.base_dir
         
         self.is_playing = False
         #self.load_albums()
@@ -76,16 +79,35 @@ class Module():
         self.backdrop_behaviour.apply(self.backdrop)
         timeline_backdrop.start()
         
-        for artist in self.artists:
-            pixbuf = artist.get_image()
-            if not pixbuf is None:
-                tmpImage = clutter.Texture()
-                tmpImage.set_pixbuf(pixbuf)
-                self.imageRow.add_texture_group(tmpImage)
-            
+        #Load in the initial images:
+        self.load_image_range(0, self.num_columns)
         
         self.stage.add(self.imageRow)
         self.imageRow.show()
+        
+        #Load the rest of the images
+        thread.start_new_thread(self.load_image_range, (self.num_columns, len(self.artists)-1))
+        #self.load_image_range(self.num_columns, len(self.artists)-1)
+        
+    def load_image_range(self, start, end, thread_data = None):
+        for i in range(start, end):
+            artist = self.artists[i]
+            pixbuf = artist.get_image()
+            tmpImage = clutter.Texture()
+            if pixbuf == artist.PENDING_DOWNLOAD:
+                artist.connect("image-found", self.set_image_cb, artist, tmpImage)
+            elif not pixbuf is None:
+                #tmpImage.set_pixbuf(pixbuf)
+                tmpImage = ImageFrame(pixbuf, self.imageRow.image_size)
+                self.imageRow.add_texture_group(tmpImage)
+        
+    #A simple callback funtion to set the image of an artist/album after it has completed a download
+    def set_image_cb(self, data, music_object, tmpImage):
+        #if self.glossMgr.debug:
+        print "Image for music_obect '%s' downloaded" % (music_object.name)
+        pixbuf = music_object.get_image()
+        if not pixbuf is None:
+                tmpImage.set_pixbuf(pixbuf)
         
     def stop(self):
         pass

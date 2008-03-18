@@ -9,7 +9,7 @@ from modules.music_player.lastFM_interface import lastFM_interface
 from ui_elements.image_row import ImageRow
 from ui_elements.image_frame import ImageFrame
 
-class Module():
+class Module:
     title = "Music"
     num_columns = 6
 
@@ -31,7 +31,8 @@ class Module():
         
         self.is_playing = False
         #self.load_albums()
-        self.load_artists()
+        #self.load_artists()
+        thread.start_new_thread(self.load_artists, ())
         
         
     def setup_ui(self):
@@ -64,6 +65,9 @@ class Module():
         if event.keyval == clutter.keysyms.q:
             clutter.main_quit()
         
+        if (event.keyval == clutter.keysyms.Left) or (event.keyval == clutter.keysyms.Right):
+            self.imageRow.input_queue.input(event)
+        
     def begin(self, glossMgr):
         
         #Create a backdrop for the player. In this case we just use the same background as the menus
@@ -73,25 +77,37 @@ class Module():
         self.backdrop.show()
         self.stage.add(self.backdrop)
         #Fade the backdrop in
-        timeline_backdrop = clutter.Timeline(10,40)
-        alpha = clutter.Alpha(timeline_backdrop, clutter.ramp_inc_func)
-        self.backdrop_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
+        self.timeline_backdrop = clutter.Timeline(10,40)
+        self.alpha = clutter.Alpha(self.timeline_backdrop, clutter.ramp_inc_func)
+        self.backdrop_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=self.alpha)
         self.backdrop_behaviour.apply(self.backdrop)
-        timeline_backdrop.start()
+
         
         #Load in the initial images:
         self.load_image_range(0, self.num_columns)
         
         self.stage.add(self.imageRow)
+        self.imageRow.set_opacity(0)
         self.imageRow.show()
+        self.backdrop_behaviour.apply(self.imageRow)
+        
+        self.timeline_backdrop.start()
         
         #Load the rest of the images
-        thread.start_new_thread(self.load_image_range, (self.num_columns, len(self.artists)-1))
+        #thread.start_new_thread(self.load_image_range, (self.num_columns, len(self.artists)-1))
+        #self.timeline_backdrop.connect("completed", self.load_image_range_cb)
         #self.load_image_range(self.num_columns, len(self.artists)-1)
+        self.imageRow.select_first()
+        
+    #Just a callback function to call 'load_image_range()'
+    def load_image_range_cb(self, timeline):
+        thread.start_new_thread(self.load_image_range, (self.num_columns, len(self.artists)-1))
         
     def load_image_range(self, start, end, thread_data = None):
+        #clutter.threads_init()
         for i in range(start, end):
             artist = self.artists[i]
+            print "loading: " + artist.name
             pixbuf = artist.get_image()
             tmpImage = clutter.Texture()
             if pixbuf == artist.PENDING_DOWNLOAD:
@@ -99,15 +115,21 @@ class Module():
             elif not pixbuf is None:
                 #tmpImage.set_pixbuf(pixbuf)
                 tmpImage = ImageFrame(pixbuf, self.imageRow.image_size)
-                self.imageRow.add_texture_group(tmpImage)
+
+            
+            self.imageRow.add_texture_group(tmpImage)
+        #clutter.threads_leave()
+        print "Finished threads"
         
     #A simple callback funtion to set the image of an artist/album after it has completed a download
     def set_image_cb(self, data, music_object, tmpImage):
         #if self.glossMgr.debug:
-        print "Image for music_obect '%s' downloaded" % (music_object.name)
+        print "Image for music_object '%s' downloaded" % (music_object.name)
         pixbuf = music_object.get_image()
         if not pixbuf is None:
-                tmpImage.set_pixbuf(pixbuf)
+            clutter.threads_init()
+            tmpImage.set_pixbuf(pixbuf)
+            clutter.threads_leave()
         
     def stop(self):
         pass

@@ -27,15 +27,19 @@ class ImageRow(clutter.Group):
         self.images_width = int(width * self.images_size_percent)
         self.images_height = int(height * self.images_size_percent)
         
+        #Columns must be an odd number
+        if (columns % 2) == 0: columns += 1
         self.num_columns = columns
         self.image_size = int(self.images_width / self.num_columns) #A cover will be cover_size * cover_size (X * Y)
+        self.center = int(columns / 2) + 1
         
         
         #The viewer actually sits within another group that clips its size
         self.images_group_clip = clutter.Group()
         self.images_group_clip.add(self.images_group)
         #Nasty hack to get around centering problem
-        self.images_group.set_position(int(self.image_size/2), int(self.image_size/2))
+        pos_x = int(self.image_size/2) + (self.image_size * (self.center-1))
+        self.images_group.set_position(pos_x, int(self.image_size/2))
         #And setup the clip size and position
         scale_amount = int(self.image_size * self.scaleFactor - self.image_size)
         clip_width = (self.image_size*columns) + scale_amount #Width is the cover size by the number of colums, plus the additional amount required for scaling
@@ -83,7 +87,7 @@ class ImageRow(clutter.Group):
         tempGroup.set_position(x, y)
         
         #If we're past the maximum rows, make the pics invistible
-        if self.num_images > (self.num_columns-1):
+        if self.num_images > (self.num_columns-self.center):
             tempGroup.set_opacity(0)
         else:
             self.images_group.add(tempGroup)
@@ -94,39 +98,40 @@ class ImageRow(clutter.Group):
         
     def select_item(self, incomingItem, outgoingItem):
         self.timeline = clutter.Timeline(10,35)
+        alpha = clutter.Alpha(self.timeline, clutter.smoothstep_inc_func)
         self.input_queue.set_timeline(self.timeline)
-        
-        #Check if the cover is currently not visible
-        rolling = False
-        if incomingItem > (self.max_visible_columns-1):
-            self.rollViewer(self.DIRECTION_LEFT, self.timeline)
-            rolling = True
-        if incomingItem < (self.min_visible_columns):
-            self.rollViewer(self.DIRECTION_RIGHT, self.timeline)
-            rolling = True
     
         outgoingTexture = self.textureLibrary[outgoingItem]
         incomingTexture = self.textureLibrary[incomingItem]
         
-        alpha = clutter.Alpha(self.timeline, clutter.smoothstep_inc_func)# clutter.ramp_inc_func)
+        #Do the stuff for edge cases (ie the textures coming in and going out)
+        if incomingItem > outgoingItem:
+            direction = self.DIRECTION_RIGHT
+            edge_texture_incoming_no = outgoingItem + (self.center)
+            edge_texture_outgoing_no = outgoingItem - (self.center)
+        else:
+            direction = self.DIRECTION_LEFT
+            edge_texture_incoming_no = outgoingItem - (self.center)
+            edge_texture_outgoing_no = outgoingItem + (self.center)
+            
+        edge_texture_incoming = self.textureLibrary[edge_texture_incoming_no]
+        if edge_texture_outgoing_no >= 0:
+            edge_texture_outgoing = self.textureLibrary[edge_texture_outgoing_no]
+            self.timeline.connect('completed', self.remove_item, edge_texture_outgoing_no)
+            
+        self.images_group.add(edge_texture_incoming)
+        self.behaviourEdgeIncomingOpacity = clutter.BehaviourOpacity(opacity_start=0, opacity_end=self.inactiveOpacity, alpha=alpha)
+        self.behaviourEdgeIncomingOpacity.apply(edge_texture_incoming)
+        
+        
+        #Now do the stuff for selecting the image in the middle
         self.behaviourNew_scale = clutter.BehaviourScale(x_scale_start=1, y_scale_start=1, x_scale_end=self.scaleFactor, y_scale_end=self.scaleFactor, alpha=alpha) #clutter.GRAVITY_CENTER)
         self.behaviourNew_z = clutter.BehaviourDepth(depth_start=1, depth_end=2, alpha=alpha)
-        #If we're performing a roll (See above) then the incoming opacity should start at 0 rather than the normal inactive opacity
-        if rolling:
-            self.behaviourNew_opacity = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
-        else:
-            self.behaviourNew_opacity = clutter.BehaviourOpacity(opacity_start=self.inactiveOpacity, opacity_end=255, alpha=alpha)
+        self.behaviourNew_opacity = clutter.BehaviourOpacity(opacity_start=self.inactiveOpacity, opacity_end=255, alpha=alpha)
         
         self.behaviourOld_scale = clutter.BehaviourScale(x_scale_start=self.scaleFactor, y_scale_start=self.scaleFactor, x_scale_end=1, y_scale_end=1, alpha=alpha)
         self.behaviourOld_z = clutter.BehaviourDepth(depth_start=2, depth_end=1, alpha=alpha)
         self.behaviourOld_opacity = clutter.BehaviourOpacity(opacity_start=255, opacity_end=self.inactiveOpacity, alpha=alpha)
-        
-        (x, y) = incomingTexture.get_position()
-        (x, y) = self.images_group.get_position()
-        anchor_x = incomingTexture.get_width()/2
-        anchor_y = incomingTexture.get_height()/2
-        #self.images_group.set_anchor_point(anchor_x, anchor_y)
-        #incomingTexture.set_anchor_point(anchor_x, anchor_y)
         
         self.behaviourNew_scale.apply(incomingTexture)
         self.behaviourNew_z.apply(incomingTexture)
@@ -135,16 +140,18 @@ class ImageRow(clutter.Group):
         self.behaviourOld_z.apply(outgoingTexture)
         self.behaviourOld_opacity.apply(outgoingTexture)
         
-        #Set gravities
-        
-        
-        (x, y) = outgoingTexture.get_position()
-        anchor_x = outgoingTexture.get_width()/2
-        anchor_y = outgoingTexture.get_height()/2
-        #outgoingTexture.set_anchor_point(anchor_x, anchor_y)
-        #incomingTexture.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
-        #outgoingTexture.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
-        
+        #And finally, moving the whole thing left/right
+        (x, y) = self.images_group.get_position()
+        if direction == self.DIRECTION_RIGHT:
+            (new_x, new_y) = ( (x-(self.image_size+self.image_gap)), y)
+        else:
+            (new_x, new_y) = ( (x+(self.image_size+self.image_gap)), y)
+        knots = (\
+                (x, y),\
+                (new_x, new_y)\
+                )
+        self.behaviour_path = clutter.BehaviourPath(alpha, knots)
+        self.behaviour_path.apply(self.images_group)
         
         self.currentSelection = incomingItem
         
@@ -153,12 +160,6 @@ class ImageRow(clutter.Group):
     def select_first(self):      
         self.timeline = clutter.Timeline(20,80)
         self.input_queue.set_timeline(self.timeline)
-        """
-        if not len(self.folderLibrary) == 0:
-            pass
-        else:
-            self.current_video_details.set_video(self.videoLibrary[0], self.timeline)
-        """
     
         incomingItem = 0
         incomingTexture = self.textureLibrary[incomingItem]
@@ -242,7 +243,7 @@ class ImageRow(clutter.Group):
         self.behaviour_outgoing.apply(self.textureLibrary[incoming])
         self.behaviour_incoming.apply(self.textureLibrary[outgoing])
         
-    def remove_item(self, itemNo):
+    def remove_item(self, timeline = None, itemNo = None):
         self.images_group.remove(self.textureLibrary[itemNo])
     
 
@@ -276,7 +277,7 @@ class ImageRow(clutter.Group):
             self.move_common(newItem)
     def move_right(self):
         #This check makes sure that we're not on the last cover already
-        if not self.currentSelection == (self.num_covers-1):
+        if not self.currentSelection == (self.num_images-1):
             newItem = self.currentSelection + 1
             self.move_common(newItem)
     def move_common(self, newItem):

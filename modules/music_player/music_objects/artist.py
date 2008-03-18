@@ -78,6 +78,8 @@ class artist(MusicObject):
                 return
         
         self.name = self.name.replace("'","")
+        self.name = self.name.replace("/","_")
+        self.name = self.name.replace("\\","_")
         filename = base_dir + self.name + ".png"
         try:
             pixbuf.save(filename, "png")

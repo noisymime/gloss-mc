@@ -107,12 +107,12 @@ class ImageRow(clutter.Group):
         #Do the stuff for edge cases (ie the textures coming in and going out)
         if incomingItem > outgoingItem:
             direction = self.DIRECTION_RIGHT
-            edge_texture_incoming_no = outgoingItem + (self.center)
+            edge_texture_incoming_no = outgoingItem + (self.center-1)
             edge_texture_outgoing_no = outgoingItem - (self.center)
         else:
             direction = self.DIRECTION_LEFT
             edge_texture_incoming_no = outgoingItem - (self.center)
-            edge_texture_outgoing_no = outgoingItem + (self.center)
+            edge_texture_outgoing_no = outgoingItem + (self.center-1)
             
         edge_texture_incoming = self.textureLibrary[edge_texture_incoming_no]
         if edge_texture_outgoing_no >= 0:

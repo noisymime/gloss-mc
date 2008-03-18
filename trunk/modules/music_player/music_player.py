@@ -1,7 +1,7 @@
 import pygtk
 import gtk
 import clutter
-import thread
+import thread, time
 from modules.music_player.music_objects.song import song
 from modules.music_player.music_objects.artist import artist
 from modules.music_player.music_objects.album import album
@@ -95,29 +95,34 @@ class Module:
         
         #Load the rest of the images
         #thread.start_new_thread(self.load_image_range, (self.num_columns, len(self.artists)-1))
-        #self.timeline_backdrop.connect("completed", self.load_image_range_cb)
+        self.timeline_backdrop.connect("completed", self.load_image_range_cb)
         #self.load_image_range(self.num_columns, len(self.artists)-1)
         self.imageRow.select_first()
         
     #Just a callback function to call 'load_image_range()'
     def load_image_range_cb(self, timeline):
+        #self.load_image_range(self.num_columns, len(self.artists)-1)
+        #clutter.threads_enter()
         thread.start_new_thread(self.load_image_range, (self.num_columns, len(self.artists)-1))
         
     def load_image_range(self, start, end, thread_data = None):
-        #clutter.threads_init()
+
         for i in range(start, end):
             artist = self.artists[i]
             print "loading: " + artist.name
             pixbuf = artist.get_image()
+            if end > 6:
+                time.sleep(0.5)
             tmpImage = clutter.Texture()
             if pixbuf == artist.PENDING_DOWNLOAD:
                 artist.connect("image-found", self.set_image_cb, artist, tmpImage)
             elif not pixbuf is None:
                 #tmpImage.set_pixbuf(pixbuf)
                 tmpImage = ImageFrame(pixbuf, self.imageRow.image_size)
-
+                
             
             self.imageRow.add_texture_group(tmpImage)
+
         #clutter.threads_leave()
         print "Finished threads"
         

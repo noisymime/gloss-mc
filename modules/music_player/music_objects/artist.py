@@ -6,7 +6,6 @@ import thread
 from modules.music_player.music_objects.music_object import MusicObject
 
 class artist(MusicObject):
-    PENDING_DOWNLOAD = range(1)
     
     artistID = None
     name = None

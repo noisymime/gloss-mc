@@ -14,3 +14,11 @@ class album:
         except IndexError, e:
             print "Music_Player: Found difference in DB structure for albums. Attempting to continue."
         
+    def get_image(self):
+        #First way to get an image is via the songs on this album
+        songs = self.music_player.backend.get_songs_by_albumID(self.albumID)
+        
+        for song in songs:
+            pixbuf = song.get_image_from_ID3()
+            if not pixbuf is None:
+                return pixbuf

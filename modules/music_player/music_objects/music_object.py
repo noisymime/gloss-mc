@@ -2,6 +2,7 @@ import gobject
 
 # An abstract class that simply serves to help emit a common signal
 class MusicObject(gobject.GObject):
+    PENDING_DOWNLOAD = range(1)
     
     #Setup signals
     __gsignals__ =  { 

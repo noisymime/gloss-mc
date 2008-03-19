@@ -3,10 +3,11 @@ import gtk
 import pango
 import clutter
 import os
+from ui_elements.ReflectionTexture import Texture_Reflection
 
 class ImageFrame(clutter.Group):
     
-    def __init__(self, pixbuf, img_size):
+    def __init__(self, pixbuf, img_size, use_reflection = False):
         clutter.Group.__init__(self)
         self.width = img_size
         self.height = img_size
@@ -33,18 +34,13 @@ class ImageFrame(clutter.Group):
         self.main_pic.show()        
         
 
-        """
-        #This just seems to keep changing in Clutter so I'll leave it here
-        gap = (cover_size - self.main_pic.get_width())/2
-        anchor_x = (cover_size - gap)/2 
-        #anchor_x = cover_size/2
-        gap = (cover_size - self.main_pic.get_height())/2
-        anchor_y = (cover_size - gap)/2 
-        #anchor_y = cover_size/2 #self.main_pic.get_height()/2
-        self.set_anchor_point(anchor_x, anchor_y)
-        #self.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
-        """ 
-            
+        #If a reflection is desired, add it on
+        if use_reflection:
+            self.reflection = Texture_Reflection(self.main_pic)
+            self.add(self.reflection)
+            self.reflection.show()
+        else:
+            self.reflection = None
         
         self.main_pic.set_position(x, y)        
         self.add(self.main_pic)

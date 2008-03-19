@@ -28,7 +28,7 @@ class MusicObjectRow(ImageRow):
                 object.connect("image-found", self.set_image_cb, object, tmpImage)
             elif not pixbuf is None:
                 #tmpImage.set_pixbuf(pixbuf)
-                tmpImage = ImageFrame(pixbuf, self.image_size)
+                tmpImage = ImageFrame(pixbuf, self.image_size, use_reflection=True)
                 
             
             self.add_texture_group(tmpImage)
@@ -49,3 +49,6 @@ class MusicObjectRow(ImageRow):
             clutter.threads_init()
             tmpImage.set_pixbuf(pixbuf)
             clutter.threads_leave()
+            
+    def get_current_object(self):
+        return self.objectLibrary[self.currentSelection]

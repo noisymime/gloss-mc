@@ -1,5 +1,7 @@
 import eyeD3
 import os
+import pygtk
+import gtk
 
 class song:
     filename = None
@@ -46,6 +48,8 @@ class song:
     def get_image(self):
         return self.get_image_from_ID3()
     
+    #Tries to retrieve an image (pixbuf) from a song
+    #Returns None if nothing found
     def get_image_from_ID3(self):
         #Basic check first up to make sure the filename is set
         if self.filename is None:
@@ -74,6 +78,9 @@ class song:
                     
             print "Image Mine Type: " + str(img.mimeType)
             data = img.imageData
-            return data
+            loader = gtk.gdk.PixbufLoader()
+            loader.write(pixbuf)
+            loader.close()
+            return loader.get_pixbuf()
             
             

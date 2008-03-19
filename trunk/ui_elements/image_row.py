@@ -16,6 +16,8 @@ class ImageRow(clutter.Group):
     inactiveOpacity = 150
     images_size_percent = 0.90 #This is the percentage of the total group size that the covers will take
     
+    fps = 35
+    frames = 25
 
     def __init__(self, glossMgr, width, height, columns):
         clutter.Group.__init__(self)
@@ -97,7 +99,7 @@ class ImageRow(clutter.Group):
             
         
     def select_item(self, incomingItem, outgoingItem):
-        self.timeline = clutter.Timeline(10,35)
+        self.timeline = clutter.Timeline(self.frames, self.fps)
         alpha = clutter.Alpha(self.timeline, clutter.smoothstep_inc_func)
         self.input_queue.set_timeline(self.timeline)
     
@@ -158,7 +160,7 @@ class ImageRow(clutter.Group):
         self.timeline.start()
         
     def select_first(self):      
-        self.timeline = clutter.Timeline(20,80)
+        self.timeline = clutter.Timeline(self.frames, self.fps)
         self.input_queue.set_timeline(self.timeline)
     
         incomingItem = 0
@@ -181,7 +183,7 @@ class ImageRow(clutter.Group):
         if self.currentSelection is None:
             return
         
-        self.timeline = clutter.Timeline(10,35)
+        self.timeline = clutter.Timeline(self.frames, self.fps)
         alpha = clutter.Alpha(self.timeline, clutter.smoothstep_inc_func)        
                 
         self.behaviourOld_scale = clutter.BehaviourScale(x_scale_start=self.scaleFactor, y_scale_start=self.scaleFactor, x_scale_end=1, y_scale_end=1, alpha=alpha)

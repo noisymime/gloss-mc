@@ -70,6 +70,14 @@ class Module:
             #calculate a period of time the loading threads should sleep for when a timline is in progress
             self.sleep_time = float(MusicObjectRow.frames) / float(MusicObjectRow.fps)
             self.artistImageRow.input_queue.input(event)
+            
+            #Just a little test code
+            artist = self.artistImageRow.get_current_object()
+            albums = self.backend.get_albums_by_artistID(artist.artistID)
+            name_string = ""
+            for album in albums:
+                name_string += album.name
+            self.tmpLabel.set_text(name_string)
         
     def begin(self, glossMgr):
         
@@ -91,8 +99,17 @@ class Module:
         
         self.stage.add(self.artistImageRow)
         self.artistImageRow.set_opacity(0)
+        self.artistImageRow.select_first()
         self.artistImageRow.show()
         self.backdrop_behaviour.apply(self.artistImageRow)
+        
+        #Just a nasty temp label for outputting stuff
+        self.tmpLabel = clutter.Label()
+        self.tmpLabel.set_color(clutter.color_parse('White'))
+        self.tmpLabel.set_position(0, 350)
+        self.tmpLabel.set_text("Test")
+        self.tmpLabel.show()
+        self.stage.add(self.tmpLabel)
         
         self.timeline_backdrop.start()
         
@@ -100,7 +117,7 @@ class Module:
         #thread.start_new_thread(self.load_image_range, (self.num_columns, len(self.artists)-1))
         self.timeline_backdrop.connect("completed", self.artistImageRow.load_image_range_cb)
         #self.load_image_range(self.num_columns, len(self.artists)-1)
-        self.artistImageRow.select_first()
+        
         
     
         

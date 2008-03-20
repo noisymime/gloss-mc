@@ -57,29 +57,20 @@ class song:
         
         tag = eyeD3.Tag()
         filename = self.base_dir + "/" + self.filename
-        print filename
+        #print filename
         
         #Make sure the file exists and we can read it
         if not os.access(filename, os.R_OK):
             return None
         
         tag.link(filename)
-        """
-        print tag.getArtist()
-        print tag.getAlbum()
-        print tag.getTitle()
-        """
         
         images = tag.getImages()
-        for img in images:
-            #str(img.picTypeToString(img.pictureType) + " Image"), \
-            #print "%s: [Size: %d bytes] [Type: %s]" % "test", len(img.imageData), img.mimeType
-            #print img.picTypeToString(img.pictureType) + " Image"
-                    
-            print "Image Mine Type: " + str(img.mimeType)
+        for img in images:                    
+            #print "Image Mine Type: " + str(img.mimeType)
             data = img.imageData
             loader = gtk.gdk.PixbufLoader()
-            loader.write(pixbuf)
+            loader.write(data)
             loader.close()
             return loader.get_pixbuf()
             

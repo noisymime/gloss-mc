@@ -28,7 +28,7 @@ class Module:
         self.lastFM = lastFM_interface()
         self.base_dir = self.dbMgr.get_setting("MusicLocation")
         self.images_dir = self.get_images_dir()
-        #print "Music Base Dir: " + self.base_dir
+        print "Music Base Dir: " + self.base_dir
         
         self.is_playing = False
         #self.load_albums()
@@ -78,6 +78,9 @@ class Module:
             for album in albums:
                 name_string += album.name
             self.tmpLabel.set_text(name_string)
+            pixbuf = albums[0].get_image()
+            if not pixbuf is None:
+                self.main_img.set_pixbuf(pixbuf)
         
     def begin(self, glossMgr):
         
@@ -110,6 +113,12 @@ class Module:
         self.tmpLabel.set_text("Test")
         self.tmpLabel.show()
         self.stage.add(self.tmpLabel)
+        
+        #The preview img
+        self.main_img = clutter.Texture()
+        self.main_img.set_position(0, 400)
+        self.main_img.show()
+        self.stage.add(self.main_img)
         
         self.timeline_backdrop.start()
         

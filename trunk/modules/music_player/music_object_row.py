@@ -16,7 +16,7 @@ class MusicObjectRow(ImageRow):
         self.objectLibrary.append(object)
         
         
-    def load_image_range(self, start, end, thread_data = None):
+    def load_image_range(self, start, end, as_thread = False, thread_data = None):
 
         for i in range(start, end):
             object = self.objectLibrary[i]
@@ -27,18 +27,19 @@ class MusicObjectRow(ImageRow):
             if pixbuf == object.PENDING_DOWNLOAD:
                 object.connect("image-found", self.set_image_cb, object, tmpImage)
             elif not pixbuf is None:
-                #tmpImage.set_pixbuf(pixbuf)
-                tmpImage = ImageFrame(pixbuf, self.image_size, use_reflection=True)
-                
+                #If we're performing this loading as a seperate thread, we need to lock the Clutter threads
+                if as_thread: clutter.threads_enter()
+                tmpImage = ImageFrame(pixbuf, self.image_size, use_reflection=False)
+                if as_thread: clutter.threads_leave()
             
             self.add_texture_group(tmpImage)
 
-        #clutter.threads_leave()
-        print "Finished threads"
+        
+        #print "Finished threads"
         
     #Just a callback function to call 'load_image_range()' in a new thread
     def load_image_range_cb(self, timeline):
-        thread.start_new_thread(self.load_image_range, (self.num_columns, len(self.objectLibrary)-1))
+        thread.start_new_thread(self.load_image_range, (self.num_columns, len(self.objectLibrary)-1, True))
         
     #A simple callback funtion to set the image of an artist/album after it has completed a download
     def set_image_cb(self, data, music_object, tmpImage):

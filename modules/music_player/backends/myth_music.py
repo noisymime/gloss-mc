@@ -15,9 +15,8 @@ class Backend:
     
     #Returns a list of artist objects
     def get_artists(self):
-        #Generate some SQL to retrieve videos that were in the final_file_list
         #Load the videos into the cover viewer
-        sql = "SELECT * FROM music_artists"
+        sql = "SELECT * FROM music_artists ORDER BY artist_name"
         if self.music_player.glossMgr.debug: print "Music Artist SQL: " + sql
             
         results = self.dbMgr.run_sql(sql)

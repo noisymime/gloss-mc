@@ -20,16 +20,18 @@ class MusicObjectRow(ImageRow):
 
         for i in range(start, end):
             object = self.objectLibrary[i]
-            print "loading: " + object.name
+            #print "loading: " + object.name
             pixbuf = object.get_image()
             time.sleep(self.music_player.sleep_time)
-            tmpImage = clutter.Texture()
             if pixbuf == object.PENDING_DOWNLOAD:
+                #Get the temporary image
+                object.get_default_image()
+                tmpImage = ImageFrame(None, self.image_size, use_reflection = True, quality = ImageFrame.QUALITY_FAST) #clutter.Texture()
                 object.connect("image-found", self.set_image_cb, object, tmpImage)
             elif not pixbuf is None:
                 #If we're performing this loading as a seperate thread, we need to lock the Clutter threads
                 if as_thread: clutter.threads_enter()
-                tmpImage = ImageFrame(pixbuf, self.image_size, use_reflection=False)
+                tmpImage = ImageFrame(pixbuf, self.image_size, use_reflection=True, quality = ImageFrame.QUALITY_FAST)
                 if as_thread: clutter.threads_leave()
             
             self.add_texture_group(tmpImage)

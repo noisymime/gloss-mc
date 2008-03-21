@@ -10,4 +10,8 @@
 			<y>0</y>
 		</position>
 	</texture>
+
+	<texture id="music_default_artist_image">
+		<image>music/default_cover.png</image>
+	</texture>
 </gloss-theme>

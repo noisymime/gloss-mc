@@ -48,8 +48,8 @@ class artist(MusicObject):
             try:
                 pixbuf = gtk.gdk.pixbuf_new_from_file(filename)
             except gobject.GError, e:
-                print "Music_Player: Attempted to open file '%s', but it does not exist" % (filename)
-                return None
+                print "Music_Player: Attempted to open file '%s', but it does not exist. Using defualt image." % (filename)
+                return self.get_default_image()
             
             return pixbuf
         #If self.image is a eqaul to 'unset', means the column exists but that the image entry is blank, we should try to find one
@@ -62,8 +62,12 @@ class artist(MusicObject):
         
     def get_image_from_lastFM(self, thread_data):
         pixbuf = self.music_player.lastFM.get_artist_image(self.name)
-        if not pixbuf is None: self.save_image(pixbuf)
-        return pixbuf
+        if not pixbuf is None: 
+            self.save_image(pixbuf)
+            return pixbuf
+        else:
+            #We have failed to find an image
+            return None
     
     #Saves an image (pixbuf) to file and updates the Myth db
     def save_image(self, pixbuf):
@@ -95,3 +99,7 @@ class artist(MusicObject):
         
         #Let off a signal to say the image is ready
         self.emit("image-found")
+        
+    #Returns the pixbuf of the default artist image
+    def get_default_image(self):
+        return self.music_player.default_artist_cover

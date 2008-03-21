@@ -6,41 +6,77 @@ import os
 from ui_elements.ReflectionTexture import Texture_Reflection
 
 class ImageFrame(clutter.Group):
+    QUALITY_FAST, QUALITY_NORMAL, QUALITY_SLOW = range(3)
+    quality = QUALITY_NORMAL
     
-    def __init__(self, pixbuf, img_size, use_reflection = False):
+    def __init__(self, pixbuf, img_size, use_reflection = False, quality = QUALITY_NORMAL):
         clutter.Group.__init__(self)
         self.width = img_size
         self.height = img_size
+        self.img_size = img_size
+        self.use_reflection = use_reflection
+        self.quality = quality
         
         self.main_pic = clutter.Texture()
 
-        #New method of resizing changes size of pixbuf rather than texture.... MUCH better performance :)
-        (x, y) = (0, 0)
-        if pixbuf.get_height() > pixbuf.get_width():
-            xy_ratio = float(pixbuf.get_width()) / pixbuf.get_height()
-            height = img_size
-            width = int(img_size * xy_ratio)
-            x = (img_size - width)/2
-            #x = int(cover_size / 2)
-            #x = x + (cover_size - width)
-        else:
-            xy_ratio = float(pixbuf.get_height()) / float(pixbuf.get_width())
-            width = img_size
-            height = int(img_size * xy_ratio)
-            y = (img_size - height)/2
-            #y = y + (cover_size - height)
-        pixbuf = pixbuf.scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
-        self.main_pic.set_pixbuf(pixbuf)
-        self.main_pic.show()        
-        
-
         #If a reflection is desired, add it on
+        
+        
+        #pixbuf can be None, it just means that nothing appears initially
+        if pixbuf is None: 
+            self.add(self.main_pic)
+            
+            if use_reflection:
+                self.reflection = Texture_Reflection(self.main_pic)
+                self.add(self.reflection)
+                self.reflection.show()
+            else:
+                self.reflection = None
+                
+            return
+
+        pixbuf = self.resize_pixbuf(pixbuf)
+        
+        self.main_pic.set_pixbuf(pixbuf)
+        self.main_pic.set_position(self.x, self.y)
+        self.main_pic.show()  
+        
         if use_reflection:
             self.reflection = Texture_Reflection(self.main_pic)
             self.add(self.reflection)
             self.reflection.show()
         else:
-            self.reflection = None
-        
-        self.main_pic.set_position(x, y)        
+            self.reflection = None      
+               
         self.add(self.main_pic)
+        
+    def resize_pixbuf(self, pixbuf):
+        #New method of resizing changes size of pixbuf rather than texture.... MUCH better performance :)
+        (self.x, self.y) = (0, 0)
+        if pixbuf.get_height() > pixbuf.get_width():
+            xy_ratio = float(pixbuf.get_width()) / pixbuf.get_height()
+            height = self.img_size
+            width = int(self.img_size * xy_ratio)
+            self.x = (self.img_size - width)/2
+            #x = int(cover_size / 2)
+            #x = x + (cover_size - width)
+        else:
+            xy_ratio = float(pixbuf.get_height()) / float(pixbuf.get_width())
+            width = self.img_size
+            height = int(self.img_size * xy_ratio)
+            self.y = (self.img_size - height)/2
+            #y = y + (cover_size - height)
+        
+        #Set the conversion mode / quality
+        if self.quality == self.QUALITY_FAST: conversion_mode = gtk.gdk.INTERP_NEAREST #gtk.gdk.INTERP_TILES
+        elif self.quality == self.QUALITY_NORMAL: conversion_mode = gtk.gdk.INTERP_BILINEAR
+        elif self.quality == self.QUALITY_SLOW: conversion_mode = gtk.gdk.INTERP_HYPER
+        pixbuf = pixbuf.scale_simple(width, height, conversion_mode)
+        
+        return pixbuf
+        
+    def set_pixbuf(self, pixbuf):
+        pixbuf = self.resize_pixbuf(pixbuf)
+        self.main_pic.set_pixbuf(pixbuf)
+        self.main_pic.set_position(self.x, self.y)
+        self.main_pic.show()

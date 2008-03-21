@@ -5,7 +5,7 @@ import thread, time
 from modules.music_player.backends.myth_music import Backend
 from modules.music_player.lastFM_interface import lastFM_interface
 from modules.music_player.music_object_row import MusicObjectRow
-
+from ui_elements.image_frame import ImageFrame
 
 class Module:
     title = "Music"
@@ -38,6 +38,9 @@ class Module:
         
     def setup_ui(self):
         self.menu_image = self.glossMgr.themeMgr.get_texture("music_menu_image", None, None)
+        
+        self.default_artist_cover = self.glossMgr.themeMgr.get_texture("music_default_artist_image", None, None).get_pixbuf()
+        
     
     #Get the images dir setting our of the DB
     #But also creates the setting if it doesn't already exist
@@ -68,7 +71,7 @@ class Module:
         
         if (event.keyval == clutter.keysyms.Left) or (event.keyval == clutter.keysyms.Right):
             #calculate a period of time the loading threads should sleep for when a timline is in progress
-            self.sleep_time = float(MusicObjectRow.frames) / float(MusicObjectRow.fps)
+            #self.sleep_time = float(MusicObjectRow.frames) / float(MusicObjectRow.fps)
             self.artistImageRow.input_queue.input(event)
             
             #Just a little test code
@@ -115,8 +118,9 @@ class Module:
         self.stage.add(self.tmpLabel)
         
         #The preview img
-        self.main_img = clutter.Texture()
-        self.main_img.set_position(0, 400)
+        self.main_img = ImageFrame(None, 300, True) #clutter.Texture()
+        self.main_img.set_position(30, 400)
+        self.main_img.set_rotation(clutter.Y_AXIS, 45, self.main_img.get_width(), 0, 0)
         self.main_img.show()
         self.stage.add(self.main_img)
         

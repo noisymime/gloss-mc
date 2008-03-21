@@ -14,7 +14,7 @@ class ImageRow(clutter.Group):
     
     scaleFactor = 1.4
     inactiveOpacity = 150
-    images_size_percent = 0.90 #This is the percentage of the total group size that the covers will take
+    images_size_percent = 1 #0.90 #This is the percentage of the total group size that the covers will take
     
     fps = 35
     frames = 25
@@ -67,6 +67,7 @@ class ImageRow(clutter.Group):
         self.currentSelection = 0
         
         self.add(self.images_group_clip)
+        #self.add(self.images_group)
         covers_x = int(width * (1-self.images_size_percent)/2)
         covers_y = int(height * (1-self.images_size_percent)/2)
         #self.images_group.set_position(covers_x, covers_y)
@@ -89,7 +90,7 @@ class ImageRow(clutter.Group):
         tempGroup.set_position(x, y)
         
         #If we're past the maximum rows, make the pics invistible
-        if self.num_images > (self.num_columns-self.center):
+        if self.num_images > (self.num_columns-self.center-1):
             tempGroup.set_opacity(0)
         else:
             self.images_group.add(tempGroup)
@@ -109,22 +110,26 @@ class ImageRow(clutter.Group):
         #Do the stuff for edge cases (ie the textures coming in and going out)
         if incomingItem > outgoingItem:
             direction = self.DIRECTION_RIGHT
-            edge_texture_incoming_no = outgoingItem + (self.center-1)
-            edge_texture_outgoing_no = outgoingItem - (self.center)
+            edge_texture_incoming_no = outgoingItem + (self.center)
+            edge_texture_outgoing_no = outgoingItem - (self.center-1)
         else:
             direction = self.DIRECTION_LEFT
             edge_texture_incoming_no = outgoingItem - (self.center)
             edge_texture_outgoing_no = outgoingItem + (self.center-1)
+        
+        if edge_texture_incoming_no < len(self.textureLibrary):
+            edge_texture_incoming = self.textureLibrary[edge_texture_incoming_no]
+            self.images_group.add(edge_texture_incoming)
             
-        edge_texture_incoming = self.textureLibrary[edge_texture_incoming_no]
+            self.behaviourEdgeIncomingOpacity = clutter.BehaviourOpacity(opacity_start=0, opacity_end=self.inactiveOpacity, alpha=alpha)
+            self.behaviourEdgeIncomingOpacity.apply(edge_texture_incoming)
         if edge_texture_outgoing_no >= 0:
             edge_texture_outgoing = self.textureLibrary[edge_texture_outgoing_no]
             self.timeline.connect('completed', self.remove_item, edge_texture_outgoing_no)
             
-        self.images_group.add(edge_texture_incoming)
-        self.behaviourEdgeIncomingOpacity = clutter.BehaviourOpacity(opacity_start=0, opacity_end=self.inactiveOpacity, alpha=alpha)
-        self.behaviourEdgeIncomingOpacity.apply(edge_texture_incoming)
-        
+            self.behaviourEdgeOutgoingOpacity = clutter.BehaviourOpacity(opacity_start=self.inactiveOpacity, opacity_end=0, alpha=alpha)
+            self.behaviourEdgeOutgoingOpacity.apply(edge_texture_outgoing)
+            
         
         #Now do the stuff for selecting the image in the middle
         self.behaviourNew_scale = clutter.BehaviourScale(x_scale_start=1, y_scale_start=1, x_scale_end=self.scaleFactor, y_scale_end=self.scaleFactor, alpha=alpha) #clutter.GRAVITY_CENTER)
@@ -197,55 +202,8 @@ class ImageRow(clutter.Group):
         
         self.timeline.start()
         
-    #This moves the visible row of covers left and right
-    def rollViewer(self, direction, timeline):
-        if direction == self.DIRECTION_LEFT:
-            new_y = self.images_group.get_y() - self.image_size
-            self.max_visible_column += 1
-            self.min_visible_column += 1
-            
-            #Define the row of image that now needs to disapear / appear
-            outgoing = self.min_visible_column - 1
-            incoming = self.max_visible_column - 1
-            
-            #Quick check to make sure that max_incoming isn't greater than the max number of images (This occurs when the final row is incomplete)
-            if incoming > self.num_covers:
-                return None
-            
-        elif direction == self.DIRECTION_RIGHT:
-            new_y = self.images_group.get_y() + self.image_size
-            self.max_visible_column -= 1
-            self.min_visible_column -= 1
-
-            #Define the row of covers that now needs to disapear / appear
-            outgoing = self.min_visible_column + 1
-            incoming = self.max_visible_column + 1 
-            
-            #Quick check to make sure that max_outgoing isn't greater than the max number of images (This occurs when the final row is incomplete)
-            if outgoing > self.num_images:
-                return None         
-        
-        #Need to add the new image to the group
-        self.images_group.add(self.textureLibrary[incoming])
-        #And set the outgoing row to remove after the timeline finishes
-        self.timeline.connect('completed', self.removeItem, outgoing)
-        
-        
-        knots = (\
-                (self.images_group.get_x(), self.images_group.get_y()),\
-                (self.images_group.get_x(), new_y) \
-                )
-        
-        alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
-        self.behaviour_path = clutter.BehaviourPath(alpha, knots)
-        self.behaviour_incoming = clutter.BehaviourOpacity(opacity_start=0, opacity_end=self.inactiveOpacity, alpha=alpha)
-        self.behaviour_outgoing = clutter.BehaviourOpacity(opacity_start=self.inactiveOpacity, opacity_end=0, alpha=alpha)
-        
-        self.behaviour_path.apply(self.images_group)
-        self.behaviour_outgoing.apply(self.textureLibrary[incoming])
-        self.behaviour_incoming.apply(self.textureLibrary[outgoing])
-        
     def remove_item(self, timeline = None, itemNo = None):
+        self.textureLibrary[itemNo].set_opacity(0)
         self.images_group.remove(self.textureLibrary[itemNo])
     
 

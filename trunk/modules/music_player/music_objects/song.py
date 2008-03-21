@@ -66,12 +66,15 @@ class song:
         tag.link(filename)
         
         images = tag.getImages()
-        for img in images:                    
-            #print "Image Mine Type: " + str(img.mimeType)
-            data = img.imageData
-            loader = gtk.gdk.PixbufLoader()
-            loader.write(data)
-            loader.close()
-            return loader.get_pixbuf()
-            
+        for img in images:   
+            try:                 
+                #print "Image Mine Type: " + str(img.mimeType)
+                data = img.imageData
+                loader = gtk.gdk.PixbufLoader()
+                loader.write(data)
+                loader.close()
+                return loader.get_pixbuf()
+            except gobject.GError:
+                if self.music_player.glossMgr.debug:
+                    print "Music_Player: Found image in ID3 for song '%s' but could not load it" % (self.filename)
             

@@ -1,7 +1,7 @@
 import pygtk
 import gtk
 import clutter
-import thread, time
+#import thread, time
 from modules.music_player.backends.myth_music import Backend
 from modules.music_player.lastFM_interface import lastFM_interface
 from modules.music_player.music_object_row import MusicObjectRow
@@ -72,7 +72,9 @@ class Module:
         if (event.keyval == clutter.keysyms.Left) or (event.keyval == clutter.keysyms.Right):
             #calculate a period of time the loading threads should sleep for when a timline is in progress
             #self.sleep_time = float(MusicObjectRow.frames) / float(MusicObjectRow.fps)
+            duration = float(MusicObjectRow.frames) / float(MusicObjectRow.fps)
             self.artistImageRow.input_queue.input(event)
+            self.artistImageRow.sleep = True
             
             #Just a little test code
             artist = self.artistImageRow.get_current_object()

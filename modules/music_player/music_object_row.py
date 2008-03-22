@@ -9,6 +9,7 @@ class MusicObjectRow(ImageRow):
     def __init__(self, glossMgr, width, height, columns, music_player):
         ImageRow.__init__(self, glossMgr, width, height, columns)
         self.music_player = music_player
+        self.sleep = False
         
         self.objectLibrary = []
         
@@ -20,9 +21,12 @@ class MusicObjectRow(ImageRow):
 
         for i in range(start, end):
             object = self.objectLibrary[i]
-            #print "loading: " + object.name
+            print "loading: " + object.name
             pixbuf = object.get_image()
-            time.sleep(self.music_player.sleep_time)
+            #If there is currently motion, we need to pause this work
+            if self.sleep: 
+                self.timeline.connect('completed', self.restart_cb)
+                time.sleep(self.music_player.sleep_time)
             if pixbuf == object.PENDING_DOWNLOAD:
                 #Get the temporary image
                 object.get_default_image()
@@ -52,6 +56,9 @@ class MusicObjectRow(ImageRow):
             clutter.threads_init()
             tmpImage.set_pixbuf(pixbuf)
             clutter.threads_leave()
+    
+    def restart_cb(self, data):
+        self.sleep = True
             
     def get_current_object(self):
         return self.objectLibrary[self.currentSelection]

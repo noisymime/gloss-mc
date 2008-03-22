@@ -16,8 +16,8 @@ class ImageRow(clutter.Group):
     inactiveOpacity = 150
     images_size_percent = 1 #0.90 #This is the percentage of the total group size that the covers will take
     
-    fps = 35
-    frames = 25
+    fps = 25
+    frames = 15
 
     def __init__(self, glossMgr, width, height, columns):
         clutter.Group.__init__(self)
@@ -117,7 +117,7 @@ class ImageRow(clutter.Group):
             edge_texture_incoming_no = outgoingItem - (self.center)
             edge_texture_outgoing_no = outgoingItem + (self.center-1)
         
-        if edge_texture_incoming_no < len(self.textureLibrary):
+        if (edge_texture_incoming_no < len(self.textureLibrary)) and (edge_texture_incoming_no >= 0):
             edge_texture_incoming = self.textureLibrary[edge_texture_incoming_no]
             self.images_group.add(edge_texture_incoming)
             

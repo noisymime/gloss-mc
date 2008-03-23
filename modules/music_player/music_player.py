@@ -6,6 +6,7 @@ from modules.music_player.backends.myth_music import Backend
 from modules.music_player.lastFM_interface import lastFM_interface
 from modules.music_player.music_object_row import MusicObjectRow
 from ui_elements.image_frame import ImageFrame
+from ui_elements.label_list import LabelList
 
 class Module:
     title = "Music"
@@ -79,10 +80,12 @@ class Module:
             #Just a little test code
             artist = self.artistImageRow.get_current_object()
             albums = self.backend.get_albums_by_artistID(artist.artistID)
-            name_string = ""
+            self.list1.clear()
             for album in albums:
-                name_string += album.name
-            self.tmpLabel.set_text(name_string)
+                self.list1.add_item(album.name)
+                #name_string += album.name
+            self.list1.display()
+            #self.tmpLabel.set_text(name_string)
             pixbuf = albums[0].get_image()
             if not pixbuf is None:
                 self.main_img.set_pixbuf(pixbuf)
@@ -112,12 +115,17 @@ class Module:
         self.backdrop_behaviour.apply(self.artistImageRow)
         
         #Just a nasty temp label for outputting stuff
+        self.list1 = LabelList(5)
+        self.list1.set_position(self.stage.get_width()/2, 350)
+        self.stage.add(self.list1)
+        """
         self.tmpLabel = clutter.Label()
         self.tmpLabel.set_color(clutter.color_parse('White'))
         self.tmpLabel.set_position(0, 350)
         self.tmpLabel.set_text("Test")
         self.tmpLabel.show()
         self.stage.add(self.tmpLabel)
+        """
         
         #The preview img
         self.main_img = ImageFrame(None, 300, True) #clutter.Texture()

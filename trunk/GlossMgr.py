@@ -120,22 +120,27 @@ class GlossMgr:
             if not self.currentPlugin == None:
                 #Plugins on_key_press_event should return true if the plugin is finishing
                 if self.currentPlugin.on_key_press_event(stage, event):
-                    self.currentPlugin.stop()
-                    self.currentPlugin = None
-                    
-                    timeline_stop = clutter.Timeline(10,30)
-                    alpha = clutter.Alpha(timeline_stop, clutter.ramp_inc_func)
-                    self.stop_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
-                    self.currentMenu.set_opacity(0)
-                    self.currentMenu.show()
-                    self.stop_behaviour.apply(self.currentMenu)
-                    timeline_stop.start()
+                    self.kill_plugin()
             #If there's no plugin running, go back one in the menu list (Providing we're not already at the first item.
             else:
                 if len(self.menuHistory)>1:
                     self.transition.do_transition(self.menuHistory.pop(), self.menuHistory[-1])
                     self.currentMenu = self.menuHistory[-1]
         #print event.hardware_keycode
+        
+    #Kills any currently running plugin/s
+    def kill_plugin(self):
+        if not self.currentPlugin is None:
+            self.currentPlugin.stop()
+            self.currentPlugin = None
+            
+            timeline_stop = clutter.Timeline(10,30)
+            alpha = clutter.Alpha(timeline_stop, clutter.ramp_inc_func)
+            self.stop_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
+            self.currentMenu.set_opacity(0)
+            self.currentMenu.show()
+            self.stop_behaviour.apply(self.currentMenu)
+            timeline_stop.start()
     
     def get_current_menu(self):
         return self.currentMenu

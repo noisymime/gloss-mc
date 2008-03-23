@@ -77,7 +77,9 @@ class MythBackendConnection(threading.Thread):
         
         if not result == protRecvString:
             #Protocol Version check failed
-            raise RuntimeError, "Myth Protocol version failure. Aborting."
+            backend_protocol = result.rsplit("[]:[]")[1]
+            err_string = "Myth Protocol version failure. This client uses protocol %s however backend is using %s." % (self.protocolVersion, backend_protocol)
+            raise RuntimeError(err_string)
         
         #Perform the mandatory ANN
         ANNstring = "ANN Playback " + self.localhost_name + " 0"
@@ -214,7 +216,8 @@ class MythBackendConnection(threading.Thread):
         result = self.receive_reply(self.msg_sock)
         if not result == protRecvString:
             #Protocol Version check failed
-            raise RuntimeError, "Myth Protocol version failure. Aborting."
+            return
+            
         
         #Perform the mandatory ANN (The 1 at the end says that we want to receive all messages from the server)
         ANNstring = "ANN Monitor " + self.localhost_name + " 1"

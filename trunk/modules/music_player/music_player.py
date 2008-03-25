@@ -13,7 +13,7 @@ class Module:
     
     title = "Music"
     num_columns = 6
-    sleep_time = 0.2
+    sleep_time = 0.3
 
     def __init__(self, glossMgr, dbMgr):
         self.stage = glossMgr.get_stage()

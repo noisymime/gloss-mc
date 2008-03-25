@@ -1,17 +1,36 @@
+import cairo
 import clutter
+import gtk
+from clutter.cluttercairo import CairoTexture
 
-class Texture_Reflection (clutter.Texture):
 
-    def __init__(self, origTexture):
-        clutter.Texture.__init__(self)
+class Texture_Reflection (CairoTexture):
+
+    def __init__(self, origTexture, height = 0.5, opacity = 0.9):
+        #clutter.Texture.__init__(self)
+
         
         #Connect to the textures pixbuf-change signal so the reflection will auto update
         origTexture.connect("pixbuf-change", self.update_pixbuf)
         
         if origTexture.get_pixbuf() is None:
             return None
-        
-        self.set_pixbuf(origTexture.get_pixbuf())
+
+        CairoTexture.__init__(self, origTexture.get_width(), origTexture.get_height())        
+        #self.set_pixbuf(origTexture.get_pixbuf())
+
+        context = self.cairo_create()
+        ct = gtk.gdk.CairoContext(context)
+
+        self.gradient = cairo.LinearGradient(0, 0, 0, origTexture.get_pixbuf().get_height())
+        self.gradient.add_color_stop_rgba(1 - height, 1, 1, 1, 0)
+        self.gradient.add_color_stop_rgba(1, 0, 0, 0, opacity)
+
+        ct.set_source_pixbuf(origTexture.get_pixbuf(),0,0)
+        context.mask(self.gradient)
+
+        del context # Update texture
+        del ct
         
         #Rotate the reflection based on any rotations to the master
         ang_y = origTexture.get_rotation(clutter.Y_AXIS) #ryang()

@@ -20,7 +20,7 @@ Gloss was developed on Ubuntu so hence I can give the best instructions for how 
 Using the SVN of Clutter is HIGHLY recommended as it is required for all newer versions of Gloss.
 The following instructions are a rough guide for Ubuntu Gutsy
 
-  # `sudo apt-get install libgtk2.0-dev gtk-doc-tools gcc libpango1.0-dev libsdl-pango-dev python automake1.9 subversion gstreamer0.10-fluendo-mpegdemux jackd python-mysqldb python-dev python-gtk2-dev python-gobject-dev libgstreamer-plugins-base0.10-dev python-gobject-doc gstreamer0.10-plugins-bad gstreamer0.10-plugins-bad-multiverse gstreamer0.10-plugins-ugly eyed3`
+  # `sudo apt-get install libgtk2.0-dev gtk-doc-tools gcc libpango1.0-dev libsdl-pango-dev python automake1.9 subversion gstreamer0.10-fluendo-mpegdemux python-cairo-dev jackd python-mysqldb python-dev python-gtk2-dev python-gobject-dev libgstreamer-plugins-base0.10-dev python-gobject-doc gstreamer0.10-plugins-bad gstreamer0.10-plugins-bad-multiverse gstreamer0.10-plugins-ugly eyed3`
   # `svn co http://svn.o-hand.com/repos/clutter/trunk clutter`
   # `cd clutter/clutter`
   # `./autogen.sh`

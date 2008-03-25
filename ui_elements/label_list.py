@@ -26,6 +26,9 @@ class LabelList(clutter.Group):
         self.displayMax = length
         self.displaySize = self.displayMax - self.displayMin
         
+        #Selector bar image, moves with selections to show current item
+        self.selector_bar = None
+        
     def on_key_press_event (self, event):
         self.input_queue.input(event)
         return self.timeline
@@ -72,7 +75,7 @@ class LabelList(clutter.Group):
 
         if direction == self.DIRECTION_DOWN:
             #Check if we're at the last item in the list
-            if (self.selected) == (len(self.menuItems)-1):
+            if (self.selected) == (len(self.items)-1):
                 return
             else:
                 self.selected = self.selected+1
@@ -98,7 +101,7 @@ class LabelList(clutter.Group):
             elif (i == self.selected+1) and (i <= self.displayMax-1):
                 self.items[i].scaleLabel(ListItem.SCALE_MEDIUM, self.timeline)
             else:
-                self.items[i].scaleLabel(ListItem.SCALE_None, self.timeline)
+                self.items[i].scaleLabel(ListItem.SCALE_NONE, self.timeline)
         
         #Check we're at the top of the viewable list
         if self.selected < (self.displayMin):
@@ -107,8 +110,9 @@ class LabelList(clutter.Group):
             #self.menuItems[self.selected].show()
             self.rollList( self.menuItems[self.selected], self.menuItems[self.selected+self.displaySize], self.timeline)
         else:
-            #move the selection bar
-            self.glossMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
+            if not self.selector_bar is None:
+                #move the selection bar
+                self.selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
 
         self.timeline.start()
             
@@ -118,11 +122,13 @@ class LabelList(clutter.Group):
     def move_down(self):
         self.move_selection(self.DIRECTION_DOWN)
                         
-    def selectFirst(self, moveBar):
-        if self.timeline.is_playing:
+    def select_first(self, frames = 1, fps = 75):
+        if self.input_queue.is_in_queue():
             "ERROR: Timeline should NOT be playing here!"
+            return
                
-        self.timeline = clutter.Timeline(1, 75)
+        self.timeline = clutter.Timeline(frames, fps)
+        self.input_queue.set_timeline(self.timeline)
         self.selected = 0
         for i in range(0,len(self.items)):
             if i == 0:
@@ -132,13 +138,11 @@ class LabelList(clutter.Group):
             else:
                 self.items[i].scaleLabel(ListItem.SCALE_NONE, self.timeline)
                 
-        #Show the current menu item's graphic
-        self.menuItems[self.selected].itemTexturesGroup.show()
-        
-        if moveBar:    
-            self.glossMgr.get_selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
-        
         self.timeline.start()
+        
+    #Just calls the above function with different arguements to result in the first item being selected in a 'prettier' manner
+    def select_first_elegant(self):
+        self.select_first(frames=self.frames, fps=self.fps)
         
     #When the menu needs to display a new item from the top or bottom, it rolls
     # The distance the menu moves is the distance (in pixels) between the incoming item and the selector bar
@@ -184,8 +188,16 @@ class LabelList(clutter.Group):
         self.behaviour1.apply(self)
         self.behaviour2.apply(outgoingMenuItem)
         
-        
+import gobject
 class ListItem(clutter.Group):
+    #Setup signals
+    __gsignals__ =  { 
+        "selected": (
+            gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, []),
+        "deselected": (
+            gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, [])
+        }
+    
     SCALE_NONE, SCALE_MEDIUM, SCALE_FULL = range(3) 
     
     #Default values for zoom and opacity
@@ -239,9 +251,11 @@ class ListItem(clutter.Group):
         if level == self.SCALE_FULL:
             zoomTo = self.scale_step_full #self.menu.zoomStep0
             opacityTo = self.opacity_step_full #self.menu.opacityStep0
+            self.emit("selected")
         if level == self.SCALE_MEDIUM:
             zoomTo = self.scale_step_medium #self.menu.zoomStep1
             opacityTo = self.opacity_step_medium #self.menu.opacityStep1
+            self.emit("deselected")
             #self.itemTexturesGroup.hide_all()
         if level == self.SCALE_NONE:
             zoomTo = self.scale_step_none #self.menu.zoomStep2

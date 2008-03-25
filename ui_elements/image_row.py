@@ -35,7 +35,7 @@ class ImageRow(clutter.Group):
         self.image_size = int(self.images_width / self.num_columns) #A cover will be cover_size * cover_size (X * Y)
         self.center = int(columns / 2) + 1
         
-        
+        """
         #The viewer actually sits within another group that clips its size
         self.images_group_clip = clutter.Group()
         self.images_group_clip.add(self.images_group)
@@ -47,6 +47,9 @@ class ImageRow(clutter.Group):
         clip_width = (self.image_size*columns) + scale_amount #Width is the cover size by the number of colums, plus the additional amount required for scaling
         clip_height = (height) + scale_amount
         self.images_group_clip.set_clip(-(scale_amount/2), -(scale_amount/2), clip_width, clip_height)
+        """
+        pos_x = int(self.image_size/2) + (self.image_size * (self.center-1))
+        self.images_group.set_position(pos_x, int(self.image_size/2))
         
         
         #self.current_video_details = video_details_group(self.covers_width)
@@ -66,14 +69,14 @@ class ImageRow(clutter.Group):
         
         self.currentSelection = 0
         
-        self.add(self.images_group_clip)
-        #self.add(self.images_group)
+        #self.add(self.images_group_clip)
+        self.add(self.images_group)
         covers_x = int(width * (1-self.images_size_percent)/2)
         covers_y = int(height * (1-self.images_size_percent)/2)
         #self.images_group.set_position(covers_x, covers_y)
         #self.images_group.set_depth(1) #self.image_size)
         self.images_group.show()
-        self.images_group_clip.show()
+        #self.images_group_clip.show()
         
         
     def add_texture_group(self, tempGroup):
@@ -94,6 +97,13 @@ class ImageRow(clutter.Group):
             tempGroup.set_opacity(0)
         else:
             self.images_group.add(tempGroup)
+            
+        #Set the gravity to the center
+        gap = (self.image_size - tempGroup.get_width())/2
+        anchor_x = (self.image_size - self.image_gap)/2 
+        gap = (self.image_size - tempGroup.get_height())/2
+        anchor_y = (self.image_size - self.image_gap)/2 
+        tempGroup.set_anchor_point(anchor_x, anchor_y)
         
         tempGroup.show()
         self.num_images += 1

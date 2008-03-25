@@ -9,6 +9,8 @@ from ui_elements.image_frame import ImageFrame
 from ui_elements.label_list import LabelList
 
 class Module:
+    CONTEXT_HEADINGS, CONTEXT_ROW, CONTEXT_LIST1, CONTEXT_LIST2 = range(4)
+    
     title = "Music"
     num_columns = 6
     sleep_time = 0.2
@@ -25,6 +27,9 @@ class Module:
         self.backend = Backend(self)
         
         self.artistImageRow = MusicObjectRow(self.glossMgr, self.stage.get_width(), 200, self.num_columns, self)
+        
+        #This is the current input context
+        self.current_context = self.CONTEXT_ROW
         
         self.lastFM = lastFM_interface()
         self.base_dir = self.dbMgr.get_setting("MusicLocation")
@@ -70,25 +75,42 @@ class Module:
         if event.keyval == clutter.keysyms.q:
             clutter.main_quit()
         
-        if (event.keyval == clutter.keysyms.Left) or (event.keyval == clutter.keysyms.Right):
-            #calculate a period of time the loading threads should sleep for when a timline is in progress
-            #self.sleep_time = float(MusicObjectRow.frames) / float(MusicObjectRow.fps)
-            duration = float(MusicObjectRow.frames) / float(MusicObjectRow.fps)
-            self.artistImageRow.input_queue.input(event)
-            self.artistImageRow.sleep = True
-            
-            #Just a little test code
-            artist = self.artistImageRow.get_current_object()
-            albums = self.backend.get_albums_by_artistID(artist.artistID)
-            self.list1.clear()
-            for album in albums:
-                self.list1.add_item(album.name)
-                #name_string += album.name
-            self.list1.display()
-            #self.tmpLabel.set_text(name_string)
-            pixbuf = albums[0].get_image()
-            if not pixbuf is None:
-                self.main_img.set_pixbuf(pixbuf)
+        #React based on the current input context
+        if self.current_context == self.CONTEXT_ROW:
+            if (event.keyval == clutter.keysyms.Left) or (event.keyval == clutter.keysyms.Right):
+                duration = float(MusicObjectRow.frames) / float(MusicObjectRow.fps)
+                self.artistImageRow.input_queue.input(event)
+                self.artistImageRow.sleep = True
+                
+                #Just a little test code
+                artist = self.artistImageRow.get_current_object()
+                albums = self.backend.get_albums_by_artistID(artist.artistID)
+                self.list1.clear()
+                for album in albums:
+                    tmpItem = self.list1.add_item(album.name)
+                    tmpItem.connect("selected", self.process_songlist_from_album, album)
+                    #name_string += album.name
+                self.list1.display()
+                #self.tmpLabel.set_text(name_string)
+                pixbuf = albums[0].get_image()
+                if not pixbuf is None:
+                    self.main_img.set_pixbuf(pixbuf)
+            elif (event.keyval == clutter.keysyms.Down):
+                self.list1.select_first_elegant()
+                self.current_context = self.CONTEXT_LIST1
+        elif self.current_context == self.CONTEXT_LIST1:
+            if (event.keyval == clutter.keysyms.Down) or (event.keyval == clutter.keysyms.Up):
+                self.list1.input_queue.input(event)
+    
+    #Fills self.list2 with songs from an album
+    def process_songlist_from_album(self, list_item, album):
+        #print "got album %s" % album.name
+        songs = self.backend.get_songs_by_albumID(album.albumID)
+        self.list2.clear()
+        for song in songs:
+            tmpItem = self.list2.add_item(song.name)
+        self.list2.display()
+        
         
     def begin(self, glossMgr):
         
@@ -118,6 +140,10 @@ class Module:
         self.list1 = LabelList(5)
         self.list1.set_position(self.stage.get_width()/2, 350)
         self.stage.add(self.list1)
+        
+        self.list2 = LabelList(5)
+        self.list2.set_position( (self.list1.get_x() + self.list1.get_width()), 350)
+        self.stage.add(self.list2)
         """
         self.tmpLabel = clutter.Label()
         self.tmpLabel.set_color(clutter.color_parse('White'))
@@ -138,6 +164,7 @@ class Module:
         
         #Load the rest of the images
         #thread.start_new_thread(self.load_image_range, (self.num_columns, len(self.artists)-1))
+        self.artistImageRow.sleep = True
         self.timeline_backdrop.connect("completed", self.artistImageRow.load_image_range_cb)
         #self.load_image_range(self.num_columns, len(self.artists)-1)
         

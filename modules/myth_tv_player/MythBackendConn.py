@@ -14,7 +14,7 @@ class MythBackendConnection(threading.Thread):
     def __init__(self, videoPlayer, server, port):    
         threading.Thread.__init__(self)  
         
-        self.protocolVersion = 31
+        self.protocolVersion = 40
         self.localhost_name = "myhost" # Change this later
         self.server = server #"192.168.0.8"
         self.server_port = port #6543
@@ -78,7 +78,7 @@ class MythBackendConnection(threading.Thread):
         if not result == protRecvString:
             #Protocol Version check failed
             backend_protocol = result.rsplit("[]:[]")[1]
-            err_string = "Myth Protocol version failure. This client uses protocol %s however backend is using %s." % (self.protocolVersion, backend_protocol)
+            err_string = "Myth Protocol version failure. This client uses protocol version %s however backend is using %s." % (self.protocolVersion, backend_protocol)
             raise RuntimeError(err_string)
         
         #Perform the mandatory ANN

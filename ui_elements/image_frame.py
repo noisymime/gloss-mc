@@ -26,12 +26,7 @@ class ImageFrame(clutter.Group):
         if pixbuf is None: 
             self.add(self.main_pic)
             
-            if use_reflection:
-                self.reflection = Texture_Reflection(self.main_pic)
-                self.add(self.reflection)
-                self.reflection.show()
-            else:
-                self.reflection = None
+            self.reflection = None
                 
             return
 
@@ -80,3 +75,10 @@ class ImageFrame(clutter.Group):
         self.main_pic.set_pixbuf(pixbuf)
         self.main_pic.set_position(self.x, self.y)
         self.main_pic.show()
+        
+        if self.use_reflection:
+                self.reflection = Texture_Reflection(self.main_pic)
+                self.add(self.reflection)
+                self.reflection.show()
+        else:
+                self.reflection = None

@@ -12,32 +12,43 @@ class MusicObjectRow(ImageRow):
         self.sleep = False
         
         self.objectLibrary = []
+        self.timeline = None
         
     def add_object(self, object):
         self.objectLibrary.append(object)
         
         
     def load_image_range(self, start, end, as_thread = False, thread_data = None):
-
+        #External timeline can be set by other objects as a form of 'lock'. If external timeline is running, thread will be paused
+        self.external_timeline = None
+        
         for i in range(start, end):
             object = self.objectLibrary[i]
             print "loading: " + object.name
             pixbuf = object.get_image()
             #If there is currently motion, we need to pause this work
-            if self.sleep: 
-                self.timeline.connect('completed', self.restart_cb)
-                time.sleep(self.music_player.sleep_time)
+            while self.should_sleep():
+                time.sleep(0.1)
+            #if self.sleep: 
+                #self.timeline.connect('completed', self.restart_cb)
+                #time.sleep(self.music_player.sleep_time)
+
+            if as_thread: clutter.threads_enter()
             if pixbuf == object.PENDING_DOWNLOAD:
                 #Get the temporary image
-                object.get_default_image()
-                tmpImage = ImageFrame(None, self.image_size, use_reflection = True, quality = ImageFrame.QUALITY_FAST) #clutter.Texture()
+                pixbuf = object.get_default_image()
+                tmpImage = ImageFrame(pixbuf, self.image_size, use_reflection = True, quality = ImageFrame.QUALITY_FAST) #clutter.Texture()
                 object.connect("image-found", self.set_image_cb, object, tmpImage)
             elif not pixbuf is None:
                 #If we're performing this loading as a seperate thread, we need to lock the Clutter threads
-                if as_thread: clutter.threads_enter()
+
                 tmpImage = ImageFrame(pixbuf, self.image_size, use_reflection=True, quality = ImageFrame.QUALITY_FAST)
-                if as_thread: clutter.threads_leave()
-            
+
+            else:
+                pixbuf = object.get_default_image()
+                tmpImage = ImageFrame(pixbuf, self.image_size, use_reflection = True, quality = ImageFrame.QUALITY_FAST) #clutter.Texture()
+
+            if as_thread: clutter.threads_leave()
             self.add_texture_group(tmpImage)
 
         
@@ -59,6 +70,21 @@ class MusicObjectRow(ImageRow):
     
     def restart_cb(self, data):
         self.sleep = True
+        
+    def should_sleep(self):
+        ret_val = False
+        #if self.sleep:
+        #    return True
+        
+        if not self.external_timeline is None:
+            if self.external_timeline.is_playing():
+                ret_val = True
+        
+        if not self.timeline is None:
+            if self.timeline.is_playing():
+                ret_val = True
+                
+        return ret_val
             
     def get_current_object(self):
         return self.objectLibrary[self.currentSelection]

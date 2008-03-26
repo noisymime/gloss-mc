@@ -6,25 +6,30 @@ from clutter.cluttercairo import CairoTexture
 
 class Texture_Reflection (CairoTexture):
 
-    def __init__(self, origTexture, height = 0.5, opacity = 0.9):
+    def __init__(self, origTexture, reflection_height = 0.5, opacity = 0.9):
         #clutter.Texture.__init__(self)
-
+        CairoTexture.__init__(self, origTexture.get_width(), origTexture.get_height())
         
         #Connect to the textures pixbuf-change signal so the reflection will auto update
         origTexture.connect("pixbuf-change", self.update_pixbuf)
+        self.reflection_height = reflection_height
+        self.opacity = opacity
         
         if origTexture.get_pixbuf() is None:
             return None
-
-        CairoTexture.__init__(self, origTexture.get_width(), origTexture.get_height())        
+        
+        #self.set_size(origTexture.get_width(), origTexture.get_height())
         #self.set_pixbuf(origTexture.get_pixbuf())
+        
+        self.update_pixbuf(origTexture)
 
+    def update_pixbuf(self, origTexture):
         context = self.cairo_create()
         ct = gtk.gdk.CairoContext(context)
-
+        
         self.gradient = cairo.LinearGradient(0, 0, 0, origTexture.get_pixbuf().get_height())
-        self.gradient.add_color_stop_rgba(1 - height, 1, 1, 1, 0)
-        self.gradient.add_color_stop_rgba(1, 0, 0, 0, opacity)
+        self.gradient.add_color_stop_rgba(1 - self.reflection_height, 1, 1, 1, 0)
+        self.gradient.add_color_stop_rgba(1, 0, 0, 0, self.opacity)
 
         ct.set_source_pixbuf(origTexture.get_pixbuf(),0,0)
         context.mask(self.gradient)
@@ -53,7 +58,7 @@ class Texture_Reflection (CairoTexture):
         self.set_position(x, y)
         
         
-    def update_pixbuf(self, origTexture):
+        """
         self.set_pixbuf(origTexture.get_pixbuf())
         
         #Rotate the reflection based on any rotations to the master
@@ -75,3 +80,4 @@ class Texture_Reflection (CairoTexture):
         #Get/Set the location for it               
         (x, y) = origTexture.get_position()
         self.set_position(x, y)
+        """

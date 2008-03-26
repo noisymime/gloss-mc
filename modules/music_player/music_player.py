@@ -14,6 +14,8 @@ class Module:
     title = "Music"
     num_columns = 6
     sleep_time = 0.3
+    
+    delay = 1
 
     def __init__(self, glossMgr, dbMgr):
         self.stage = glossMgr.get_stage()
@@ -80,26 +82,24 @@ class Module:
             if (event.keyval == clutter.keysyms.Left) or (event.keyval == clutter.keysyms.Right):
                 duration = float(MusicObjectRow.frames) / float(MusicObjectRow.fps)
                 self.artistImageRow.input_queue.input(event)
+                self.artistImageRow.input_queue.connect("queue-flushed", self.load_albums)
                 self.artistImageRow.sleep = True
                 
-                #Just a little test code
-                artist = self.artistImageRow.get_current_object()
-                albums = self.backend.get_albums_by_artistID(artist.artistID)
-                self.list1.clear()
-                for album in albums:
-                    tmpItem = self.list1.add_item(album.name)
-                    tmpItem.connect("selected", self.process_songlist_from_album, album)
-                    #name_string += album.name
-                self.list1.display()
-                #self.tmpLabel.set_text(name_string)
-                pixbuf = albums[0].get_image()
-                if not pixbuf is None:
-                    self.main_img.set_pixbuf(pixbuf)
+                
             elif (event.keyval == clutter.keysyms.Down):
                 self.list1.select_first_elegant()
                 self.current_context = self.CONTEXT_LIST1
         elif self.current_context == self.CONTEXT_LIST1:
-            if (event.keyval == clutter.keysyms.Down) or (event.keyval == clutter.keysyms.Up):
+            
+            if (event.keyval == clutter.keysyms.Up):
+                #If we're at the top of the list already, we change focus bar to the image_row
+                if self.list1.selected == 0:
+                    self.list1.select_none_elegant()
+                    self.current_context = self.CONTEXT_ROW
+                else:
+                    
+                    self.list1.input_queue.input(event)
+            elif (event.keyval == clutter.keysyms.Down):
                 self.list1.input_queue.input(event)
     
     #Fills self.list2 with songs from an album
@@ -110,6 +110,27 @@ class Module:
         for song in songs:
             tmpItem = self.list2.add_item(song.name)
         self.list2.display()
+    
+    #Simple delay 
+    def start_delay(self, function, args):
+        gobject.timeout_add((self.delay * 1000), function, args)
+    
+    #Loads albums into List1
+    def load_albums(self, queue):
+    #Just a little test code
+        return
+        artist = self.artistImageRow.get_current_object()
+        albums = self.backend.get_albums_by_artistID(artist.artistID)
+        self.list1.clear()
+        for album in albums:
+            tmpItem = self.list1.add_item(album.name)
+            tmpItem.connect("selected", self.process_songlist_from_album, album)
+            #name_string += album.name
+        self.list1.display()
+        #self.tmpLabel.set_text(name_string)
+        pixbuf = albums[0].get_image()
+        if not pixbuf is None:
+            self.main_img.set_pixbuf(pixbuf)
         
         
     def begin(self, glossMgr):

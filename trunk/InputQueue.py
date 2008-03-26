@@ -1,4 +1,5 @@
 import clutter
+import gobject
 
 #########################################################
 # The input queue controls fast user input by queing up
@@ -6,10 +7,20 @@ import clutter
 # are complete
 #########################################################
 
-class InputQueue:
+class InputQueue(gobject.GObject):
     NORTH, EAST, SOUTH, WEST = range(4)
     
+    #Setup signals
+    __gsignals__ =  { 
+        "queue-flushed": (
+            gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, []),
+        "entering-queue": (
+            gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, [])
+        }
+    
     def __init__(self):
+        gobject.GObject.__init__(self)
+        
         self.queue_north = 0
         self.queue_east = 0
         self.queue_south = 0
@@ -32,6 +43,8 @@ class InputQueue:
             if (event.keyval == clutter.keysyms.Down) and (not self.action_south is None): self.action_south()
             
             return True
+        
+        self.emit("entering-queue")
         
         if event.keyval == clutter.keysyms.Left:
             self.queue_west = self.queue_west + 1
@@ -75,6 +88,8 @@ class InputQueue:
         self.queue_south = 0
         self.queue_west = 0
         self.queue_north = 0
+        
+        self.emit("queue-flushed")
         
     def is_in_queue(self):
         if (self.queue_north > 0) or (self.queue_south > 0) or (self.queue_east > 0) or (self.queue_west > 0):

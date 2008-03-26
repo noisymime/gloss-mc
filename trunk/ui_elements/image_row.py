@@ -93,8 +93,9 @@ class ImageRow(clutter.Group):
         tempGroup.set_position(x, y)
         
         #If we're past the maximum rows, make the pics invistible
-        if self.num_images > (self.num_columns-self.center-1):
+        if self.num_images > (self.num_columns-self.center):
             tempGroup.set_opacity(0)
+            tempGroup.hide()
         else:
             self.images_group.add(tempGroup)
             
@@ -129,6 +130,7 @@ class ImageRow(clutter.Group):
         
         if (edge_texture_incoming_no < len(self.textureLibrary)) and (edge_texture_incoming_no >= 0):
             edge_texture_incoming = self.textureLibrary[edge_texture_incoming_no]
+            edge_texture_incoming.show()
             self.images_group.add(edge_texture_incoming)
             
             self.behaviourEdgeIncomingOpacity = clutter.BehaviourOpacity(opacity_start=0, opacity_end=self.inactiveOpacity, alpha=alpha)
@@ -214,6 +216,8 @@ class ImageRow(clutter.Group):
         
     def remove_item(self, timeline = None, itemNo = None):
         self.textureLibrary[itemNo].set_opacity(0)
+        self.textureLibrary[itemNo].hide()
+        self.textureLibrary[itemNo].unrealize()
         self.images_group.remove(self.textureLibrary[itemNo])
     
 

@@ -144,6 +144,18 @@ class LabelList(clutter.Group):
     def select_first_elegant(self):
         self.select_first(frames=self.frames, fps=self.fps)
         
+    def select_none(self, frames = 1, fps = 75):
+        self.timeline = clutter.Timeline(frames, fps)
+        self.input_queue.set_timeline(self.timeline)
+        self.selected = None
+        for i in range(0,len(self.items)):
+            self.items[i].scaleLabel(ListItem.SCALE_NONE, self.timeline)
+                
+        self.timeline.start()
+    
+    def select_none_elegant(self):
+        self.select_none(self.frames, self.fps)
+        
     #When the menu needs to display a new item from the top or bottom, it rolls
     # The distance the menu moves is the distance (in pixels) between the incoming item and the selector bar
     def rollList(self, incomingMenuItem, outgoingMenuItem, timeline):  

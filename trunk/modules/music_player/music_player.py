@@ -1,7 +1,8 @@
 import pygtk
+import gobject
 import gtk
 import clutter
-#import thread, time
+import thread
 from modules.music_player.backends.myth_music import Backend
 from modules.music_player.lastFM_interface import lastFM_interface
 from modules.music_player.music_object_row import MusicObjectRow
@@ -41,6 +42,8 @@ class Module:
         self.is_playing = False
         #self.load_albums()
         self.artists = self.backend.get_artists()
+        
+        self.timeout_id = 0
         #thread.start_new_thread(self.load_artists, ())
         
         
@@ -80,9 +83,12 @@ class Module:
         #React based on the current input context
         if self.current_context == self.CONTEXT_ROW:
             if (event.keyval == clutter.keysyms.Left) or (event.keyval == clutter.keysyms.Right):
-                duration = float(MusicObjectRow.frames) / float(MusicObjectRow.fps)
+                #First check if there's any current timeouts and if there is, clear it
+                #if not self.timeout_id == 0: gobject.source_remove(self.timeout_id)
+
                 self.artistImageRow.input_queue.input(event)
-                self.artistImageRow.input_queue.connect("queue-flushed", self.load_albums)
+                #self.artistImageRow.input_queue.connect("queue-flushed", self.start_delay, self.load_albums, None)
+                self.queue_id = self.artistImageRow.input_queue.connect("queue-flushed", self.load_albums)
                 self.artistImageRow.sleep = True
                 
                 
@@ -112,15 +118,24 @@ class Module:
         self.list2.display()
     
     #Simple delay 
-    def start_delay(self, function, args):
-        gobject.timeout_add((self.delay * 1000), function, args)
+    def start_delay(self, queue, function, args):
+        self.timeout_id = gobject.timeout_add((self.delay * 1000), function, args)
     
     #Loads albums into List1
     def load_albums(self, queue):
-    #Just a little test code
-        return
+        self.artistImageRow.input_queue.disconnect(self.queue_id)
+        #Just a little test code
         artist = self.artistImageRow.get_current_object()
+        thread.start_new_thread(self.backend.get_albums_by_artistID, (artist.artistID,))
+        self.conn_id = self.backend.connect("query-complete", self.update_for_albums, artist)
+        
+    def update_for_albums(self, data, artist = None):
+        self.backend.disconnect(self.conn_id)
+
+        if artist is None: self.artistImageRow.get_current_object()
         albums = self.backend.get_albums_by_artistID(artist.artistID)
+        
+        clutter.threads_enter()
         self.list1.clear()
         for album in albums:
             tmpItem = self.list1.add_item(album.name)
@@ -131,7 +146,7 @@ class Module:
         pixbuf = albums[0].get_image()
         if not pixbuf is None:
             self.main_img.set_pixbuf(pixbuf)
-        
+        clutter.threads_leave()
         
     def begin(self, glossMgr):
         
@@ -159,11 +174,11 @@ class Module:
         
         #Just a nasty temp label for outputting stuff
         self.list1 = LabelList(5)
-        self.list1.set_position(self.stage.get_width()/2, 350)
+        self.list1.set_position(self.stage.get_width()/3, 350)
         self.stage.add(self.list1)
         
         self.list2 = LabelList(5)
-        self.list2.set_position( (self.list1.get_x() + self.list1.get_width()), 350)
+        self.list2.set_position( (self.stage.get_width()/2 + self.list1.get_width()), 350)
         self.stage.add(self.list2)
         """
         self.tmpLabel = clutter.Label()

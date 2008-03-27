@@ -244,8 +244,10 @@ class ListItem(clutter.Group):
         
         #Text is actually scaled down in 'regular' position so that it doesn't get jaggies when zoomed in
         #self.set_scale(self.zoomLevel, self.zoomLevel)
-        self.currentZoom = 0        
-        
+        self.currentZoom = self.scale_step_medium
+        self.currentOpacity = self.opacity_step_medium
+        self.set_scale(self.currentZoom, self.currentZoom)
+        self.set_opacity(self.currentOpacity)
         """
         #(label_width, label_height) = self.label.get_size()
         label_x = 0 #x #self.stage.get_width() - label_width - 50

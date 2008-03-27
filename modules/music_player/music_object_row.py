@@ -33,22 +33,25 @@ class MusicObjectRow(ImageRow):
                 #self.timeline.connect('completed', self.restart_cb)
                 #time.sleep(self.music_player.sleep_time)
 
-            if as_thread: clutter.threads_enter()
+            
             if pixbuf == object.PENDING_DOWNLOAD:
                 #Get the temporary image
+                if as_thread: clutter.threads_enter()
                 pixbuf = object.get_default_image()
                 tmpImage = ImageFrame(pixbuf, self.image_size, use_reflection = True, quality = ImageFrame.QUALITY_FAST) #clutter.Texture()
                 object.connect("image-found", self.set_image_cb, object, tmpImage)
+                if as_thread: clutter.threads_leave()
             elif not pixbuf is None:
                 #If we're performing this loading as a seperate thread, we need to lock the Clutter threads
-
+                if as_thread: clutter.threads_enter()
                 tmpImage = ImageFrame(pixbuf, self.image_size, use_reflection=True, quality = ImageFrame.QUALITY_FAST)
-
+                if as_thread: clutter.threads_leave()
             else:
+                if as_thread: clutter.threads_enter()
                 pixbuf = object.get_default_image()
                 tmpImage = ImageFrame(pixbuf, self.image_size, use_reflection = True, quality = ImageFrame.QUALITY_FAST) #clutter.Texture()
+                if as_thread: clutter.threads_leave()
 
-            if as_thread: clutter.threads_leave()
             self.add_texture_group(tmpImage)
 
         

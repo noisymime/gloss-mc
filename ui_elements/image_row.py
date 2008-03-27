@@ -175,6 +175,7 @@ class ImageRow(clutter.Group):
         self.currentSelection = incomingItem
         
         self.timeline.start()
+
         
     def select_first(self):      
         self.timeline = clutter.Timeline(self.frames, self.fps)
@@ -217,7 +218,6 @@ class ImageRow(clutter.Group):
     def remove_item(self, timeline = None, itemNo = None):
         self.textureLibrary[itemNo].set_opacity(0)
         self.textureLibrary[itemNo].hide()
-        self.textureLibrary[itemNo].unrealize()
         self.images_group.remove(self.textureLibrary[itemNo])
     
 

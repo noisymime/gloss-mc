@@ -41,6 +41,7 @@ class Module:
     def begin(self, glossMgr):
         self.glossMgr = glossMgr
         #self.buffer_file_reader = open("test.mpg","r")
+        self.spinning = True
         glossMgr.get_selector_bar().set_spinner(True)
         self.loading_scr = SplashScr(self.stage)
         self.loading_scr.set_msg("Starting TV...")
@@ -64,7 +65,10 @@ class Module:
         self.isRunning = True
         
     def begin_playback(self, fd):#buffer_file):
-        self.glossMgr.get_selector_bar().set_spinner(False)
+        if self.spinning: 
+            self.glossMgr.get_selector_bar().set_spinner(False)
+            self.spinning = False
+        
         
         #uri = "file://" + os.getcwd() +"/" + buffer_file
         #f = open(os.getcwd() +"/" + buffer_file, 'r')

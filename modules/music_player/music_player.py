@@ -2,7 +2,7 @@ import pygtk
 import gobject
 import gtk
 import clutter
-import thread
+import threading
 from modules.music_player.backends.myth_music import Backend
 from modules.music_player.lastFM_interface import lastFM_interface
 from modules.music_player.music_object_row import MusicObjectRow
@@ -42,7 +42,6 @@ class Module:
         self.is_playing = False
         #self.load_albums()
         self.artists = self.backend.get_artists()
-        
         self.timeout_id = 0
         #thread.start_new_thread(self.load_artists, ())
         
@@ -85,11 +84,11 @@ class Module:
             if (event.keyval == clutter.keysyms.Left) or (event.keyval == clutter.keysyms.Right):
                 #First check if there's any current timeouts and if there is, clear it
                 #if not self.timeout_id == 0: gobject.source_remove(self.timeout_id)
-
+                self.artistImageRow.sleep = True
                 self.artistImageRow.input_queue.input(event)
                 #self.artistImageRow.input_queue.connect("queue-flushed", self.start_delay, self.load_albums, None)
                 self.queue_id = self.artistImageRow.input_queue.connect("queue-flushed", self.load_albums)
-                self.artistImageRow.sleep = True
+                self.artistImageRow.sleep = False
                 
                 
             elif (event.keyval == clutter.keysyms.Down):
@@ -98,6 +97,7 @@ class Module:
         elif self.current_context == self.CONTEXT_LIST1:
             
             if (event.keyval == clutter.keysyms.Up):
+                self.artistImageRow.external_timeline = self.list1.timeline
                 #If we're at the top of the list already, we change focus bar to the image_row
                 if self.list1.selected == 0:
                     self.list1.select_none_elegant()
@@ -123,16 +123,20 @@ class Module:
     
     #Loads albums into List1
     def load_albums(self, queue):
-        self.artistImageRow.input_queue.disconnect(self.queue_id)
+        if self.artistImageRow.input_queue.handler_is_connected(self.queue_id): self.artistImageRow.input_queue.disconnect(self.queue_id)
         #Just a little test code
         artist = self.artistImageRow.get_current_object()
-        thread.start_new_thread(self.backend.get_albums_by_artistID, (artist.artistID,))
+        #gobject.idle_add(self.backend.get_albums_by_artistID, artist.artistID)
+        thread = threading.Thread(target=self.backend.get_albums_by_artistID, args=(artist.artistID,))
+        thread.start()
+        #thread.start_new_thread(self.backend.get_albums_by_artistID, (artist.artistID,))
         self.conn_id = self.backend.connect("query-complete", self.update_for_albums, artist)
         
     def update_for_albums(self, data, artist = None):
-        self.backend.disconnect(self.conn_id)
 
-        if artist is None: self.artistImageRow.get_current_object()
+
+        if not artist == self.artistImageRow.get_current_object(): return
+        if self.backend.handler_is_connected(self.conn_id): self.backend.disconnect(self.conn_id)
         albums = self.backend.get_albums_by_artistID(artist.artistID)
         
         clutter.threads_enter()
@@ -149,7 +153,15 @@ class Module:
         clutter.threads_leave()
         
     def begin(self, glossMgr):
+        #self.display("blah", glossMgr)
+        #return
+        self.artistImageRow.objectLibrary = self.artists
+        #thread.start_new_thread(self.artistImageRow.load_image_range, (0, len(self.artists)-1, True))
+        gobject.idle_add(self.artistImageRow.load_image_range, 0, len(self.artists)-1, True)
+        self.artistImageRow.connect("load-complete", self.display, glossMgr)
+
         
+    def display(self, data, glossMgr):
         #Create a backdrop for the player. In this case we just use the same background as the menus
         self.backdrop = glossMgr.get_themeMgr().get_texture("background", None, None)
         self.backdrop.set_size(self.stage.get_width(), self.stage.get_height())
@@ -163,8 +175,8 @@ class Module:
         self.backdrop_behaviour.apply(self.backdrop)
         
         #Load in the initial images:
-        self.artistImageRow.objectLibrary = self.artists
-        self.artistImageRow.load_image_range(0, self.num_columns)
+        #self.artistImageRow.objectLibrary = self.artists
+        #self.artistImageRow.load_image_range(0, self.num_columns)
         
         self.stage.add(self.artistImageRow)
         self.artistImageRow.set_opacity(0)
@@ -178,33 +190,17 @@ class Module:
         self.stage.add(self.list1)
         
         self.list2 = LabelList(5)
-        self.list2.set_position( (self.stage.get_width()/2 + self.list1.get_width()), 350)
+        self.list2.set_position( (600), 350)
         self.stage.add(self.list2)
-        """
-        self.tmpLabel = clutter.Label()
-        self.tmpLabel.set_color(clutter.color_parse('White'))
-        self.tmpLabel.set_position(0, 350)
-        self.tmpLabel.set_text("Test")
-        self.tmpLabel.show()
-        self.stage.add(self.tmpLabel)
-        """
         
         #The preview img
         self.main_img = ImageFrame(None, 300, True) #clutter.Texture()
-        self.main_img.set_position(30, 400)
+        self.main_img.set_position(50, 300)
         self.main_img.set_rotation(clutter.Y_AXIS, 45, self.main_img.get_width(), 0, 0)
         self.main_img.show()
         self.stage.add(self.main_img)
         
         self.timeline_backdrop.start()
-        
-        #Load the rest of the images
-        #thread.start_new_thread(self.load_image_range, (self.num_columns, len(self.artists)-1))
-        self.artistImageRow.sleep = True
-        self.timeline_backdrop.connect("completed", self.artistImageRow.load_image_range_cb)
-        #self.load_image_range(self.num_columns, len(self.artists)-1)
-        
-        
     
         
     def stop(self):

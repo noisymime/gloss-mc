@@ -72,7 +72,7 @@ class mythDB():
             self.cursor.execute(sql)
             data = self.cursor.fetchall()
             if not data == ():
-                return data[1][1]
+                return data[0][1]
             else:
                 return None
         

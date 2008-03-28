@@ -2,7 +2,7 @@ import pygtk
 import gtk
 import gobject
 import os
-import thread
+import threading
 from modules.music_player.music_objects.music_object import MusicObject
 
 class artist(MusicObject):
@@ -56,18 +56,19 @@ class artist(MusicObject):
         else:
             #We send a request off to LastFM to grab an image.
             #This will emit the "image-found" signal when and if it was successful
-            thread.start_new_thread(self.get_image_from_lastFM, (None,))
+            #gobject.idle_add(self.get_image_from_lastFM)
+            thread = threading.Thread(target=self.get_image_from_lastFM)
+            thread.start()
+            #thread.start_new_thread(self.get_image_from_lastFM, (None,))
             #pixbuf = self.get_image_from_lastFM()
             return self.PENDING_DOWNLOAD
         
-    def get_image_from_lastFM(self, thread_data):
+    def get_image_from_lastFM(self):
         pixbuf = self.music_player.lastFM.get_artist_image(self.name)
         if not pixbuf is None: 
             self.save_image(pixbuf)
-            return pixbuf
-        else:
-            #We have failed to find an image
-            return None
+            
+        return False
     
     #Saves an image (pixbuf) to file and updates the Myth db
     def save_image(self, pixbuf):

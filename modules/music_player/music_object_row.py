@@ -1,10 +1,18 @@
 import time
-import thread
 import clutter
+import gobject
 from ui_elements.image_row import ImageRow
 from ui_elements.image_frame import ImageFrame
 
 class MusicObjectRow(ImageRow):
+        #Setup signals
+    __gsignals__ =  { 
+        "load-complete": (
+            gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, []),
+        "load-begin": (
+            gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, [])
+        }
+    
     
     def __init__(self, glossMgr, width, height, columns, music_player):
         ImageRow.__init__(self, glossMgr, width, height, columns)
@@ -22,6 +30,7 @@ class MusicObjectRow(ImageRow):
         #External timeline can be set by other objects as a form of 'lock'. If external timeline is running, thread will be paused
         self.external_timeline = None
         
+        self.emit("load-begin")
         for i in range(start, end):
             object = self.objectLibrary[i]
             print "loading: " + object.name
@@ -54,20 +63,17 @@ class MusicObjectRow(ImageRow):
 
             self.add_texture_group(tmpImage)
 
-        
+        self.emit("load-complete")
+        return False
         #print "Finished threads"
-        
-    #Just a callback function to call 'load_image_range()' in a new thread
-    def load_image_range_cb(self, timeline):
-        thread.start_new_thread(self.load_image_range, (self.num_columns, len(self.objectLibrary)-1, True))
-        
+         
     #A simple callback funtion to set the image of an artist/album after it has completed a download
     def set_image_cb(self, data, music_object, tmpImage):
         #if self.glossMgr.debug:
         print "Image for music_object '%s' downloaded" % (music_object.name)
         pixbuf = music_object.get_image()
         if not pixbuf is None:
-            clutter.threads_init()
+            clutter.threads_enter()
             tmpImage.set_pixbuf(pixbuf)
             clutter.threads_leave()
     

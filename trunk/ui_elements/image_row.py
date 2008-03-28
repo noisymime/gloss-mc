@@ -177,7 +177,10 @@ class ImageRow(clutter.Group):
         self.timeline.start()
 
         
-    def select_first(self):      
+    def select_first(self):
+        #Sanity check
+        if len(self.textureLibrary) == 0: return
+         
         self.timeline = clutter.Timeline(self.frames, self.fps)
         self.input_queue.set_timeline(self.timeline)
     

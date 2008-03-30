@@ -66,6 +66,7 @@ class Backend(gobject.GObject):
     def get_albums_by_artistID(self, id, no_cache = False):
         #Check cache
         if (not no_cache) and (self.cache_albums_by_artistID.has_key(str(id))):
+            self.emit("query-complete")
             return self.cache_albums_by_artistID[str(id)]
         
         #Generate some SQL
@@ -99,6 +100,7 @@ class Backend(gobject.GObject):
     def get_songs_by_albumID(self, id, no_cache = False):
         #Check cache
         if (not no_cache) and (self.cache_songs_by_albumID.has_key(str(id))):
+            self.emit("query-complete")
             return self.cache_songs_by_albumID[str(id)]
         
         

@@ -134,7 +134,6 @@ class Module:
         
     def update_for_albums(self, data, artist = None):
 
-
         if not artist == self.artistImageRow.get_current_object(): return
         if self.backend.handler_is_connected(self.conn_id): self.backend.disconnect(self.conn_id)
         albums = self.backend.get_albums_by_artistID(artist.artistID)
@@ -150,6 +149,8 @@ class Module:
         pixbuf = albums[0].get_image()
         if not pixbuf is None:
             self.main_img.set_pixbuf(pixbuf)
+        else:
+            self.main_img.set_pixbuf(None)
         clutter.threads_leave()
         
     def begin(self, glossMgr):

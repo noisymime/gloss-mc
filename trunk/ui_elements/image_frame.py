@@ -71,12 +71,20 @@ class ImageFrame(clutter.Group):
         return pixbuf
         
     def set_pixbuf(self, pixbuf):
-        pixbuf = self.resize_pixbuf(pixbuf)
-        self.main_pic.set_pixbuf(pixbuf)
-        self.main_pic.set_position(self.x, self.y)
-        self.main_pic.show()
+        if pixbuf is None:
+            self.main_pic.hide()
+            if not self.reflection is None: self.reflection.hide()
+            return
+        else:
+            pixbuf = self.resize_pixbuf(pixbuf)
+            self.main_pic.set_pixbuf(pixbuf)
+            self.main_pic.set_position(self.x, self.y)
+            self.main_pic.show()
         
+        #For the most part the Reflection texture automatically takes car of pixbuf changes
+        #So we only need to set the flection the first time arouns (ie self.reflection is None)
         if self.use_reflection:
+            if self.reflection is None:
                 self.reflection = Texture_Reflection(self.main_pic)
                 self.add(self.reflection)
                 self.reflection.show()

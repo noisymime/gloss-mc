@@ -21,8 +21,14 @@ class InputQueue(gobject.GObject):
         }
     
     accelerating = False
-    acceleration_factor = 10 #Timelines will run at regular speed times this
-    acceleration_threshold = 5 #The queue size at which accleration kicks in
+    current_acceleration_factor = 1
+    acceleration_factor_base = 10 #Timelines will run at regular speed times this when accelerated
+    acceleration_threshold = 3 #The queue size at which accleration kicks in (Make this higher to increase the delay before acceleration takes place)
+    acceleration_time = 1000 #Time (in ms) it takes for the queue to accelerate/decelerate from nothing to full
+    acceleration_steps = 5 #The number of steps in the acceleration process
+    
+    queue_max_size = 10
+    release_timeout = 500 #The time (in ms) that the queue waits for key-events before timing out
     
     def __init__(self):
         gobject.GObject.__init__(self)
@@ -37,16 +43,23 @@ class InputQueue(gobject.GObject):
         self.action_south = None
         self.action_west = None
         
-        gtk.settings_get_default().set_long_property("gtk-timeout-repeat", 5000, "gloss")
+        self.current_acceleration_step = 0
+        self.stage = clutter.stage_get_default()
+        self.poll_time = None
+        self.release_timeout_id = None
+        #gtk.settings_get_default().set_long_property("gtk-timeout-repeat", 5000, "gloss")
         
     def set_timeline(self, timeline):
         self.timeline = timeline
+        self.base_fps = self.timeline.get_speed()
         if self.accelerating:
-            fps = self.timeline.get_speed() * self.acceleration_factor
+            fps = self.timeline.get_speed() * self.current_acceleration_factor
+            if fps < 1: fps = self.base_fps
             self.timeline.set_speed(fps)
         self.timeline.connect('completed', self.flush_queue)
         
     def input(self, event):
+        self.actor = event.source
         if not self.timeline.is_playing():
             if (event.keyval == clutter.keysyms.Left) and (not self.action_west is None): self.action_west()
             if (event.keyval == clutter.keysyms.Right) and (not self.action_east is None): self.action_east()
@@ -56,6 +69,12 @@ class InputQueue(gobject.GObject):
             return True
         
         self.emit("entering-queue")
+        
+        #Poll for key release
+        if self.accelerating:
+            if not self.release_timeout_id is None:
+                gobject.source_remove(self.release_timeout_id)
+            self.release_timeout_id = gobject.timeout_add(self.release_timeout, self.decelerate)
         
         if event.keyval == clutter.keysyms.Left:
             self.queue_west += 1
@@ -80,6 +99,11 @@ class InputQueue(gobject.GObject):
         if (direction == self.WEST): self.action_west = function
         
     def flush_queue(self, data):
+        if self.queue_north > self.queue_max_size: self.queue_north = self.queue_max_size
+        if self.queue_east > self.queue_max_size: self.queue_east = self.queue_max_size
+        if self.queue_south > self.queue_max_size: self.queue_south = self.queue_max_size
+        if self.queue_west > self.queue_max_size: self.queue_west = self.queue_max_size
+        
         #Consolodate north/south, east/west volumes
         if self.queue_north > self.queue_south: 
             self.queue_north = self.queue_north - self.queue_south
@@ -99,11 +123,9 @@ class InputQueue(gobject.GObject):
             
             absolute_queue_size = self.queue_north + self.queue_east + self.queue_south + self.queue_west
             if absolute_queue_size > self.acceleration_threshold:
-                self.accelerating = True
-            else:
-                self.accelerating = False
-            
-            print "Queue Size: N=%s E=%s S=%s W=%s" % (self.queue_north, self.queue_east, self.queue_south, self.queue_west)
+                if not self.accelerating:
+                    self.accelerate()
+            #print "Queue Size: N=%s E=%s S=%s W=%s" % (self.queue_north, self.queue_east, self.queue_south, self.queue_west)
             
             if self.queue_north > 0:
                 self.queue_north -= 1
@@ -126,10 +148,44 @@ class InputQueue(gobject.GObject):
         self.queue_west = 0
         self.queue_north = 0
         
-        self.emit("queue-flushed")
+        self.emit("queue-flushed") 
+        
         
     def is_in_queue(self):
         if (self.queue_north > 0) or (self.queue_south > 0) or (self.queue_east > 0) or (self.queue_west > 0):
             return True
         else:
             return False
+        
+    def accelerate(self):
+        self.accelerating = True
+        if self.current_acceleration_step < self.acceleration_steps:
+            self.current_acceleration_step +=1
+            print "accelerating: %s" % str(self.current_acceleration_step)
+            self.current_acceleration_factor = self.current_acceleration_step * (self.acceleration_factor_base / self.acceleration_steps)
+            
+            fps = self.base_fps * self.current_acceleration_factor
+            if fps < 1: fps = self.base_fps
+            self.timeline.set_speed(fps)
+            if self.current_acceleration_step == 1: gobject.timeout_add( (self.acceleration_time / self.acceleration_steps), self.accelerate)
+            return True
+        
+        print "Acceleration finished"
+        return False
+        
+    def decelerate(self, actor = None, event = None):
+        #print "Key released: %s" % str(gtk.gdk.keyval_name(event.keyval))
+        if self.current_acceleration_step > 0:
+            self.current_acceleration_step -= 1
+            print "decelerating: %s" % str(self.current_acceleration_step)
+            self.current_acceleration_factor = self.current_acceleration_step * (self.acceleration_factor_base / self.acceleration_steps)
+            
+            fps = self.base_fps * self.current_acceleration_factor
+            if fps < 1: fps = self.base_fps
+            self.timeline.set_speed(fps)
+            if self.current_acceleration_step == (self.acceleration_steps-1): gobject.timeout_add( (self.acceleration_time / self.acceleration_steps), self.decelerate)
+            return True
+
+        self.accelerating = False
+        print "Deceleration finished"   
+        return False

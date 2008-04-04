@@ -2,6 +2,7 @@ import eyeD3
 import os
 import pygtk
 import gtk
+import gobject
 
 class song:
     filename = None

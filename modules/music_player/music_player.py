@@ -7,6 +7,7 @@ from modules.music_player.backends.myth_music import Backend
 from modules.music_player.lastFM_interface import lastFM_interface
 from modules.music_player.music_object_row import MusicObjectRow
 from ui_elements.image_frame import ImageFrame
+from ui_elements.image_clone import ImageClone
 from ui_elements.label_list import LabelList
 
 class Module:
@@ -156,36 +157,56 @@ class Module:
         clutter.threads_leave()
         
     def begin(self, glossMgr):
-        #self.display("blah", glossMgr)
-        #return
-        self.artistImageRow.objectLibrary = self.artists
-        #thread.start_new_thread(self.artistImageRow.load_image_range, (0, len(self.artists)-1, True))
-        gobject.idle_add(self.artistImageRow.load_image_range, 0, len(self.artists)-1, True)
-        self.artistImageRow.connect("load-complete", self.display, glossMgr)
-
+        self.timeline_loading = clutter.Timeline(10,40)
+        self.alpha = clutter.Alpha(self.timeline_loading, clutter.ramp_inc_func)
+        self.opacity_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=self.alpha)
         
-    def display(self, data, glossMgr):
         #Create a backdrop for the player. In this case we just use the same background as the menus
         self.backdrop = glossMgr.get_themeMgr().get_texture("background", None, None)
         self.backdrop.set_size(self.stage.get_width(), self.stage.get_height())
         self.backdrop.set_opacity(0)
         self.backdrop.show()
         self.stage.add(self.backdrop)
-        #Fade the backdrop in
-        self.timeline_backdrop = clutter.Timeline(10,40)
-        self.alpha = clutter.Alpha(self.timeline_backdrop, clutter.ramp_inc_func)
-        self.backdrop_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=self.alpha)
-        self.backdrop_behaviour.apply(self.backdrop)
+        self.opacity_behaviour.apply(self.backdrop)
         
-        #Load in the initial images:
-        #self.artistImageRow.objectLibrary = self.artists
-        #self.artistImageRow.load_image_range(0, self.num_columns)
+        self.loading_img = ImageClone(glossMgr.get_current_menu().get_current_item().get_main_texture())
+        self.loading_img.show()
+        self.stage.add(self.loading_img)
+        
+        x = int( (self.stage.get_width() - self.loading_img.get_width()) / 2 )
+        y = int( (self.stage.get_height() - self.loading_img.get_height()) / 2 )
+        knots = (\
+                 (int(self.loading_img.get_x()), int(self.loading_img.get_y()) ),\
+                 (x, y)\
+                 )
+        self.path_behaviour = clutter.BehaviourPath(knots = knots, alpha = self.alpha)
+        self.path_behaviour.apply(self.loading_img)
+        
+        self.timeline_loading.start()
+        
+        self.artistImageRow.objectLibrary = self.artists
+        self.artistImageRow.connect("load-complete", self.display, glossMgr)
+        self.timeline_loading.connect("completed", self.artistImageRow.load_image_range_cb, 0, len(self.artists)-1, False)
+        #thread.start_new_thread(self.artistImageRow.load_image_range, (0, len(self.artists)-1, True))
+
+        #gobject.idle_add(self.artistImageRow.load_image_range, 0, len(self.artists)-1, True)
+        
+
+        
+    def display(self, data, glossMgr):
+        self.timeline_display = clutter.Timeline(10,40)
+        self.alpha = clutter.Alpha(self.timeline_display, clutter.ramp_inc_func)
+        self.opacity_behaviour_incoming = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=self.alpha)
+        self.opacity_behaviour_outgoing = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=self.alpha)
+        #Fade the backdrop in
+        
+        self.opacity_behaviour_outgoing.apply(self.loading_img)
         
         self.stage.add(self.artistImageRow)
         self.artistImageRow.set_opacity(0)
         self.artistImageRow.select_first()
         self.artistImageRow.show()
-        self.backdrop_behaviour.apply(self.artistImageRow)
+        self.opacity_behaviour_incoming.apply(self.artistImageRow)
         
         #Just a nasty temp label for outputting stuff
         self.list1 = LabelList(5)
@@ -203,7 +224,7 @@ class Module:
         self.main_img.show()
         self.stage.add(self.main_img)
         
-        self.timeline_backdrop.start()
+        self.timeline_display.start()
     
         
     def stop(self):

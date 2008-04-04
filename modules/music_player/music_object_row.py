@@ -25,6 +25,8 @@ class MusicObjectRow(ImageRow):
     def add_object(self, object):
         self.objectLibrary.append(object)
         
+    def load_image_range_cb(self, timeline, start, end, as_thread = False, thread_data = None):
+        self.load_image_range(start, end, as_thread, thread_data)
         
     def load_image_range(self, start, end, as_thread = False, thread_data = None):
         #External timeline can be set by other objects as a form of 'lock'. If external timeline is running, thread will be paused
@@ -36,7 +38,7 @@ class MusicObjectRow(ImageRow):
             print "loading: " + object.name
             pixbuf = object.get_image()
             #If there is currently motion, we need to pause this work
-            while self.should_sleep():
+            if self.should_sleep():
                 time.sleep(0.1)
             #if self.sleep: 
                 #self.timeline.connect('completed', self.restart_cb)

@@ -161,7 +161,7 @@ class InputQueue(gobject.GObject):
         self.accelerating = True
         if self.current_acceleration_step < self.acceleration_steps:
             self.current_acceleration_step +=1
-            print "accelerating: %s" % str(self.current_acceleration_step)
+            #print "accelerating: %s" % str(self.current_acceleration_step)
             self.current_acceleration_factor = self.current_acceleration_step * (self.acceleration_factor_base / self.acceleration_steps)
             
             fps = self.base_fps * self.current_acceleration_factor
@@ -170,14 +170,14 @@ class InputQueue(gobject.GObject):
             if self.current_acceleration_step == 1: gobject.timeout_add( (self.acceleration_time / self.acceleration_steps), self.accelerate)
             return True
         
-        print "Acceleration finished"
+        #print "Acceleration finished"
         return False
         
     def decelerate(self, actor = None, event = None):
         #print "Key released: %s" % str(gtk.gdk.keyval_name(event.keyval))
         if self.current_acceleration_step > 0:
             self.current_acceleration_step -= 1
-            print "decelerating: %s" % str(self.current_acceleration_step)
+            #print "decelerating: %s" % str(self.current_acceleration_step)
             self.current_acceleration_factor = self.current_acceleration_step * (self.acceleration_factor_base / self.acceleration_steps)
             
             fps = self.base_fps * self.current_acceleration_factor
@@ -187,5 +187,5 @@ class InputQueue(gobject.GObject):
             return True
 
         self.accelerating = False
-        print "Deceleration finished"   
+        #print "Deceleration finished"   
         return False

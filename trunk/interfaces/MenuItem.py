@@ -17,6 +17,8 @@ class MenuItem (clutter.Label):
         self.itemTexturesGroup = clutter.Group()
         self.itemTexturesGroup.set_position(menu.menu_image_x, menu.menu_image_y)
         
+        #The main texture is the first one that is added to the item
+        self.main_texture = None
         
         #setup the label
         font = menu.font
@@ -52,12 +54,15 @@ class MenuItem (clutter.Label):
         pixbuf = gtk.gdk.pixbuf_new_from_file(path)
         tempTexture.set_pixbuf(pixbuf)
         
+        
+        
         self.add_image_from_texture(tempTexture)
         
     def add_image_from_texture(self, texture):
-        if texture is None:
-            print "NO TEXTURE!"
-
+        
+        if texture is None: print "NO TEXTURE!"
+        if self.main_texture is None: 
+            self.main_texture = texture
         """
         Removing as this is currently already handled in individual module files
         #Set the image to the size in the theme
@@ -85,6 +90,9 @@ class MenuItem (clutter.Label):
         
     def get_data(self):
         return self.data
+    
+    def get_main_texture(self):
+        return self.main_texture
     
     def setAction(self, newAction):
         self.action = newAction

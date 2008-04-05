@@ -57,10 +57,13 @@ class artist(MusicObject):
             #We send a request off to LastFM to grab an image.
             #This will emit the "image-found" signal when and if it was successful
             #gobject.idle_add(self.get_image_from_lastFM)
-            thread = threading.Thread(target=self.get_image_from_lastFM)
-            thread.start()
-            #thread.start_new_thread(self.get_image_from_lastFM, (None,))
-            #pixbuf = self.get_image_from_lastFM()
+            try:
+                thread = threading.Thread(target=self.get_image_from_lastFM)
+                thread.start()
+            except thread.error, e:
+                "Music_Player: Attempted to start too many threads"
+                #Returning None forces the default image to be used
+                return None
             return self.PENDING_DOWNLOAD
         
     def get_image_from_lastFM(self):

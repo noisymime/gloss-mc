@@ -12,6 +12,11 @@ class lastFM_interface:
     lastFM_album_xml_uri = lastFM_base_xml_uri + "album/"
     lastFM_track_xml_uri = lastFM_base_xml_uri + "track/"
     
+    #Maximum size of images returned
+    #If images are larger than this, they will be downloaded and resized
+    max_image_width = 800
+    max_image_height = 600
+    
     def __init__(self):
         pass
     
@@ -36,8 +41,9 @@ class lastFM_interface:
         if xml_string[0:len(error_string)] == error_string:
             return None
         
-        #We make a little manual change to the url, so that we get the BIG pic off last.FM rather than the 160x160 one
-        xml_string = xml_string.replace("/160/", "/_/")
+        #We make a little manual change to the url, so that we get a bigger pic off last.FM rather than the 160x160 one
+        #xml_string = xml_string.replace("/160/", "/_/") #Force use this to get BIG images
+        xml_string = xml_string.replace("/160/", "/500/") #Attempt to use the 500 size image
         
         #Because we only read in 2 lines, we need to manually close the block
         xml_string += "</similarartists>"
@@ -50,6 +56,14 @@ class lastFM_interface:
             print "LastFM Error: Could not parse XML '%s'" % (xml_string)
             print "LastFM Error: URI Attempted '%s'" % (similar_uri)
             return None
+        
+        #We do a check to see if a 500 size image exists
+        #If not, fall back onto the _ size image (ie the Biggest Last.fm has)
+        img_handle = urllib.urlopen(pic_url)
+        img_size = int(img_handle.info().getheader("Content-Length"))
+        if img_size == 0:
+            pic_url = pic_url.replace("/500/", "/_/")
+        img_handle.close()
         
         return self.get_pixbuf_from_url(pic_url)
         
@@ -77,5 +91,18 @@ class lastFM_interface:
             print "Last.FM: '%s'" % (e)
             #print "Last.FM: Received invalid image file: '%s' " % (pic_url)
         
-        return loader.get_pixbuf()
+        pixbuf = loader.get_pixbuf()
+        
+        #If the image is larger than our maximum size, shrink it down
+        #This should _generally_ not be needed, but will be used whenver last.fm returns a very large image by mistake
+        if pixbuf.get_width() > self.max_image_width:
+            yx_ratio = float(pixbuf.get_height()) / float(pixbuf.get_width())
+            height = int(self.max_image_width * yx_ratio)
+            pixbuf = pixbuf.scale_simple(self.max_image_width, height, gtk.gdk.INTERP_HYPER)
+        elif pixbuf.get_height() > self.max_image_height:
+            xy_ratio = float(pixbuf.get_width()) / float(pixbuf.get_height())
+            width = int(self.max_image_height * xy_ratio)
+            pixbuf = pixbuf.scale_simple(width, self.max_image_height, gtk.gdk.INTERP_HYPER)
+        
+        return pixbuf
         

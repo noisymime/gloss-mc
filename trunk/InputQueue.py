@@ -148,7 +148,7 @@ class InputQueue(gobject.GObject):
         self.queue_west = 0
         self.queue_north = 0
         
-        self.emit("queue-flushed") 
+        if not self.accelerating: self.emit("queue-flushed") 
         
         
     def is_in_queue(self):
@@ -187,5 +187,6 @@ class InputQueue(gobject.GObject):
             return True
 
         self.accelerating = False
+        self.emit("queue-flushed")
         #print "Deceleration finished"   
         return False

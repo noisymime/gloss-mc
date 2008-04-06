@@ -11,6 +11,7 @@ class ThemeMgr:
 	currentTheme = "default"
 	currentTheme = "Pear"
 	#currentTheme = "Mich"
+	currentTheme = "Gloxygen"
 	
 	def __init__(self, glossMgr):
 		self.stage = glossMgr.stage
@@ -163,13 +164,14 @@ class ThemeMgr:
 		elif relativeTo == "relativeToSelf":
 			parent = actor
 		
+		
 		(width, height) = self.get_dimensions(element, parent)
-		if (not width is None) and (not width == "default"): actor.set_width(width)
 		if (not height is None) and (not height == "default"): 
 			if height == "relative":
 				xy_ratio = float(actor.get_height()) / float(actor.get_width())
 				height = int(width * xy_ratio)
 			actor.set_height(height)
+		if (not width is None) and (not width == "default"): actor.set_width(width)
 		
 		#Set the position of the actor
 		(x,y) = (0,0)
@@ -209,9 +211,9 @@ class ThemeMgr:
 			if height[-1] == "%":
 				height = (float(height[:-1]) / 100.0) * parent.get_height()
 			height = int(height)
-		elif height == "relative":
-			pass
-		else:
+		#elif height == "relative":
+		#	print "Found relative size"
+		elif not height == "relative":
 			height = None
 		
 		return (width, height)

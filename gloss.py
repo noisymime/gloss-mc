@@ -102,9 +102,10 @@ class MainApp:
 
         #Load all modules
         for mods in modules:
-            if self.glossMgr.debug: print "Loading module: %s" % tempMod.title
+            
             tempMod = mods.Module(self.glossMgr, self.dbMgr)
             title =  tempMod.title
+            if self.glossMgr.debug: print "Loading module: %s" % title
             #print title
             
             self.splashScreen.set_msg("Loading "+title)

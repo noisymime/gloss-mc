@@ -102,7 +102,7 @@ class MainApp:
 
         #Load all modules
         for mods in modules:
-            #print "Loading mod..."
+            if self.glossMgr.debug: print "Loading module: %s" % tempMod.title
             tempMod = mods.Module(self.glossMgr, self.dbMgr)
             title =  tempMod.title
             #print title

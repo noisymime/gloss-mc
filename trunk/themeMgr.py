@@ -11,7 +11,7 @@ class ThemeMgr:
 	currentTheme = "default"
 	currentTheme = "Pear"
 	#currentTheme = "Mich"
-	currentTheme = "Gloxygen"
+	#currentTheme = "Gloxygen"
 	
 	def __init__(self, glossMgr):
 		self.stage = glossMgr.stage

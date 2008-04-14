@@ -10,7 +10,7 @@ class ThemeMgr:
 	defaultTheme = "default"
 	currentTheme = "default"
 	currentTheme = "Pear"
-	#currentTheme = "Mich"
+	currentTheme = "Mich"
 	#currentTheme = "Gloxygen"
 	
 	def __init__(self, glossMgr):

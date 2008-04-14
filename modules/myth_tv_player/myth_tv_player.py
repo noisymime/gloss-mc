@@ -9,8 +9,7 @@ from clutter import cluttergst
 from modules.myth_tv_player.MythBackendConn import MythBackendConnection
 from modules.myth_tv_player.tv_db_controller import tv_db_controller
 from SplashScr import SplashScr
-#from Menu import Menu
-from VideoController import VideoController
+from multimedia.VideoController import VideoController
 
 class Module:
     title = "TV"

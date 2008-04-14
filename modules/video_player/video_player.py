@@ -5,7 +5,7 @@ import pango
 import clutter
 import os
 from clutter import cluttergst
-from VideoController import VideoController
+from multimedia.VideoController import VideoController
 from modules.video_player.elements.cover_viewer import coverViewer
 from modules.video_player.elements.video_details import video_details
 from modules.video_player.elements.folder_menu import folderMenu
@@ -248,6 +248,7 @@ class Module():
         #if len(self.currentViewer.textureLibrary) == 0:
         if self.currentViewer is None:
             self.glossMgr.display_msg("Error: No videos", "There are no videos available in the library. This maybe caused by an empty library or a failed connection to the server.")
+            self.currentViewer = None
             self.stop()
             return
        
@@ -321,6 +322,7 @@ class Module():
         timeline_stop.start()
         
     def destroyPlugin(self, data):
+        self.stage.remove(self.backdrop)
         self.stage.remove(self.currentViewer)
         self.stage.remove(self.folderLibrary[self.folder_level])
         self.stage.remove(self.video_details)

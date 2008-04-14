@@ -4,7 +4,7 @@ import gtk
 import pango
 import time
 import math
-from ReflectionTexture import Texture_Reflection
+from ui_elements.ReflectionTexture import Texture_Reflection
 from interfaces.MenuItem import MenuItem
 from InputQueue import InputQueue
 

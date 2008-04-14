@@ -1,6 +1,6 @@
 import clutter
 from clutter import cluttergst
-from VideoController import VideoController
+from multimedia.VideoController import VideoController
 
 class Module:
     title = "DVD"

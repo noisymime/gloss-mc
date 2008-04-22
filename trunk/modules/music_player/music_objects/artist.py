@@ -57,13 +57,14 @@ class artist(MusicObject):
             #We send a request off to LastFM to grab an image.
             #This will emit the "image-found" signal when and if it was successful
             #gobject.idle_add(self.get_image_from_lastFM)
-            try:
-                thread = threading.Thread(target=self.get_image_from_lastFM)
-                thread.start()
-            except thread.error, e:
-                "Music_Player: Attempted to start too many threads"
+            #try:
+            thread = self.queue_thread(self.get_image_from_lastFM)
+                #thread = threading.Thread(target=self.get_image_from_lastFM)
+                #thread.start()
+            #except thread.error, e:
+                #"Music_Player: Attempted to start too many threads"
                 #Returning None forces the default image to be used
-                return None
+            #    return None
             return self.PENDING_DOWNLOAD
         
     def get_image_from_lastFM(self):
@@ -71,6 +72,7 @@ class artist(MusicObject):
         if not pixbuf is None: 
             self.save_image(pixbuf)
             
+        self.thread_finished()
         return False
     
     #Saves an image (pixbuf) to file and updates the Myth db

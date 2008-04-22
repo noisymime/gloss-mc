@@ -44,6 +44,7 @@ class Module:
         #self.load_albums()
         self.artists = self.backend.get_artists()
         self.timeout_id = 0
+        self.queue_id = 0
         #thread.start_new_thread(self.load_artists, ())
         
         
@@ -88,7 +89,7 @@ class Module:
                 self.artistImageRow.sleep = True
                 self.artistImageRow.input_queue.input(event)
                 #self.artistImageRow.input_queue.connect("queue-flushed", self.start_delay, self.load_albums, None)
-                self.queue_id = self.artistImageRow.input_queue.connect("queue-flushed", self.load_albums)
+                if self.queue_id == 0: self.queue_id = self.artistImageRow.input_queue.connect("queue-flushed", self.load_albums)
                 self.artistImageRow.sleep = False
                 
                 
@@ -124,10 +125,11 @@ class Module:
     
     #Loads albums into List1
     def load_albums(self, queue):
-        if self.artistImageRow.input_queue.handler_is_connected(self.queue_id): self.artistImageRow.input_queue.disconnect(self.queue_id)
+        if self.artistImageRow.input_queue.handler_is_connected(self.queue_id): 
+            self.artistImageRow.input_queue.disconnect(self.queue_id)
+            self.queue_id = 0
         #Just a little test code
         artist = self.artistImageRow.get_current_object()
-        #gobject.idle_add(self.backend.get_albums_by_artistID, artist.artistID)
         thread = threading.Thread(target=self.backend.get_albums_by_artistID, args=(artist.artistID,))
         thread.start()
         #thread.start_new_thread(self.backend.get_albums_by_artistID, (artist.artistID,))

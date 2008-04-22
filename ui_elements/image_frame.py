@@ -18,10 +18,11 @@ class ImageFrame(clutter.Group):
         self.quality = quality
         
         self.main_pic = clutter.Texture()
+        self.reflection = None
+        #self.reflection = Texture_Reflection(self.main_pic)
 
-        #If a reflection is desired, add it on
-        
-        
+        self.set_pixbuf(pixbuf)
+        """
         #pixbuf can be None, it just means that nothing appears initially
         if pixbuf is None: 
             self.add(self.main_pic)
@@ -41,7 +42,9 @@ class ImageFrame(clutter.Group):
             self.add(self.reflection)
             self.reflection.show()
         else:
-            self.reflection = None      
+            self.reflection = None
+            
+        """
                
         self.add(self.main_pic)
         

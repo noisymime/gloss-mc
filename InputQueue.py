@@ -47,16 +47,19 @@ class InputQueue(gobject.GObject):
         self.stage = clutter.stage_get_default()
         self.poll_time = None
         self.release_timeout_id = None
+        self.timeline = None
         #gtk.settings_get_default().set_long_property("gtk-timeout-repeat", 5000, "gloss")
         
     def set_timeline(self, timeline):
+        if not self.timeline is None: self.timeline.disconnect(self.flush_id)
+        
         self.timeline = timeline
         self.base_fps = self.timeline.get_speed()
         if self.accelerating:
             fps = self.timeline.get_speed() * self.current_acceleration_factor
             if fps < 1: fps = self.base_fps
             self.timeline.set_speed(fps)
-        self.timeline.connect('completed', self.flush_queue)
+        self.flush_id = self.timeline.connect('completed', self.flush_queue)
         
     def input(self, event):
         self.actor = event.source
@@ -139,19 +142,22 @@ class InputQueue(gobject.GObject):
             if self.queue_west > 0:
                 self.queue_west -= 1
                 self.action_west()
-
-                
+    
             return
-
-        self.queue_east = 0
-        self.queue_south = 0
-        self.queue_west = 0
-        self.queue_north = 0
-        
-        if not self.accelerating: self.emit("queue-flushed") 
-        
+        else:
+            self.queue_east = 0
+            self.queue_south = 0
+            self.queue_west = 0
+            self.queue_north = 0
+            
+            if not self.accelerating: 
+                #self.timeline.disconnect(self.flush_id)
+                self.emit("queue-flushed") 
+            
         
     def is_in_queue(self):
+        if self.accelerating: return True
+        
         if (self.queue_north > 0) or (self.queue_south > 0) or (self.queue_east > 0) or (self.queue_west > 0):
             return True
         else:

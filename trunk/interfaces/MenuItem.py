@@ -2,6 +2,7 @@ import clutter
 import pango
 import gtk
 import pygtk
+from ui_elements.ReflectionTexture import Texture_Reflection
 
 class MenuItem (clutter.Label):
     zoomLevel = 0.5

@@ -90,10 +90,12 @@ class Module:
     #This makes sure we only take in image files
     def filterImageFile(self, fileName):
         extension = fileName[-3:] #Get 3 letter extension
-        if extension in self.image_file_types:
-            return True
-        else:
+        if not extension in self.image_file_types:
             return False
+        elif fileName[0] == ".":
+            return False
+        else:
+            return True
             
     #This makes sure we only take in sound files
     def filterSoundFile(self, fileName):

@@ -42,6 +42,7 @@ class song:
             self.sample_rate = mythObject[26]
             self.bitrate = mythObject[27]
             self.bpm = mythObject[28]
+            self.directory_id = mythObject[29]
             
         except IndexError, e:
             print "Music_Player: Found difference in DB structure for songs. Attempting to continue."

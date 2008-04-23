@@ -6,12 +6,13 @@ import threading
 from modules.music_player.backends.myth_music import Backend
 from modules.music_player.lastFM_interface import lastFM_interface
 from modules.music_player.music_object_row import MusicObjectRow
+from modules.music_player.playlist import Playlist
 from ui_elements.image_frame import ImageFrame
 from ui_elements.image_clone import ImageClone
 from ui_elements.label_list import LabelList
 
 class Module:
-    CONTEXT_HEADINGS, CONTEXT_ROW, CONTEXT_LIST1, CONTEXT_LIST2 = range(4)
+    CONTEXT_HEADINGS, CONTEXT_ROW, CONTEXT_LIST1, CONTEXT_LIST2, CONTEXT_PLAYING = range(5)
     
     title = "Music"
     num_columns = 6
@@ -29,6 +30,7 @@ class Module:
         self.songs = []
         
         self.backend = Backend(self)
+        self.playlist = Playlist(self)
         
         self.artistImageRow = MusicObjectRow(self.glossMgr, self.stage.get_width(), 200, self.num_columns, self)
         
@@ -89,6 +91,7 @@ class Module:
                 self.artistImageRow.sleep = True
                 self.artistImageRow.input_queue.input(event)
                 #self.artistImageRow.input_queue.connect("queue-flushed", self.start_delay, self.load_albums, None)
+                self.artistImageRow.objectLibrary[0].pause_threads()
                 if self.queue_id == 0: self.queue_id = self.artistImageRow.input_queue.connect("queue-flushed", self.load_albums)
                 self.artistImageRow.sleep = False
                 
@@ -96,6 +99,14 @@ class Module:
             elif (event.keyval == clutter.keysyms.Down):
                 self.list1.select_first_elegant()
                 self.current_context = self.CONTEXT_LIST1
+            
+            elif (event.keyval == clutter.keysyms.Return):
+                artist = self.artistImageRow.get_current_object()
+                songs = self.backend.get_songs_by_artistID(artist.artistID)
+                self.playlist.clear_songs()
+                self.playlist.add_songs(songs)
+                self.playlist.play()
+                
         elif self.current_context == self.CONTEXT_LIST1:
             
             if (event.keyval == clutter.keysyms.Up):
@@ -129,6 +140,7 @@ class Module:
             self.artistImageRow.input_queue.disconnect(self.queue_id)
             self.queue_id = 0
         #Just a little test code
+        self.artistImageRow.objectLibrary[0].unpause_threads()
         artist = self.artistImageRow.get_current_object()
         thread = threading.Thread(target=self.backend.get_albums_by_artistID, args=(artist.artistID,))
         thread.start()

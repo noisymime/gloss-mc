@@ -8,6 +8,8 @@ class MediaController(gobject.GObject):
     __gsignals__ =  { 
         "playing": (
             gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, []),
+        "completed": (
+            gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, []),
         "stopped": (
             gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, [])
         }

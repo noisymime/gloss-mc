@@ -8,6 +8,7 @@ class MusicObject(gobject.GObject):
     
     queued_threads = []
     running_threads = []
+    threads_paused = False
     
     #Setup signals
     __gsignals__ =  { 
@@ -26,15 +27,25 @@ class MusicObject(gobject.GObject):
         if len(self.running_threads) > self.MAX_THREADS:
             self.queued_threads.append(thread)
         else:
-            self.running_threads.append(thread)
-            thread.start()
+            if (not self.threads_paused):
+                self.running_threads.append(thread)
+                thread.start()
             
         return thread
             
     def thread_finished(self):
         self.running_threads.pop(0)
         
-        if len(self.queued_threads) > 0:
+        if (len(self.queued_threads) > 0) and (not self.threads_paused):
+            thread = self.queued_threads.pop(0)
+            self.running_threads.append(thread)
+            thread.start()
+            
+    def pause_threads(self):
+        self.threads_paused = True
+        
+    def unpause_threads(self):
+        while (len(self.queued_threads) > 0) and (len(self.running_threads) < self.MAX_THREADS):
             thread = self.queued_threads.pop(0)
             self.running_threads.append(thread)
             thread.start()

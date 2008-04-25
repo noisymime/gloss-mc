@@ -1,0 +1,36 @@
+The following functions are required for a backend:
+- get_artists
+- get_albums_by_artistID ( id )
+- get_songs_by_albumID ( id )
+- get_songs_by_artistID ( id )
+
+The following properties can be set on song objects (Those marked with * are compulsory):
+- songID*
+- filename*
+- directory*
+- name*
+- track
+- artistID
+- albumID
+- genreID
+- year
+- length
+- numplays
+- rating
+- lastplay
+- date_entered
+- date_modified
+- format
+- size
+- description
+- comment
+- disc_count
+- disc_number
+- track_count
+- start_time
+- stop_time
+- eq_preset
+- retrieve_volume
+- sample_rate
+- bitrate
+- bpm

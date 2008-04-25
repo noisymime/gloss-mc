@@ -1,9 +1,11 @@
 import clutter
 import pygtk
 import gtk
+import gobject
 import random
 import math
 from ReflectionTexture import Texture_Reflection
+from ui_elements.image_frame import ImageFrame
 
 class image_previewer(clutter.Group):
     tex1 = None
@@ -113,7 +115,8 @@ class image_previewer(clutter.Group):
             self.show()
             self.timeline1.start()
             timeline_opacity.start()
-            self.nextTexture = self.get_rand_tex()
+            gobject.idle_add(self.get_next_tex)
+            #self.nextTexture = self.get_rand_tex()
         else:
             self.timeline1.start()
             self.timeline2.start()
@@ -149,31 +152,20 @@ class image_previewer(clutter.Group):
     def get_rand_tex(self):
         rand = random.randint(0, len(self.textures)-1)
         
-        
-        texture = clutter.Texture()
-        pixbuf = gtk.gdk.pixbuf_new_from_file(self.textures[rand])
-        
-        
-        #Set the image size based on the max bounds
-        xy_ratio = float(pixbuf.get_width()) / pixbuf.get_height()
-        if pixbuf.get_width() > pixbuf.get_height():
-            width = self.max_img_width
-            height = int(self.max_img_width / xy_ratio)
+        #Determine the largest size for the image
+        if self.max_img_height > self.max_img_width:
+            img_size = self.max_img_height
         else:
-            height = self.max_img_height
-            width = int(xy_ratio * self.max_img_height)
+            img_size = self.max_img_width
         
-        pixbuf = pixbuf.scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
-
-        texture.set_pixbuf(pixbuf) 
-        reflectionTexture = Texture_Reflection(texture)
+        pixbuf = gtk.gdk.pixbuf_new_from_file(self.textures[rand])
+        texture = ImageFrame(pixbuf, img_size, use_reflection = True, quality = ImageFrame.QUALITY_FAST)
+        return texture
+    
+    def get_next_tex(self):
+        self.nextTexture = self.get_rand_tex()
+        return False
         
-        textureGroup = clutter.Group()
-        textureGroup.add(texture)
-        textureGroup.add(reflectionTexture)
-        texture.show()
-        reflectionTexture.show()
-        return textureGroup
         
     def next_image(self, data):
         texture = self.nextTexture
@@ -232,7 +224,8 @@ class image_previewer(clutter.Group):
         
         self.add(texture)
         texture.show()
-        self.nextTexture = self.get_rand_tex()
+        gobject.idle_add(self.get_next_tex)
+        #self.nextTexture = self.get_rand_tex()
         
     def get_texture_knots(self, texture):
         knots = (\

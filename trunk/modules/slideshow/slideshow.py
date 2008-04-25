@@ -12,6 +12,7 @@ class Module:
     title = "Slideshow"
     
     menu_image = None
+    MAX_PREVIEW_IMG = 15 #The maximum number of images from each directory that will be used in the preview
     
     image_file_types = ["jpg", "gif", "jpeg", "png", "bmp"]
     sound_file_types = ["mp3", "wav", "ogg"] #possibly more supported by default?
@@ -89,10 +90,28 @@ class Module:
         
     #This makes sure we only take in image files
     def filterImageFile(self, fileName):
+        #Strip out any directory info
+        filename_structure = fileName.split("/")
+        fileName = filename_structure[ len(filename_structure)-1 ]
+        
         extension = fileName[-3:] #Get 3 letter extension
         if not extension in self.image_file_types:
             return False
         elif fileName[0] == ".":
+            return False
+        else:
+            return True
+        
+    #This filters for image files starting with "."
+    def filterPreviewImageFile(self, fileName):
+        #Strip out any directory info
+        filename_structure = fileName.split("/")
+        fileName = filename_structure[ len(filename_structure)-1 ]
+        
+        extension = fileName[-3:] #Get 3 letter extension
+        if not extension in self.image_file_types:
+            return False
+        elif not fileName[0] == ".":
             return False
         else:
             return True
@@ -104,6 +123,19 @@ class Module:
             return True
         else:
             return False
+        
+    #A simple function to add recursive nature to os.listdir
+    def os_listdir_recursive(self, dirPath, file_list = None, showHidden = True):
+        if file_list is None: file_list = []
+        new_file_list = os.listdir(dirPath)
+        for fs_object in new_file_list:
+                if not showHidden and fs_object[0] == ".": break
+                path = dirPath + "/" + fs_object
+                if os.path.isdir(path):
+                    self.os_listdir_recursive(path, file_list)
+                else: file_list.append(path)
+
+        return file_list
     
     def begin(self, glossMgr):
         
@@ -428,7 +460,16 @@ class Module:
                 
                 #Start experimental schtuff
                 img_list = os.listdir(subdir)
-                img_list = filter(self.filterImageFile, img_list)
+                img_list = self.os_listdir_recursive(subdir, showHidden = False)
+                #Attempt to get the thumbnail images
+                #print img_list
+                img_list_preview = filter(self.filterPreviewImageFile, img_list)
+                if len(img_list_preview) == 0:
+                    img_list = img_list_preview
+                #If not, just use the full images
+                else:
+                    img_list = filter(self.filterImageFile, img_list)
+                    
                 img_previewer = image_previewer(self.glossMgr.stage)
                 #Set the max preview img sizes (These come from the slideshow.xml theme file
                 if (not self.preview_width is None) and (not self.preview_height is None):
@@ -436,6 +477,8 @@ class Module:
                     
                 for img in img_list:
                     imgPath = subdir + "/" + img #os.listdir(subdir)[0]
+                    imgPath = img
+                    print imgPath
                     img_previewer.add_texture(imgPath)
                     #print imgPath
                 #new_file_list = os.listdir(dirPath)
@@ -443,7 +486,8 @@ class Module:
                     tempItem.itemTexturesGroup = img_previewer
                     img_previewer.set_position(tempItem.menu.menu_image_x, tempItem.menu.menu_image_y)
                 else:
-                    tempItem.add_image_from_path(imgPath, 0, 0)
+                    if not len(img_list) == 0:
+                        tempItem.add_image_from_path(imgPath, 0, 0, self.preview_width, self.preview_height)
                 
                 tempItem.setAction(self)
 

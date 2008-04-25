@@ -12,7 +12,7 @@ from ui_elements.image_clone import ImageClone
 from ui_elements.label_list import LabelList
 
 class Module:
-    CONTEXT_HEADINGS, CONTEXT_ROW, CONTEXT_LIST1, CONTEXT_LIST2, CONTEXT_PLAYING = range(5)
+    CONTEXT_HEADINGS, CONTEXT_ROW, CONTEXT_ALBUM_LIST, CONTEXT_SONG_LIST, CONTEXT_PLAYING = range(5)
     
     title = "Music"
     num_columns = 6
@@ -43,11 +43,9 @@ class Module:
         print "Music Base Dir: " + self.base_dir
         
         self.is_playing = False
-        #self.load_albums()
         self.artists = self.backend.get_artists()
         self.timeout_id = 0
         self.queue_id = 0
-        #thread.start_new_thread(self.load_artists, ())
         
         
     def setup_ui(self):
@@ -98,7 +96,7 @@ class Module:
                 
             elif (event.keyval == clutter.keysyms.Down):
                 self.list1.select_first_elegant()
-                self.current_context = self.CONTEXT_LIST1
+                self.current_context = self.CONTEXT_ALBUM_LIST
             
             elif (event.keyval == clutter.keysyms.Return):
                 artist = self.artistImageRow.get_current_object()
@@ -107,7 +105,7 @@ class Module:
                 self.playlist.add_songs(songs)
                 self.playlist.play()
                 
-        elif self.current_context == self.CONTEXT_LIST1:
+        elif self.current_context == self.CONTEXT_ALBUM_LIST:
             
             if (event.keyval == clutter.keysyms.Up):
                 self.artistImageRow.external_timeline = self.list1.timeline
@@ -130,9 +128,11 @@ class Module:
             tmpItem = self.list2.add_item(song.name)
         self.list2.display()
     
+    """
     #Simple delay 
     def start_delay(self, queue, function, args):
         self.timeout_id = gobject.timeout_add((self.delay * 1000), function, args)
+    """
     
     #Loads albums into List1
     def load_albums(self, queue):
@@ -249,7 +249,7 @@ class Module:
         
     def unpause(self):
         pass
-    
+    """
     def load_songs(self):
         #Generate some SQL to retrieve videos that were in the final_file_list
         #Load the videos into the cover viewer
@@ -285,3 +285,4 @@ class Module:
             self.tmpImage = clutter.Texture()
             self.tmpImage.set_pixbuf(pixbuf)
             
+    """

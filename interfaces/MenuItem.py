@@ -50,11 +50,13 @@ class MenuItem (clutter.Label):
         self.onStage = False
 
         
-    def add_image_from_path(self, path, x, y):
+    def add_image_from_path(self, path, x, y, width = None, height = None):
         tempTexture = clutter.Texture()
         pixbuf = gtk.gdk.pixbuf_new_from_file(path)
         tempTexture.set_pixbuf(pixbuf)
         
+        if not width is None: tempTexture.set_width(width)
+        if not height is None: tempTexture.set_height(height)
         
         
         self.add_image_from_texture(tempTexture)

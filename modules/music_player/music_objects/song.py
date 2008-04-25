@@ -11,41 +11,36 @@ class song:
         self.music_player = music_player
         self.base_dir = music_player.base_dir
     
-    def import_from_mythObject(self, mythObject):
-        try:
-            self.songID = mythObject[0]
-            self.filename = mythObject[1]
-            self.name = mythObject[2]
-            self.track = mythObject[3]
-            self.artistID = mythObject[4]
-            self.albumID = mythObject[5]
-            self.genreID = mythObject[6]
-            self.year = mythObject[7]
-            self.length = mythObject[8]
-            self.numplays = mythObject[9]
-            self.rating = mythObject[10]
-            self.lastplay = mythObject[11]
-            self.date_entered = mythObject[12]
-            self.date_modified = mythObject[13]
-            self.format = mythObject[14]
-            self.mythdigest = mythObject[15]
-            self.size = mythObject[16]
-            self.description = mythObject[17]
-            self.comment = mythObject[18]
-            self.disc_count = mythObject[19]
-            self.disc_number = mythObject[20]
-            self.track_count = mythObject[21]
-            self.start_time = mythObject[22]
-            self.stop_time = mythObject[23]
-            self.eq_preset = mythObject[24]
-            self.retrieve_volume = mythObject[25]
-            self.sample_rate = mythObject[26]
-            self.bitrate = mythObject[27]
-            self.bpm = mythObject[28]
-            self.directory_id = mythObject[29]
-            
-        except IndexError, e:
-            print "Music_Player: Found difference in DB structure for songs. Attempting to continue."
+        self.songID = None
+        self.filename = None
+        self.directory = None
+        self.name = None
+        self.track = None
+        self.artistID = None
+        self.albumID = None
+        self.genreID = None
+        self.year = None
+        self.length = None
+        self.numplays = None
+        self.rating = None
+        self.lastplay = None
+        self.date_entered = None
+        self.date_modified = None
+        self.format = None
+        self.mythdigest = None
+        self.size = None
+        self.description = None
+        self.comment = None
+        self.disc_count = None
+        self.disc_number = None
+        self.track_count = None
+        self.start_time = None
+        self.stop_time = None
+        self.eq_preset = None
+        self.retrieve_volume = None
+        self.sample_rate = None
+        self.bitrate = None
+        self.bpm = None
     
     def get_image(self):
         return self.get_image_from_ID3()

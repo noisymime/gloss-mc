@@ -151,9 +151,9 @@ class InputQueue(gobject.GObject):
             self.queue_north = 0
             
             if not self.accelerating: 
-                #self.timeline.disconnect(self.flush_id)
-                self.emit("queue-flushed") 
-            
+                self.emit("queue-flushed")
+            self.accelerating = False
+
         
     def is_in_queue(self):
         if self.accelerating: return True

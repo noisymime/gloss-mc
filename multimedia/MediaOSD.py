@@ -1,5 +1,6 @@
 import clutter
 import time
+import gobject
 
 class osd:
 

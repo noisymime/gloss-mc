@@ -141,7 +141,7 @@ class Backend(gobject.GObject):
         #Else add the entries in    
         for record in results:
             tempSong = song(self.music_player)
-            tempSong.import_from_mythObject(record)
+            self.import_song_from_mythObject(record, tempSong)
             tempSong.directory = self.directories[str(tempSong.directory_id)]
             songs.append(tempSong)
             #self.artistImageRow.add_object(tempArtist)
@@ -176,11 +176,47 @@ class Backend(gobject.GObject):
         #Else add the entries in    
         for record in results:
             tempSong = song(self.music_player)
-            tempSong.import_from_mythObject(record)
+            self.import_song_from_mythObject(record, tempSong)
             tempSong.directory = self.directories[str(tempSong.directory_id)]
             songs.append(tempSong)
             #self.artistImageRow.add_object(tempArtist)
         self.emit("query-complete")
         self.cache_songs_by_artistID[str(id)] = songs
         return songs
+    
+    def import_song_from_mythObject(self, mythObject, song):
+        try:
+            song.songID = mythObject[0]
+            song.filename = mythObject[1]
+            song.name = mythObject[2]
+            song.track = mythObject[3]
+            song.artistID = mythObject[4]
+            song.albumID = mythObject[5]
+            song.genreID = mythObject[6]
+            song.year = mythObject[7]
+            song.length = mythObject[8]
+            song.numplays = mythObject[9]
+            song.rating = mythObject[10]
+            song.lastplay = mythObject[11]
+            song.date_entered = mythObject[12]
+            song.date_modified = mythObject[13]
+            song.format = mythObject[14]
+            song.mythdigest = mythObject[15]
+            song.size = mythObject[16]
+            song.description = mythObject[17]
+            song.comment = mythObject[18]
+            song.disc_count = mythObject[19]
+            song.disc_number = mythObject[20]
+            song.track_count = mythObject[21]
+            song.start_time = mythObject[22]
+            song.stop_time = mythObject[23]
+            song.eq_preset = mythObject[24]
+            song.retrieve_volume = mythObject[25]
+            song.sample_rate = mythObject[26]
+            song.bitrate = mythObject[27]
+            song.bpm = mythObject[28]
+            song.directory_id = mythObject[29]
+            
+        except IndexError, e:
+            print "Music_Player: Found difference in DB structure for songs. Attempting to continue."
     

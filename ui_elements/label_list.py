@@ -28,6 +28,33 @@ class LabelList(clutter.Group):
         
         #Selector bar image, moves with selections to show current item
         self.selector_bar = None
+    
+    def setup_from_theme_id(self, themeMgr, id):
+        element = themeMgr.search_docs("label_list", id).childNodes
+        #Quick check to make sure we found something
+        if element is None:
+            return None
+        
+        self.item_gap = int(themeMgr.find_child_value(element, "item_gap"))
+        self.displayMax = int(themeMgr.find_child_value(element, "num_visible_elements"))
+        
+        #Grab the font
+        font_node = themeMgr.get_subnode(element, "font")
+        fontString = themeMgr.get_font("main", font_node)
+        self.font = fontString
+        
+        #Set the selection effect steps
+        self.zoomStep0 = float(themeMgr.find_child_value(element, "scale_step0"))
+        self.zoomStep1 = float(themeMgr.find_child_value(element, "scale_step1"))
+        self.zoomStep2 = float(themeMgr.find_child_value(element, "scale_step2"))
+        self.opacityStep0 = int(themeMgr.find_child_value(element, "opacity_step0"))
+        self.opacityStep1 = int(themeMgr.find_child_value(element, "opacity_step1"))
+        self.opacityStep2 = int(themeMgr.find_child_value(element, "opacity_step2"))
+        
+        self.fps = int(themeMgr.find_child_value(element, "transition_fps"))
+        self.frames = int(themeMgr.find_child_value(element, "transition_frames"))
+        
+        themeMgr.setup_actor(self, element, themeMgr.stage)
         
     def on_key_press_event (self, event):
         self.input_queue.input(event)
@@ -222,6 +249,7 @@ class ListItem(clutter.Group):
 
     def __init__ (self, font, label_left = "", label_right = ""):
         clutter.Group.__init__ (self) #, menu, itemLabel, y)
+        self.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
         
         self.label_left = clutter.Label()
         self.label_right = clutter.Label()
@@ -280,7 +308,6 @@ class ListItem(clutter.Group):
     
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
         self.behaviourScale = clutter.BehaviourScale(x_scale_start=self.currentZoom, y_scale_start=self.currentZoom, x_scale_end=zoomTo, y_scale_end=zoomTo, alpha=alpha) #scale_gravity=clutter.GRAVITY_WEST, 
-        self.set_anchor_point_from_gravity(clutter.GRAVITY_WEST)
         self.behaviourOpacity = clutter.BehaviourOpacity(opacity_start=self.currentOpacity, opacity_end=opacityTo, alpha=alpha)
         self.behaviourScale.apply(self)
         self.behaviourOpacity.apply(self)

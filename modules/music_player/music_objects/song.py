@@ -53,7 +53,7 @@ class song:
             return None
         
         tag = eyeD3.Tag()
-        filename = self.base_dir + "/" + self.filename
+        filename = self.base_dir + "/" + self.directory + "/" + self.filename
         #print filename
         
         #Make sure the file exists and we can read it

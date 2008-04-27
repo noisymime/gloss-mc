@@ -166,8 +166,10 @@ class Module:
         pixbuf = albums[0].get_image()
         if not pixbuf is None:
             self.main_img.set_pixbuf(pixbuf)
+            self.main_img.show()
         else:
             self.main_img.set_pixbuf(None)
+            self.main_img.hide()
         clutter.threads_leave()
         
     def begin(self, glossMgr):
@@ -224,11 +226,13 @@ class Module:
         
         #Just a nasty temp label for outputting stuff
         self.list1 = LabelList(5)
-        self.list1.set_position(self.stage.get_width()/3, 350)
+        self.list1.setup_from_theme_id(self.glossMgr.themeMgr, "music_albums")
+        #self.list1.set_position(self.stage.get_width()/3, 350)
         self.stage.add(self.list1)
         
         self.list2 = LabelList(5)
-        self.list2.set_position( (600), 350)
+        self.list2.setup_from_theme_id(self.glossMgr.themeMgr, "music_songs")
+        #self.list2.set_position( (600), 350)
         self.stage.add(self.list2)
         
         #The preview img

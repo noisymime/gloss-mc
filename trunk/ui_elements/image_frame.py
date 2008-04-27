@@ -87,9 +87,11 @@ class ImageFrame(clutter.Group):
         #For the most part the Reflection texture automatically takes car of pixbuf changes
         #So we only need to set the flection the first time arouns (ie self.reflection is None)
         if self.use_reflection:
-            if self.reflection is None:
-                self.reflection = Texture_Reflection(self.main_pic)
-                self.add(self.reflection)
-                self.reflection.show()
+            if not self.reflection is None:
+                self.remove(self.reflection)
+                self.reflection = None
+            self.reflection = Texture_Reflection(self.main_pic)
+            self.add(self.reflection)
+            self.reflection.show()                
         else:
                 self.reflection = None

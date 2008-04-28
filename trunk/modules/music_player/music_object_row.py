@@ -38,8 +38,8 @@ class MusicObjectRow(ImageRow):
             print "loading: " + object.name
             pixbuf = object.get_image()
             #If there is currently motion, we need to pause this work
-            if self.should_sleep():
-                time.sleep(0.1)
+            #if self.should_sleep():
+            #    time.sleep(0.1)
             #if self.sleep: 
                 #self.timeline.connect('completed', self.restart_cb)
                 #time.sleep(self.music_player.sleep_time)

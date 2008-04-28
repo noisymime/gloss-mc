@@ -63,7 +63,7 @@ class LabelList(clutter.Group):
     def add_item(self, itemLabel):
         if len(self.items) == 0:
             #Perform a cheap hack to figure out the height of a label
-            tempLabel = clutter.Label()
+            tempLabel = clutter.Label()            
             tempLabel.set_font_name(self.font_string)
             tempLabel.set_text("S")
 
@@ -72,7 +72,7 @@ class LabelList(clutter.Group):
         
         label_y = len(self.items) * (self.label_height + self.item_gap)
         
-        newItem = ListItem(self.font_string, itemLabel)
+        newItem = ListItem(self.font_string, itemLabel, label_list = self)
         newItem.set_position(0, label_y)
         newItem.show()
         self.items.append(newItem)
@@ -86,6 +86,7 @@ class LabelList(clutter.Group):
             self.remove(item)
             item = None
         self.items = []
+        self.selected = 0
         
     
     def display(self):
@@ -177,7 +178,8 @@ class LabelList(clutter.Group):
         self.selected = None
         for i in range(0,len(self.items)):
             self.items[i].scaleLabel(ListItem.SCALE_NONE, self.timeline)
-                
+        
+        self.selected = 0
         self.timeline.start()
     
     def select_none_elegant(self):
@@ -247,13 +249,22 @@ class ListItem(clutter.Group):
     scale_step_medium = 0.5
     scale_step_none = 0.4
 
-    def __init__ (self, font, label_left = "", label_right = ""):
+    def __init__ (self, font, label_left = "", label_right = "", label_list = None):
         clutter.Group.__init__ (self) #, menu, itemLabel, y)
-        self.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
+        self.set_anchor_point_from_gravity(clutter.GRAVITY_WEST)
         
         self.label_left = clutter.Label()
         self.label_right = clutter.Label()
         
+        #Takes the scale and opacity values from a label list, if given
+        if not label_list is None:
+            self.opacity_step_full = label_list.opacityStep0
+            self.opacity_step_medium = label_list.opacityStep1
+            self.opacity_step_none = label_list.opacityStep2
+            self.scale_step_full = label_list.zoomStep0
+            self.scale_step_medium = label_list.zoomStep1
+            self.scale_step_none = label_list.zoomStep2
+            
         #setup the label/s
         self.add(self.label_left)
         self.label_left.show()

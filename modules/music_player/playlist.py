@@ -30,7 +30,7 @@ class Playlist:
         self.audio_controller.play_audio(current_song_uri)
         
     #Called when the playback of one song finishes and the next is required
-    def next_song(self):
+    def next_song(self, data = None):
         self.position += 1
         self.play()
         

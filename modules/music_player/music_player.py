@@ -96,6 +96,7 @@ class Module:
                 
             elif (event.keyval == clutter.keysyms.Down):
                 self.list1.select_first_elegant()
+                self.list2.show()
                 self.current_context = self.CONTEXT_ALBUM_LIST
             
             elif (event.keyval == clutter.keysyms.Return):
@@ -112,6 +113,7 @@ class Module:
                 #If we're at the top of the list already, we change focus bar to the image_row
                 if self.list1.selected == 0:
                     self.list1.select_none_elegant()
+                    self.list2.hide()
                     self.current_context = self.CONTEXT_ROW
                 else:
                     self.list1.input_queue.input(event)
@@ -175,7 +177,7 @@ class Module:
 
         
     def begin(self, glossMgr):
-        self.timeline_loading = clutter.Timeline(10,40)
+        self.timeline_loading = clutter.Timeline(80,160)
         self.alpha = clutter.Alpha(self.timeline_loading, clutter.ramp_inc_func)
         self.opacity_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=self.alpha)
         
@@ -202,14 +204,23 @@ class Module:
         
         self.artistImageRow.objectLibrary = self.artists
         self.artistImageRow.connect("load-complete", self.display, glossMgr)
-        self.timeline_loading.connect("completed", self.artistImageRow.load_image_range_cb, 0, len(self.artists)-1, False)
+        #self.timeline_loading.connect("completed", self.artistImageRow.load_image_range_cb, 0, len(self.artists)-1, False)
+        self.timeline_loading.connect("completed", self.flush_gobject_queue)
         
         self.timeline_loading.start()
         #thread.start_new_thread(self.artistImageRow.load_image_range, (0, len(self.artists)-1, True))
 
         #gobject.idle_add(self.artistImageRow.load_image_range, 0, len(self.artists)-1, True)
         
-
+    def flush_gobject_queue(self, data=None):
+        """
+        mc = gobject.main_context_default()
+        while mc.pending():
+            print "Iteration: " + str(mc.iteration(False))
+        
+        print "finiahed loop"
+        """
+        self.artistImageRow.load_image_range(0, len(self.artists)-1, False)
         
     def display(self, data, glossMgr):
         self.timeline_display = clutter.Timeline(10,40)

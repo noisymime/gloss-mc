@@ -13,6 +13,8 @@ class MusicObjectRow(ImageRow):
             gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, [])
         }
     
+    fps = 75
+    frames = 45
     
     def __init__(self, glossMgr, width, height, columns, music_player):
         ImageRow.__init__(self, glossMgr, width, height, columns)

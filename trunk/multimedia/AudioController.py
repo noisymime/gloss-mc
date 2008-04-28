@@ -8,11 +8,12 @@ class AudioController(MediaController):
     def __init__(self, glossMgr):
         MediaController.__init__(self, glossMgr)
         
+        """
         # Primary audio object
         self.audio = clutter.cluttergst.Audio()
         self.audio.connect("eos", self.stream_complete)
         self.media_element = self.audio    
-
+        """
         #self.osd = osd(glossMgr)
 
         
@@ -25,6 +26,12 @@ class AudioController(MediaController):
         #self.osd.enter()
     
     def play_audio(self, uri):
+        print "Playing audio %s" % uri
+        # Primary audio object
+        self.audio = clutter.cluttergst.Audio()
+        self.audio.connect("eos", self.stream_complete)
+        self.media_element = self.audio 
+        
         self.audio.set_uri(uri)
         self.audio.set_playing(True)
 
@@ -35,8 +42,11 @@ class AudioController(MediaController):
         return self.audio
 
     def stream_complete(self, audio):
+        
+        self.isPlaying = False
+        self.audio.set_playing(False)
         self.emit("completed")
-        self.stop_audio
+        #self.stop_audio
 
     def stop_audio(self):
         if self.audio.get_playing():

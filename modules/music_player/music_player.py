@@ -89,7 +89,7 @@ class Module:
                 self.artistImageRow.sleep = True
                 self.artistImageRow.input_queue.input(event)
                 #self.artistImageRow.input_queue.connect("queue-flushed", self.start_delay, self.load_albums, None)
-                self.artistImageRow.objectLibrary[0].pause_threads()
+                #self.artistImageRow.objectLibrary[0].pause_threads()
                 if self.queue_id == 0: self.queue_id = self.artistImageRow.input_queue.connect("queue-flushed", self.load_albums)
                 self.artistImageRow.sleep = False
                 
@@ -114,10 +114,12 @@ class Module:
                     self.list1.select_none_elegant()
                     self.current_context = self.CONTEXT_ROW
                 else:
-                    
                     self.list1.input_queue.input(event)
+                    self.update_main_img()
             elif (event.keyval == clutter.keysyms.Down):
                 self.list1.input_queue.input(event)
+                #if self.artist_queue_id == 0: self.artist_queue_id = self.list1.input_queue.connect("queue-flushed", self.update_main_img)
+                #self.update_main_img()
     
     #Fills self.list2 with songs from an album
     def process_songlist_from_album(self, list_item, album):
@@ -127,12 +129,6 @@ class Module:
         for song in songs:
             tmpItem = self.list2.add_item(song.name)
         self.list2.display()
-    
-    """
-    #Simple delay 
-    def start_delay(self, queue, function, args):
-        self.timeout_id = gobject.timeout_add((self.delay * 1000), function, args)
-    """
     
     #Loads albums into List1
     def load_albums(self, queue):
@@ -148,29 +144,35 @@ class Module:
         self.conn_id = self.backend.connect("query-complete", self.update_for_albums, artist)
         
     def update_for_albums(self, data, artist = None):
-
         if not artist == self.artistImageRow.get_current_object(): return
         if not self.backend.handler_is_connected(self.conn_id): 
             return
         self.backend.disconnect(self.conn_id)
-        albums = self.backend.get_albums_by_artistID(artist.artistID)
+        self.current_albums = self.backend.get_albums_by_artistID(artist.artistID)
         
         clutter.threads_enter()
         self.list1.clear()
-        for album in albums:
+        for album in self.current_albums:
             tmpItem = self.list1.add_item(album.name)
             tmpItem.connect("selected", self.process_songlist_from_album, album)
-            #name_string += album.name
         self.list1.display()
-        #self.tmpLabel.set_text(name_string)
-        pixbuf = albums[0].get_image()
+        self.update_main_img()
+        clutter.threads_leave()
+        
+    def update_main_img(self, data = None):
+        #clutter.threads_enter()
+        pixbuf = self.current_albums[self.list1.selected].get_image()
         if not pixbuf is None:
             self.main_img.set_pixbuf(pixbuf)
+            #clutter.threads_leave()
             self.main_img.show()
         else:
+            #clutter.threads_enter()
             self.main_img.set_pixbuf(None)
+
             self.main_img.hide()
-        clutter.threads_leave()
+        #clutter.threads_leave()
+
         
     def begin(self, glossMgr):
         self.timeline_loading = clutter.Timeline(10,40)
@@ -198,11 +200,11 @@ class Module:
         self.path_behaviour = clutter.BehaviourPath(knots = knots, alpha = self.alpha)
         self.path_behaviour.apply(self.loading_img)
         
-        self.timeline_loading.start()
-        
         self.artistImageRow.objectLibrary = self.artists
         self.artistImageRow.connect("load-complete", self.display, glossMgr)
         self.timeline_loading.connect("completed", self.artistImageRow.load_image_range_cb, 0, len(self.artists)-1, False)
+        
+        self.timeline_loading.start()
         #thread.start_new_thread(self.artistImageRow.load_image_range, (0, len(self.artists)-1, True))
 
         #gobject.idle_add(self.artistImageRow.load_image_range, 0, len(self.artists)-1, True)
@@ -227,6 +229,7 @@ class Module:
         #Just a nasty temp label for outputting stuff
         self.list1 = LabelList(5)
         self.list1.setup_from_theme_id(self.glossMgr.themeMgr, "music_albums")
+        self.list1.input_queue.connect("queue-flushed", self.update_main_img)
         #self.list1.set_position(self.stage.get_width()/3, 350)
         self.stage.add(self.list1)
         

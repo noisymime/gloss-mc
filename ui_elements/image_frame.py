@@ -95,3 +95,6 @@ class ImageFrame(clutter.Group):
             self.reflection.show()                
         else:
                 self.reflection = None
+                
+    def get_texture(self):
+        return self.main_pic

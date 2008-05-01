@@ -7,6 +7,7 @@ from modules.music_player.backends.myth_music import Backend
 from modules.music_player.lastFM_interface import lastFM_interface
 from modules.music_player.music_object_row import MusicObjectRow
 from modules.music_player.playlist import Playlist
+from modules.music_player.play_screen import PlayScreen
 from ui_elements.image_frame import ImageFrame
 from ui_elements.image_clone import ImageClone
 from ui_elements.label_list import LabelList
@@ -33,6 +34,7 @@ class Module:
         self.playlist = Playlist(self)
         
         self.artistImageRow = MusicObjectRow(self.glossMgr, self.stage.get_width(), 200, self.num_columns, self)
+        self.play_screen = PlayScreen(self)
         
         #This is the current input context
         self.current_context = self.CONTEXT_ROW
@@ -105,6 +107,9 @@ class Module:
                 self.playlist.clear_songs()
                 self.playlist.add_songs(songs)
                 self.playlist.play()
+                
+                self.play_screen.append_playlist(self.playlist)
+                self.play_screen.display(self.artistImageRow.get_current_texture().get_texture())
                 
         elif self.current_context == self.CONTEXT_ALBUM_LIST:
             

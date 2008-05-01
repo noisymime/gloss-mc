@@ -12,7 +12,8 @@ class ImageClone(clutter.CloneTexture):
     def __init__(self, texture):
         clutter.CloneTexture.__init__(self, texture)
         
-        self.set_size(texture.get_x(), texture.get_y())
+        (width, height) = texture.get_abs_size()
+        self.set_size(width, height)
         self.set_opacity(texture.get_opacity())
         (abs_x, abs_y) = texture.get_abs_position()
         self.set_position(abs_x, abs_y)

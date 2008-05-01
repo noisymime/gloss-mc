@@ -1,0 +1,38 @@
+<gloss-theme>
+
+	<label_list id="music_play_screen_songs">		
+		<font id="main">
+			<face>Tahoma</face>
+			<size id="default">30</size>
+			<size id="1024x768">38</size>
+			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
+		</font>
+
+		<dimensions type="relativeToStage">
+			<width>40%</width>
+			<height>40%</height>
+		</dimensions>
+		<position type="relativeToStage">
+			<x>40%</x>
+			<y>50%</y>
+		</position>
+
+		<item_gap>0</item_gap>
+		<num_visible_elements>4</num_visible_elements>
+		
+		<!-- These are the opacity and scale values for the 3 possible steps in the menu
+		     Make all the values the same if you do not want these effects -->
+		<opacity_step0>255</opacity_step0>
+		<opacity_step1>135</opacity_step1>
+		<opacity_step2>135</opacity_step2>
+		<scale_step0>1</scale_step0>
+		<scale_step1>1</scale_step1>
+		<scale_step2>1</scale_step2>
+		
+		<transition_fps>30</transition_fps>
+		<transition_frames>10</transition_frames>
+
+	</label_list>
+
+</gloss-theme>

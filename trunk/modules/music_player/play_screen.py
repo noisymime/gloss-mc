@@ -6,6 +6,7 @@ from ui_elements.label_list import LabelList
 
 class PlayScreen(clutter.Group):
     
+    img_size = 300
 
     def __init__(self, musicPlayer):
         clutter.Group.__init__(self)
@@ -40,7 +41,7 @@ class PlayScreen(clutter.Group):
         self.add(self.backdrop)
         self.opacity_behaviour.apply(self.backdrop)
         
-        self.main_img = ImageClone(image)
+        self.main_img = ImageClone(img_frame = image)
         self.main_img.show()
         self.add(self.main_img)
         
@@ -53,6 +54,15 @@ class PlayScreen(clutter.Group):
         self.path_behaviour = clutter.BehaviourPath(knots = knots, alpha = self.alpha)
         self.path_behaviour.apply(self.main_img)
         
+        
+        #Calculate the required scale factor
+        (x_scale_start, y_scale_start) = self.main_img.get_scale()
+        x_scale_end = float(self.img_size) / float(self.main_img.get_width())
+        y_scale_end = float(self.img_size) / float(self.main_img.get_height())
+        print "x_scale_end: %s" % x_scale_end
+        self.scale_behaviour = clutter.BehaviourScale(x_scale_start = x_scale_start, x_scale_end = x_scale_end, y_scale_start = y_scale_start, y_scale_end = y_scale_end, alpha = self.alpha)
+        self.scale_behaviour.apply(self.main_img)
+        
         for song in self.playlist.songs:
             self.song_list.add_item(song.name)
         self.opacity_behaviour.apply(self.song_list)
@@ -64,3 +74,6 @@ class PlayScreen(clutter.Group):
         self.stage.add(self)
         
         self.timeline.start()
+        
+    def hide(self):
+        pass

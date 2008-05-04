@@ -1,19 +1,43 @@
 import pygtk
 import gtk
 import clutter
+from ui_elements.image_frame import ImageFrame
 
 ########################################################
 # A simple class that copies all of an images properties 
-# and returns a clone texture.
+# and returns an ImageFrame.
+# Note: The location of the texture being cloned is set to absolute rather than relative to any parent
 ########################################################
-class ImageClone(clutter.CloneTexture):
+class ImageClone(ImageFrame):
     
     
-    def __init__(self, texture):
-        clutter.CloneTexture.__init__(self, texture)
+    def __init__(self, texture = None, img_frame = None):
+        use_reflection = False
+        if not img_frame is None:
+            pixbuf = img_frame.orig_pixbuf
+            texture = img_frame
+            (width, height) = img_frame.main_pic.get_abs_size()
+            if height > width:
+                size = height
+            else:
+                size = width
+            (anchor_x, anchor_y) = img_frame.get_anchor_point()
+            use_reflection = img_frame.use_reflection
+        else:
+            pixbuf = texture.get_pixbuf()
+            (width, height) = texture.get_abs_size()
+            if height > width:
+                size = height
+            else:
+                size = width
+            (anchor_x, anchor_y) = texture.get_anchor_point()
+            
+        ImageFrame.__init__(self, pixbuf, size, use_reflection = use_reflection)
+        #self.set_anchor_point(anchor_x, anchor_y)
+        #clutter.CloneTexture.__init__(self, texture)
         
         (width, height) = texture.get_abs_size()
-        self.set_size(width, height)
+        #self.set_size(width, height)
         self.set_opacity(texture.get_opacity())
         (abs_x, abs_y) = texture.get_abs_position()
         self.set_position(abs_x, abs_y)
@@ -28,8 +52,6 @@ class ImageClone(clutter.CloneTexture):
         """
         
         self.set_depth(texture.get_depth())
-        (anchor_x, anchor_y) = texture.get_anchor_point()
-        self.set_anchor_point(anchor_x, anchor_y)
         
         #if texture.has_clip(): self.set_clip(texture.get_clip())
         

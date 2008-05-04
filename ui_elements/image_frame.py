@@ -8,14 +8,17 @@ from ui_elements.ReflectionTexture import Texture_Reflection
 class ImageFrame(clutter.Group):
     QUALITY_FAST, QUALITY_NORMAL, QUALITY_SLOW = range(3)
     quality = QUALITY_NORMAL
+    orig_pixbuf = None
     
-    def __init__(self, pixbuf, img_size, use_reflection = False, quality = QUALITY_NORMAL):
+    def __init__(self, pixbuf, img_size, use_reflection = False, quality = QUALITY_NORMAL, anchor = None):
         clutter.Group.__init__(self)
         self.width = img_size
         self.height = img_size
         self.img_size = img_size
         self.use_reflection = use_reflection
         self.quality = quality
+        self.orig_pixbuf = pixbuf
+        
         
         self.main_pic = clutter.Texture()
         self.reflection = None
@@ -87,14 +90,27 @@ class ImageFrame(clutter.Group):
         #For the most part the Reflection texture automatically takes car of pixbuf changes
         #So we only need to set the flection the first time arouns (ie self.reflection is None)
         if self.use_reflection:
-            if not self.reflection is None:
-                self.remove(self.reflection)
-                self.reflection = None
-            self.reflection = Texture_Reflection(self.main_pic)
-            self.add(self.reflection)
-            self.reflection.show()                
+            self.set_reflection(True)               
         else:
                 self.reflection = None
-                
+    
+    #Turns reflections on and off
+    def set_reflection(self, toggle):
+        #If the current state is the requested state, do nothing
+        if self.reflection == toggle:
+            return
+        
+        if not self.reflection is None:
+            self.remove(self.reflection)
+            self.reflection = None
+        self.reflection = Texture_Reflection(self.main_pic)
+        self.add(self.reflection)
+        self.reflection.show()
+        
     def get_texture(self):
         return self.main_pic
+    
+    def get_width(self):
+        return self.img_size
+    def get_height(self):
+        return self.img_size

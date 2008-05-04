@@ -13,7 +13,7 @@ from ui_elements.image_clone import ImageClone
 from ui_elements.label_list import LabelList
 
 class Module:
-    CONTEXT_HEADINGS, CONTEXT_ROW, CONTEXT_ALBUM_LIST, CONTEXT_SONG_LIST, CONTEXT_PLAYING = range(5)
+    CONTEXT_HEADINGS, CONTEXT_ROW, CONTEXT_ALBUM_LIST, CONTEXT_SONG_LIST, CONTEXT_PLAY_SCR = range(5)
     
     title = "Music"
     num_columns = 6
@@ -38,6 +38,7 @@ class Module:
         
         #This is the current input context
         self.current_context = self.CONTEXT_ROW
+        self.previous_context = None
         
         self.lastFM = lastFM_interface()
         self.base_dir = self.dbMgr.get_setting("MusicLocation")
@@ -109,7 +110,10 @@ class Module:
                 self.playlist.play()
                 
                 self.play_screen.append_playlist(self.playlist)
-                self.play_screen.display(self.artistImageRow.get_current_texture().get_texture())
+                self.play_screen.display(self.artistImageRow.get_current_texture())#.get_texture())
+                
+                self.current_context = self.CONTEXT_PLAY_SCR
+                self.previous_context = self.CONTEXT_ROW
                 
         elif self.current_context == self.CONTEXT_ALBUM_LIST:
             
@@ -127,6 +131,14 @@ class Module:
                 self.list1.input_queue.input(event)
                 #if self.artist_queue_id == 0: self.artist_queue_id = self.list1.input_queue.connect("queue-flushed", self.update_main_img)
                 #self.update_main_img()
+                
+        elif self.current_context == self.CONTEXT_SONG_LIST:
+            pass
+        
+        elif self.current_context == self.CONTEXT_PLAY_SCR:
+            if (event.keyval == clutter.keysyms.Escape):
+                self.current_context = self.previous_context
+                self.play_screen.hide()
     
     #Fills self.list2 with songs from an album
     def process_songlist_from_album(self, list_item, album):
@@ -197,6 +209,7 @@ class Module:
         self.loading_img = ImageClone(glossMgr.get_current_menu().get_current_item().get_main_texture())
         self.loading_img.show()
         self.stage.add(self.loading_img)
+        glossMgr.get_current_menu().get_current_item().get_main_texture().hide()
         
         x = int( (self.stage.get_width() - self.loading_img.get_width()) / 2 )
         y = int( (self.stage.get_height() - self.loading_img.get_height()) / 2 )

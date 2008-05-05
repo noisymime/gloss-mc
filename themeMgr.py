@@ -160,7 +160,7 @@ class ThemeMgr:
 		if relativeTo == "relativeToStage":
 			parent = self.stage
 		elif relativeTo == "relativeToParent":
-			parent = actor.get_parent()
+			if parent is None: parent = actor.get_parent()
 		elif relativeTo == "relativeToSelf":
 			parent = actor
 		
@@ -198,8 +198,8 @@ class ThemeMgr:
 			if width[-1] == "%":
 				#Quick check on parent
 				if parent is None:
-					print "Theme error: type must be specified when using percentage values"
-					return None
+					print "Theme error (get_dimensions width): parent must be specified when using percentage values"
+					return (None, None)
 				
 				width = (float(width[:-1]) / 100.0) * parent.get_width()
 				#print "width: " + str(width)
@@ -226,7 +226,7 @@ class ThemeMgr:
 			if x[-1] == "%":
 				#Quick check on parent
 				if parent is None:
-					print "Theme error: type must be specified when using percentage values"
+					print "Theme error (get_position x): type must be specified when using percentage values"
 					return None
 				
 				x = (float(x[:-1]) / 100.0) * parent.get_width()
@@ -246,7 +246,7 @@ class ThemeMgr:
 			if y[-1] == "%":
 				#Quick check on parent
 				if parent is None:
-					print "Theme error: type must be specified when using percentage values"
+					print "Theme error (get_position y): type must be specified when using percentage values"
 					return None
 				
 				y = (float(y[:-1]) / 100.0) * parent.get_height()
@@ -262,13 +262,14 @@ class ThemeMgr:
 			
 		return (int(x), int(y))
 	
-	def get_texture(self, name, parent, texture):
+	def get_texture(self, name, parent, texture = None, element = None):
 		texture_src = None
 		if texture is None:
 			texture = clutter.Texture()
 
-		element = self.search_docs("texture", name).childNodes
-		#Quick check to make sure we found something
+		#Element can be supplied but if not, we search through everything
+		if element is None:	element = self.search_docs("texture", name).childNodes
+		#Quick check to make sure we've got something
 		if element is None:
 			return None
 		
@@ -277,13 +278,15 @@ class ThemeMgr:
 		#Special case to handle no image
 		if src == "None":
 			return texture
+		if src is None:
+			return None
 		
 		src = self.theme_dir + self.currentTheme + "/" + src
 		pixbuf = gtk.gdk.pixbuf_new_from_file(src)
 		texture.set_pixbuf(pixbuf)
 		
 		#Setup general actor properties
-		self.setup_actor(texture, element, None)
+		self.setup_actor(texture, element, parent)
 		
 		return texture
 	

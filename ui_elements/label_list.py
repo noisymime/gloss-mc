@@ -1,5 +1,7 @@
 import clutter
 import pango
+import pygtk
+import gtk
 from InputQueue import InputQueue
 
 class LabelList(clutter.Group):
@@ -25,6 +27,11 @@ class LabelList(clutter.Group):
         self.displayMin = 0 #The number of menu items that will be shown at a time
         self.displayMax = length
         self.displaySize = self.displayMax - self.displayMin
+        
+        self.inactive_item_background = None
+        self.background_group = clutter.Group()
+        self.background_group.show()
+        self.add(self.background_group)
         
         #Selector bar image, moves with selections to show current item
         self.selector_bar = None
@@ -54,7 +61,14 @@ class LabelList(clutter.Group):
         self.fps = int(themeMgr.find_child_value(element, "transition_fps"))
         self.frames = int(themeMgr.find_child_value(element, "transition_frames"))
         
+        
+        
         themeMgr.setup_actor(self, element, themeMgr.stage)
+        
+        img_element = themeMgr.search_docs("label_list", id).getElementsByTagName("texture")
+        if len(img_element) > 0: img_element = img_element[0].childNodes
+        #img_element = themeMgr.find_element(element, "id", "inactive_background")
+        self.inactive_item_background = themeMgr.get_texture("inactive_background", self, element = img_element)
         
     def on_key_press_event (self, event):
         self.input_queue.input(event)
@@ -71,6 +85,16 @@ class LabelList(clutter.Group):
             label_width = 0
         
         label_y = len(self.items) * (self.label_height + self.item_gap)
+        
+        #If a background pic is specified in the theme, clone it and add
+        if not self.inactive_item_background is None:
+            bg_img = clutter.CloneTexture(self.inactive_item_background)
+            bg_img.set_height(self.label_height)
+            bg_img.set_width(self.get_width())
+            bg_img.set_position(0, label_y)
+            bg_img.show()
+            self.background_group.add(bg_img)
+            
         
         newItem = ListItem(self.font_string, itemLabel, label_list = self)
         newItem.set_position(0, label_y)

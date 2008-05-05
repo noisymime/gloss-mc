@@ -44,6 +44,7 @@
 		<transition_fps>30</transition_fps>
 		<transition_frames>10</transition_frames>
 
+
 	</label_list>
 	
 	<label_list id="music_songs">		

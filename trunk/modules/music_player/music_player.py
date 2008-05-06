@@ -157,10 +157,11 @@ class Module:
         #Just a little test code
         self.artistImageRow.objectLibrary[0].unpause_threads()
         artist = self.artistImageRow.get_current_object()
-        thread = threading.Thread(target=self.backend.get_albums_by_artistID, args=(artist.artistID,))
-        thread.start()
-        #thread.start_new_thread(self.backend.get_albums_by_artistID, (artist.artistID,))
         self.conn_id = self.backend.connect("query-complete", self.update_for_albums, artist)
+        self.backend.get_albums_by_artistID(artist.artistID)
+        #thread = threading.Thread(target=self.backend.get_albums_by_artistID, args=(artist.artistID,))
+        #thread.start()
+        
         
     def update_for_albums(self, data, artist = None):
         if not artist == self.artistImageRow.get_current_object(): return
@@ -169,14 +170,14 @@ class Module:
         self.backend.disconnect(self.conn_id)
         self.current_albums = self.backend.get_albums_by_artistID(artist.artistID)
         
-        clutter.threads_enter()
+        #clutter.threads_enter()
         self.list1.clear()
         for album in self.current_albums:
             tmpItem = self.list1.add_item(album.name)
             tmpItem.connect("selected", self.process_songlist_from_album, album)
         self.list1.display()
         self.update_main_img()
-        clutter.threads_leave()
+        #clutter.threads_leave()
         
     def update_main_img(self, data = None):
         #clutter.threads_enter()

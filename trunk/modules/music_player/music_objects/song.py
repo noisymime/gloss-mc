@@ -74,6 +74,7 @@ class song:
                 loader = gtk.gdk.PixbufLoader()
                 loader.write(data)
                 loader.close()
+                if self.music_player.glossMgr.debug: print "Music_Player:Image successfully written to pixbuf loader: " + str(img.mimeType)
                 return loader.get_pixbuf()
             except gobject.GError:
                 if self.music_player.glossMgr.debug:

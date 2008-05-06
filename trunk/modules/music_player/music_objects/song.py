@@ -61,11 +61,15 @@ class song:
             return None
         
         tag.link(filename)
+        if self.music_player.glossMgr.debug: print "Music_Player: eyeD3 tag linked to file '%s'" % filename
         
         images = tag.getImages()
+        if self.music_player.glossMgr.debug: print "Music_Player: found %i images in file '%s'" % (len(images), filename)
+        
         for img in images:   
             try:                 
-                #print "Image Mine Type: " + str(img.mimeType)
+                if self.music_player.glossMgr.debug: print "Music_Player: Image Mine Type: " + str(img.mimeType)
+                
                 data = img.imageData
                 loader = gtk.gdk.PixbufLoader()
                 loader.write(data)

@@ -66,9 +66,10 @@ class LabelList(clutter.Group):
         themeMgr.setup_actor(self, element, themeMgr.stage)
         
         img_element = themeMgr.search_docs("label_list", id).getElementsByTagName("texture")
-        if len(img_element) > 0: img_element = img_element[0].childNodes
-        #img_element = themeMgr.find_element(element, "id", "inactive_background")
-        self.inactive_item_background = themeMgr.get_texture("inactive_background", self, element = img_element)
+        img_element = themeMgr.find_element(img_element, "id", "inactive_background")
+        if not img_element is None:
+            img_element = img_element.childNodes
+            self.inactive_item_background = themeMgr.get_texture("inactive_background", self, element = img_element)
         
     def on_key_press_event (self, event):
         self.input_queue.input(event)
@@ -288,6 +289,8 @@ class ListItem(clutter.Group):
             self.scale_step_full = label_list.zoomStep0
             self.scale_step_medium = label_list.zoomStep1
             self.scale_step_none = label_list.zoomStep2
+            
+            self.set_width(label_list.get_width())
             
         #setup the label/s
         self.add(self.label_left)

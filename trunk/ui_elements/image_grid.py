@@ -269,7 +269,8 @@ class ImageGrid(clutter.Group):
         return self.textureLibrary[self.currentSelection]
     
     def get_current_item(self):
-        return self.itemLibrary[(self.currentSelection-len(self.folderLibrary))]
+        cur_item_no = (self.currentSelection-len(self.folderLibrary))
+        return self.itemLibrary[cur_item_no]
     
     #Was get_item_x()
     def get_texture_x(self, itemNo):

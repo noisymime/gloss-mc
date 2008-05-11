@@ -13,6 +13,7 @@ class LabelList(clutter.Group):
     #Default font
     font_string = "Tahoma 30"
     item_gap = 0
+    width = 0
     
     def __init__(self, length):
         clutter.Group.__init__(self)
@@ -48,7 +49,7 @@ class LabelList(clutter.Group):
         #Grab the font
         font_node = themeMgr.get_subnode(element, "font")
         fontString = themeMgr.get_font("main", font_node)
-        self.font = fontString
+        self.font_string = fontString
         
         #Set the selection effect steps
         self.zoomStep0 = float(themeMgr.find_child_value(element, "scale_step0"))
@@ -64,6 +65,9 @@ class LabelList(clutter.Group):
         
         
         themeMgr.setup_actor(self, element, themeMgr.stage)
+        (self.width, self.height) = themeMgr.get_dimensions(element, themeMgr.stage)
+        
+        print "Label List width: %s" % self.get_width()
         
         img_element = themeMgr.search_docs("label_list", id).getElementsByTagName("texture")
         img_element = themeMgr.find_element(img_element, "id", "inactive_background")
@@ -91,13 +95,13 @@ class LabelList(clutter.Group):
         if not self.inactive_item_background is None:
             bg_img = clutter.CloneTexture(self.inactive_item_background)
             bg_img.set_height(self.label_height)
-            bg_img.set_width(self.get_width())
+            bg_img.set_width(self.width)
             bg_img.set_position(0, label_y)
             bg_img.show()
             self.background_group.add(bg_img)
             
         
-        newItem = ListItem(self.font_string, itemLabel, label_list = self)
+        newItem = ListItem(self.font_string, itemLabel, label_list = self, max_width = self.width)
         newItem.set_position(0, label_y)
         newItem.show()
         self.items.append(newItem)
@@ -274,7 +278,7 @@ class ListItem(clutter.Group):
     scale_step_medium = 0.5
     scale_step_none = 0.4
 
-    def __init__ (self, font, label_left = "", label_right = "", label_list = None):
+    def __init__ (self, font, label_left = "", label_right = "", label_list = None, max_width = None):
         clutter.Group.__init__ (self) #, menu, itemLabel, y)
         self.set_anchor_point_from_gravity(clutter.GRAVITY_WEST)
         
@@ -314,6 +318,11 @@ class ListItem(clutter.Group):
         self.currentOpacity = self.opacity_step_medium
         self.set_scale(self.currentZoom, self.currentZoom)
         self.set_opacity(self.currentOpacity)
+        
+        #Set ellipses
+        if not max_width is None:
+            self.label_left.set_width( max_width - self.label_right.get_width() )
+            self.label_left.set_ellipsize(pango.ELLIPSIZE_END)
         """
         #(label_width, label_height) = self.label.get_size()
         label_x = 0 #x #self.stage.get_width() - label_width - 50

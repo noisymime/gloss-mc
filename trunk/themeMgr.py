@@ -172,7 +172,8 @@ class ThemeMgr:
 				xy_ratio = float(actor.get_height()) / float(actor.get_width())
 				height = int(width * xy_ratio)
 			actor.set_height(height)
-		if (not width is None) and (not width == "default"): actor.set_width(width)
+		if (not width is None) and (not width == "default"): 
+			actor.set_width(width)
 		
 		#Set the position of the actor
 		(x,y) = (0,0)

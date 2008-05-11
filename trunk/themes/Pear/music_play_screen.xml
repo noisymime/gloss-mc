@@ -15,7 +15,7 @@
 		</dimensions>
 		<position type="relativeToStage">
 			<x>40%</x>
-			<y>50%</y>
+			<y>20%</y>
 		</position>
 
 		<item_gap>0</item_gap>

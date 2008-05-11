@@ -85,4 +85,19 @@
 	<texture id="music_default_artist_image">
 		<image>music/default_cover.png</image>
 	</texture>
+	
+	<image_frame id="music_main_image">
+		<image>None</image>
+		<use_reflections>True</use_reflections>
+		
+		
+		<dimensions type="relativeToStage">
+			<width>25%</width>
+			<height>25%</height>
+		</dimensions>
+		<position type="relativeToStage">
+			<x>10%</x>
+			<y>40%</y>
+		</position>
+	</image_frame>
 </gloss-theme>

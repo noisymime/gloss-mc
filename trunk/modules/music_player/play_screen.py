@@ -23,6 +23,8 @@ class PlayScreen(clutter.Group):
         
     def setup(self):
         self.song_list.setup_from_theme_id(self.glossMgr.themeMgr, "music_play_screen_songs")
+        self.main_img_theme = self.glossMgr.themeMgr.get_imageFrame("music_playing_image")
+        self.img_size = self.main_img_theme.img_size
         
     def append_playlist(self, playlist):
         self.playlist.add_songs(playlist.songs)
@@ -45,8 +47,8 @@ class PlayScreen(clutter.Group):
         self.main_img.show()
         self.add(self.main_img)
         
-        x = int( (self.stage.get_width() - self.main_img.get_width()) / 2 )
-        y = int( (self.stage.get_height() - self.main_img.get_height()) / 2 )
+        x = int( self.main_img_theme.get_x() )
+        y = int( self.main_img_theme.get_y() )
         knots = (\
                  (int(self.main_img.get_x()), int(self.main_img.get_y()) ),\
                  (x, y)\
@@ -59,7 +61,6 @@ class PlayScreen(clutter.Group):
         (x_scale_start, y_scale_start) = self.main_img.get_scale()
         x_scale_end = float(self.img_size) / float(self.main_img.get_width())
         y_scale_end = float(self.img_size) / float(self.main_img.get_height())
-        print "x_scale_end: %s" % x_scale_end
         self.scale_behaviour = clutter.BehaviourScale(x_scale_start = x_scale_start, x_scale_end = x_scale_end, y_scale_start = y_scale_start, y_scale_end = y_scale_end, alpha = self.alpha)
         self.scale_behaviour.apply(self.main_img)
         

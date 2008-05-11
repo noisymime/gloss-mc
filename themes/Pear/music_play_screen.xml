@@ -48,4 +48,19 @@
 
 	</label_list>
 
+	<image_frame id="music_playing_image">
+		<image>None</image>
+		<use_reflections>True</use_reflections>
+		
+		
+		<dimensions type="relativeToStage">
+			<width>30%</width>
+			<height>30%</height>
+		</dimensions>
+		<position type="relativeToStage">
+			<x>10%</x>
+			<y>40%</y>
+		</position>
+	</image_frame>
+
 </gloss-theme>

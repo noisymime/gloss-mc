@@ -8,7 +8,6 @@ from modules.music_player.lastFM_interface import lastFM_interface
 from modules.music_player.music_object_row import MusicObjectRow
 from modules.music_player.playlist import Playlist
 from modules.music_player.play_screen import PlayScreen
-from ui_elements.image_frame import ImageFrame
 from ui_elements.image_clone import ImageClone
 from ui_elements.label_list import LabelList
 
@@ -55,6 +54,7 @@ class Module:
         self.menu_image = self.glossMgr.themeMgr.get_texture("music_menu_image", None, None)
         
         self.default_artist_cover = self.glossMgr.themeMgr.get_texture("music_default_artist_image", None, None).get_pixbuf()
+        self.main_img = self.glossMgr.themeMgr.get_imageFrame("music_main_image")
         
     
     #Get the images dir setting our of the DB
@@ -269,8 +269,8 @@ class Module:
         self.stage.add(self.list2)
         
         #The preview img
-        self.main_img = ImageFrame(None, 300, True) #clutter.Texture()
-        self.main_img.set_position(50, 300)
+        #self.main_img = ImageFrame(None, 300, True) #clutter.Texture()
+        #self.main_img.set_position(50, 300)
         self.main_img.set_rotation(clutter.Y_AXIS, 45, self.main_img.get_width(), 0, 0)
         self.main_img.show()
         self.stage.add(self.main_img)

@@ -2,6 +2,7 @@ import os
 import clutter
 import pygtk
 import gtk
+from ui_elements.image_frame import ImageFrame
 from xml.dom import minidom
 
 class ThemeMgr:
@@ -316,3 +317,66 @@ class ThemeMgr:
 		
 		fontString = str(face) + " " + str(size)
 		return fontString
+	
+	def get_imageFrame(self, id, element = None):
+		if element is None:
+			element = self.search_docs("image_frame", id).childNodes
+		#Quick check to make sure we found something
+		if element is None:
+			return None
+		
+		(width, height) = self.get_dimensions(element, self.stage)
+		if (not width is None) and (not height is None):
+			if width > height:
+				size = width
+			else:
+				size = height
+		else:
+			size = 300
+		
+		use_reflections = self.find_child_value(element, "use_reflections")
+		if not use_reflections is None:
+			use_reflections = (use_reflections.upper() == "TRUE")
+		else:
+			#Gotta have some default value. In reality if this is running, someone else has stuffed up by not providing the size in the theme
+			use_reflections = True
+		
+		quality = self.find_child_value(element, "quality")
+		if not quality is None:
+			if (quality.upper() == "FAST"):
+				quality = ImageFrame.QUALITY_FAST
+			elif (quality.upper() == "NORMAL"):
+				quality = ImageFrame.QUALITY_NORMAL
+			elif (quality.upper() == "SLOW"):
+				quality = ImageFrame.QUALITY_SLOW
+			else:
+				#Default value
+				quality = ImageFrame.QUALITY_NORMAL
+		else:
+			#Gotta have some default value. In reality if this is running, someone else has stuffed up by not providing the size in the theme
+			quality = ImageFrame.QUALITY_NORMAL
+		
+		#Setup the pixbuf
+		src = self.find_child_value(element, "image")
+		if src == "None":
+			pixbuf = None
+		elif src is None:
+			pixbuf = None
+		else:
+			src = self.theme_dir + self.currentTheme + "/" + src
+			pixbuf = gtk.gdk.pixbuf_new_from_file(src)
+			
+		img_frame = ImageFrame(pixbuf, size, use_reflections, quality)
+		
+		#Set the position of the Frame
+		(x,y) = (0,0)
+		#Get the parent
+		relativeTo = str(self.find_attribute_value(element, "position", "type"))
+		if relativeTo == "relativeToStage":
+			parent = self.stage
+		elif not (relativeTo == "relativeToParent"):
+			parent = None
+		(x, y) = self.get_position(element, parent)
+		img_frame.set_position(int(x), int(y))
+		
+		return img_frame

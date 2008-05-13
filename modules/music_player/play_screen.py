@@ -26,6 +26,12 @@ class PlayScreen(clutter.Group):
         self.main_img_theme = self.glossMgr.themeMgr.get_imageFrame("music_playing_image")
         self.img_size = self.main_img_theme.img_size
         
+    def on_key_press_event(self, stage, event):
+        if (event.keyval == clutter.keysyms.Up):
+            self.song_list.input_queue.input(event)
+        elif (event.keyval == clutter.keysyms.Down):
+            self.song_list.input_queue.input(event)
+        
     def append_playlist(self, playlist):
         self.playlist.add_songs(playlist.songs)
         
@@ -68,6 +74,7 @@ class PlayScreen(clutter.Group):
             self.song_list.add_item(song.name)
         self.opacity_behaviour.apply(self.song_list)
         self.song_list.set_opacity(0)
+        self.song_list.select_first()
         self.song_list.show()
         self.add(self.song_list)
         
@@ -76,5 +83,6 @@ class PlayScreen(clutter.Group):
         
         self.timeline.start()
         
-    def hide(self):
-        pass
+    def undisplay(self):
+        self.playlist.stop()
+        self.hide()

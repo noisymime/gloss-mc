@@ -138,7 +138,9 @@ class Module:
         elif self.current_context == self.CONTEXT_PLAY_SCR:
             if (event.keyval == clutter.keysyms.Escape):
                 self.current_context = self.previous_context
-                self.play_screen.hide()
+                self.play_screen.undisplay()
+            else:
+                self.play_screen.on_key_press_event(stage, event)
     
     #Fills self.list2 with songs from an album
     def process_songlist_from_album(self, list_item, album):

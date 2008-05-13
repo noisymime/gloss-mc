@@ -34,6 +34,10 @@ class Playlist:
         self.position += 1
         self.play()
         
+    def stop(self):
+        if self.is_playing:
+            self.audio_controller.stop_audio()
+        
     def add_song(self, song):
         self.songs.append(song)
         

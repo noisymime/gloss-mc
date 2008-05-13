@@ -339,7 +339,7 @@ class ThemeMgr:
 		if not use_reflections is None:
 			use_reflections = (use_reflections.upper() == "TRUE")
 		else:
-			#Gotta have some default value. In reality if this is running, someone else has stuffed up by not providing the size in the theme
+			#Gotta have some default value.
 			use_reflections = True
 		
 		quality = self.find_child_value(element, "quality")
@@ -354,7 +354,7 @@ class ThemeMgr:
 				#Default value
 				quality = ImageFrame.QUALITY_NORMAL
 		else:
-			#Gotta have some default value. In reality if this is running, someone else has stuffed up by not providing the size in the theme
+			#Gotta have some default value.
 			quality = ImageFrame.QUALITY_NORMAL
 		
 		#Setup the pixbuf

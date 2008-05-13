@@ -14,12 +14,15 @@
 			<height>40%</height>
 		</dimensions>
 		<position type="relativeToStage">
-			<x>40%</x>
-			<y>20%</y>
+			<x>50%</x>
+			<y>25%</y>
 		</position>
 
-		<item_gap>0</item_gap>
-		<num_visible_elements>4</num_visible_elements>
+		<!-- This determines the height of each item based on a percentage of the font size. 
+			 Eg: 1.00 means that each item will be the same height as the font,
+			     1.50 means that the item will be 1.x times the height as the font etc
+		 -->
+		<item_height_percent>1.00</item_height_percent>
 		
 		<!-- These are the opacity and scale values for the 3 possible steps in the menu
 		     Make all the values the same if you do not want these effects -->
@@ -44,7 +47,33 @@
 				<y>0</y>
 			</position>
 		</texture>
+		
+		<texture id="image_up">
+			<image>up.png</image>
+			<dimensions type="relativeToStage">
+				<width>3%</width>
+				<height>3%</height>
+			</dimensions>
+			<position type="relativeToSelf">
+				<x>0</x>
+				<y>0</y>
+			</position>
+		</texture>
+		
+		<texture id="image_down">
+			<image>down.png</image>
+			<dimensions type="relativeToStage">
+				<width>3%</width>
+				<height>3%</height>
+			</dimensions>
+			<position type="blah">
+				<x>0</x>
+				<y>0</y>
+			</position>
+		</texture>
 		<inactive_background>music/songlist_off.png</inactive_background>
+		
+		
 
 	</label_list>
 
@@ -59,7 +88,7 @@
 		</dimensions>
 		<position type="relativeToStage">
 			<x>10%</x>
-			<y>40%</y>
+			<y>35%</y>
 		</position>
 	</image_frame>
 

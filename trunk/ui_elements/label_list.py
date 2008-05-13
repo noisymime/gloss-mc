@@ -12,7 +12,7 @@ class LabelList(clutter.Group):
 
     #Default font
     font_string = "Tahoma 30"
-    item_gap = 0
+    item_height_percent = 1.00
     width = 0
     
     def __init__(self, length):
@@ -29,22 +29,28 @@ class LabelList(clutter.Group):
         self.displayMax = length
         self.displaySize = self.displayMax - self.displayMin
         
+        self.item_group = clutter.Group()
+        self.item_group.show()
+        
         self.inactive_item_background = None
         self.background_group = clutter.Group()
         self.background_group.show()
         self.add(self.background_group)
+        
+        self.image_down = None
+        self.image_up = None
         
         #Selector bar image, moves with selections to show current item
         self.selector_bar = None
     
     def setup_from_theme_id(self, themeMgr, id):
         element = themeMgr.search_docs("label_list", id).childNodes
+        img_element = themeMgr.search_docs("label_list", id).getElementsByTagName("texture")
         #Quick check to make sure we found something
         if element is None:
             return None
         
-        self.item_gap = int(themeMgr.find_child_value(element, "item_gap"))
-        self.displayMax = int(themeMgr.find_child_value(element, "num_visible_elements"))
+        self.item_height_percent = float(themeMgr.find_child_value(element, "item_height_percent"))
         
         #Grab the font
         font_node = themeMgr.get_subnode(element, "font")
@@ -62,18 +68,37 @@ class LabelList(clutter.Group):
         self.fps = int(themeMgr.find_child_value(element, "transition_fps"))
         self.frames = int(themeMgr.find_child_value(element, "transition_frames"))
         
-        
-        
         themeMgr.setup_actor(self, element, themeMgr.stage)
         (self.width, self.height) = themeMgr.get_dimensions(element, themeMgr.stage)
         
-        print "Label List width: %s" % self.get_width()
+        #Set the up/down images
+        #This assumes images go in the bottom right corner, will add flexibility later
+        img_element_up = themeMgr.find_element(img_element, "id", "image_up")
+        img_element_down = themeMgr.find_element(img_element, "id", "image_down")
+        if not img_element_up is None:
+            img_element_up = img_element_up.childNodes
+            self.image_up = themeMgr.get_texture("image_up", self, element = img_element_up)
+            self.image_up.set_opacity(180)
+            self.image_up.set_position( self.width-self.image_up.get_width(), self.height+1)
+            self.image_up.show()
+            self.add(self.image_up)
+        if not img_element_down is None:
+            img_element_down = img_element_down.childNodes
+            self.image_down = themeMgr.get_texture("image_up", self, element = img_element_down)
+            self.image_down.set_opacity(180)
+            self.image_down.set_position( self.width-self.image_down.get_width()-self.image_up.get_width(), self.height+1)
+            self.image_down.show()
+            self.add(self.image_down)
+            
         
-        img_element = themeMgr.search_docs("label_list", id).getElementsByTagName("texture")
-        img_element = themeMgr.find_element(img_element, "id", "inactive_background")
-        if not img_element is None:
-            img_element = img_element.childNodes
-            self.inactive_item_background = themeMgr.get_texture("inactive_background", self, element = img_element)
+        self.item_group.set_clip(0, 0, self.width, self.height)
+        self.background_group.set_clip(0, 0, self.width, self.height)
+        
+        #Get the item background img
+        img_element_item = themeMgr.find_element(img_element, "id", "inactive_background")
+        if not img_element_item is None:
+            img_element_item = img_element_item.childNodes
+            self.inactive_item_background = themeMgr.get_texture("inactive_background", self, element = img_element_item)
         
     def on_key_press_event (self, event):
         self.input_queue.input(event)
@@ -87,32 +112,42 @@ class LabelList(clutter.Group):
             tempLabel.set_text("S")
 
             self.label_height = tempLabel.get_height()
+            self.item_height = int(self.label_height * self.item_height_percent)
+            self.displayMax = self.height / self.label_height
             label_width = 0
+    
+            #This has to go hear for layering purposes
+            if self.item_group.get_parent() is None:
+                self.add(self.item_group)
         
-        label_y = len(self.items) * (self.label_height + self.item_gap)
+        item_y = len(self.items) * self.item_height
+        label_y = item_y + ((self.item_height - self.label_height)/2)
+        label_y = int(label_y)
         
         #If a background pic is specified in the theme, clone it and add
         if not self.inactive_item_background is None:
             bg_img = clutter.CloneTexture(self.inactive_item_background)
-            bg_img.set_height(self.label_height)
+            bg_img.set_height(self.item_height)
             bg_img.set_width(self.width)
-            bg_img.set_position(0, label_y)
-            bg_img.show()
+            bg_img.set_position(0, item_y)
             self.background_group.add(bg_img)
             
         
         newItem = ListItem(self.font_string, itemLabel, label_list = self, max_width = self.width)
         newItem.set_position(0, label_y)
-        newItem.show()
+        if len(self.items) < self.displaySize:
+            newItem.show()            
+            if not self.image_down is None: self.image_down.set_opacity(255)
+            if not self.inactive_item_background is None: bg_img.show()
         self.items.append(newItem)
         
-        self.add(newItem)
+        self.item_group.add(newItem)
         return newItem
     
     #Removes all items from the list
     def clear(self):
         for item in self.items:
-            self.remove(item)
+            self.item_group.remove(item)
             item = None
         self.items = []
         self.selected = 0
@@ -121,7 +156,7 @@ class LabelList(clutter.Group):
     def display(self):
         if self.displayMax > len(self.items):
             self.displayMax = len(self.items)
-            self.displaySize = self.displayMax - self.displayMin
+            #self.displaySize = self.displayMax - self.displayMin
         
         #for i in range(self.displaySize):
         #    self.menuItems[i].show()
@@ -249,14 +284,14 @@ class LabelList(clutter.Group):
             (group_x, new_y )\
             )
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
-        self.behaviour1 = clutter.BehaviourPath(alpha, knots)
-        self.behaviour2 = clutter.BehaviourOpacity(opacity_start=outgoingMenuItem.get_opacity(), opacity_end=0, alpha=alpha)
+        self.behaviour_path = clutter.BehaviourPath(alpha, knots)
+        self.behaviour_opacity = clutter.BehaviourOpacity(opacity_start=outgoingMenuItem.get_opacity(), opacity_end=0, alpha=alpha)
         
         #print "Going to: "+ str(new_y)
         #print behaviour1.get_knots()
         
-        self.behaviour1.apply(self)
-        self.behaviour2.apply(outgoingMenuItem)
+        self.behaviour_path.apply(self.item_group)
+        self.behaviour_opacity.apply(outgoingMenuItem)
         
 import gobject
 class ListItem(clutter.Group):

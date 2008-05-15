@@ -458,13 +458,19 @@ class Module:
                 
                 tempItem = tempMenu.addItem(directoryEntry)
                 
-                #Start experimental schtuff
+                #Start experimental schtuff (MESSY!!!)
                 img_list = os.listdir(subdir)
-                img_list = self.os_listdir_recursive(subdir, showHidden = False)
+                img_list_temp = []
+                for img in img_list:
+                    img = subdir + "/" + img
+                    img_list_temp.append(img)
+                img_list = img_list_temp
+                img_list.extend(self.os_listdir_recursive(subdir, showHidden = False))
                 #Attempt to get the thumbnail images
                 #print img_list
+                
                 img_list_preview = filter(self.filterPreviewImageFile, img_list)
-                if len(img_list_preview) == 0:
+                if len(img_list_preview) > 0:
                     img_list = img_list_preview
                 #If not, just use the full images
                 else:
@@ -474,13 +480,18 @@ class Module:
                 #Set the max preview img sizes (These come from the slideshow.xml theme file
                 if (not self.preview_width is None) and (not self.preview_height is None):
                     img_previewer.set_max_img_dimensions(self.preview_width, self.preview_height)
-                    
+                
+                preview_count = 0
                 for img in img_list:
-                    imgPath = subdir + "/" + img #os.listdir(subdir)[0]
+                    #imgPath = subdir + "/" + img #os.listdir(subdir)[0]
                     imgPath = img
-                    print imgPath
-                    img_previewer.add_texture(imgPath)
                     #print imgPath
+                    
+                    #Only add a max of 15 images to the previewer
+                    if preview_count < 15:
+                        img_previewer.add_texture(imgPath)
+                        preview_count += 1
+    
                 #new_file_list = os.listdir(dirPath)
                 if tempMenu.usePreviewEffects:
                     tempItem.itemTexturesGroup = img_previewer

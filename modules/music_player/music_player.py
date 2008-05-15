@@ -13,6 +13,7 @@ from ui_elements.label_list import LabelList
 
 class Module:
     CONTEXT_HEADINGS, CONTEXT_ROW, CONTEXT_ALBUM_LIST, CONTEXT_SONG_LIST, CONTEXT_PLAY_SCR = range(5)
+    DIRECTION_LEFT, DIRECTION_RIGHT = range(2)
     
     title = "Music"
     num_columns = 6
@@ -24,7 +25,6 @@ class Module:
         self.stage = glossMgr.get_stage()
         self.glossMgr = glossMgr
         self.dbMgr = dbMgr
-        self.setup_ui()
         self.albums = []
         self.artists = []
         self.songs = []
@@ -49,13 +49,27 @@ class Module:
         self.timeout_id = 0
         self.queue_id = 0
         
+        #There has be 3 of these labels, one left, center and right
+        self.artist_label_1 = clutter.Label()
+        self.artist_label_2 = clutter.Label()
+        self.artist_label_3 = clutter.Label()
+        self.artist_label_current = self.artist_label_1
+        
+        self.setup_ui()
         
     def setup_ui(self):
         self.menu_image = self.glossMgr.themeMgr.get_texture("music_menu_image", None, None)
         
         self.default_artist_cover = self.glossMgr.themeMgr.get_texture("music_default_artist_image", None, None).get_pixbuf()
+        self.default_album_cover = self.glossMgr.themeMgr.get_texture("music_default_album_image", None, None).get_pixbuf()
         self.main_img = self.glossMgr.themeMgr.get_imageFrame("music_main_image")
         
+        self.artist_label_1.set_position(200, 200)
+        self.artist_label_2.set_position(200, 200)
+        self.artist_label_3.set_position(200, 200)
+        self.artist_label_1.set_color(clutter.color_parse('White'))
+        self.artist_label_2.set_color(clutter.color_parse('White'))
+        self.artist_label_3.set_color(clutter.color_parse('White'))
     
     #Get the images dir setting our of the DB
     #But also creates the setting if it doesn't already exist
@@ -87,6 +101,7 @@ class Module:
         #React based on the current input context
         if self.current_context == self.CONTEXT_ROW:
             if (event.keyval == clutter.keysyms.Left) or (event.keyval == clutter.keysyms.Right):
+                self.previous_music_object = self.artistImageRow.get_current_object()
                 #First check if there's any current timeouts and if there is, clear it
                 #if not self.timeout_id == 0: gobject.source_remove(self.timeout_id)
                 self.artistImageRow.sleep = True
@@ -95,6 +110,10 @@ class Module:
                 #self.artistImageRow.objectLibrary[0].pause_threads()
                 if self.queue_id == 0: self.queue_id = self.artistImageRow.input_queue.connect("queue-flushed", self.load_albums)
                 self.artistImageRow.sleep = False
+                
+
+                if (event.keyval == clutter.keysyms.Left): self.direction = self.DIRECTION_LEFT
+                if (event.keyval == clutter.keysyms.Right): self.direction = self.DIRECTION_RIGHT
                 
                 
             elif (event.keyval == clutter.keysyms.Down):
@@ -161,6 +180,8 @@ class Module:
         artist = self.artistImageRow.get_current_object()
         self.conn_id = self.backend.connect("query-complete", self.update_for_albums, artist)
         self.backend.get_albums_by_artistID(artist.artistID)
+        
+        self.transition_heading(self.direction, self.previous_music_object, artist, None)
         #thread = threading.Thread(target=self.backend.get_albums_by_artistID, args=(artist.artistID,))
         #thread.start()
         
@@ -277,8 +298,77 @@ class Module:
         self.main_img.show()
         self.stage.add(self.main_img)
         
+        self.stage.add(self.artist_label_1)
+        self.artist_label_1.show()
+        self.stage.add(self.artist_label_2)
+        self.artist_label_2.show()
+        self.stage.add(self.artist_label_3)
+        self.artist_label_3.show()
+        
         self.timeline_display.start()
+        
+    def transition_heading(self, direction, old_music_item, new_music_item, timeline = None):
+        start_timeline = False
+        if timeline is None:
+            #Completely generic timeline definition
+            timeline = clutter.Timeline(20, 30)
+            start_timeline = True
+            
+        self.alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
+
+        if direction == self.DIRECTION_LEFT:
+            if self.artist_label_current == self.artist_label_1: next_label = self.artist_label_2
+            elif self.artist_label_current == self.artist_label_2: next_label = self.artist_label_3
+            elif self.artist_label_current == self.artist_label_3: next_label = self.artist_label_1
+        else:
+            if self.artist_label_current == self.artist_label_1: next_label = self.artist_label_3
+            elif self.artist_label_current == self.artist_label_2: next_label = self.artist_label_1
+            elif self.artist_label_current == self.artist_label_3: next_label = self.artist_label_2
+        
+        next_label.set_opacity(0)
+        next_label.set_scale(0.5, 0.5)
+        next_label.set_text(new_music_item.name)
+        
+        if direction == self.DIRECTION_LEFT:
+            next_label.set_x( self.artist_label_current.get_x() + (self.artist_label_current.get_width()))
+            outgoing_x = self.artist_label_current.get_x() - int(self.artist_label_current.get_width()/2)
+        else:
+            next_label.set_x( self.artist_label_current.get_x() - (next_label.get_width()))
+            outgoing_x = self.artist_label_current.get_x() + int(self.artist_label_current.get_width())
+            
+        incoming_x = self.artist_label_current.get_x() + int(self.artist_label_current.get_width()/2) - int(next_label.get_width()/2)
+        knots_incoming =(\
+                         (next_label.get_x(), next_label.get_y()),
+                         (incoming_x, next_label.get_y())
+                         )
     
+        knots_outgoing =(\
+                         (self.artist_label_current.get_x(), self.artist_label_current.get_y()),
+                         (outgoing_x, next_label.get_y())
+                         )
+        
+        self.behaviourIncomingPath = clutter.BehaviourPath(knots = knots_incoming, alpha = self.alpha)
+        self.behaviourOutgoingPath = clutter.BehaviourPath(knots = knots_outgoing, alpha = self.alpha)
+        self.behaviourIncomingOpacity = clutter.BehaviourOpacity(opacity_start = 0, opacity_end = 255, alpha = self.alpha)
+        self.behaviourOutgoingOpacity = clutter.BehaviourOpacity(opacity_start = 255, opacity_end = 0, alpha = self.alpha)
+        self.behaviourIncomingScale = clutter.BehaviourScale(x_scale_start = 0.5, y_scale_start = 0.5, x_scale_end = 1, y_scale_end = 1, alpha = self.alpha)
+        self.behaviourOutgoingScale = clutter.BehaviourScale(x_scale_start = 1, y_scale_start = 1, x_scale_end = 0.5, y_scale_end = 0.5, alpha = self.alpha)
+        
+        self.behaviourIncomingPath.apply(next_label)
+        self.behaviourIncomingOpacity.apply(next_label)
+        self.behaviourIncomingScale.apply(next_label)
+        self.behaviourOutgoingPath.apply(self.artist_label_current)
+        self.behaviourOutgoingOpacity.apply(self.artist_label_current)
+        self.behaviourOutgoingScale.apply(self.artist_label_current)
+        
+        timeline.connect("completed", self.set_next_heading, next_label)
+        
+        if start_timeline:
+            timeline.start()
+        
+    def set_next_heading(self, data, new_heading):
+        self.artist_label_current = new_heading
+                          
         
     def stop(self):
         pass
@@ -288,40 +378,3 @@ class Module:
         
     def unpause(self):
         pass
-    """
-    def load_songs(self):
-        #Generate some SQL to retrieve videos that were in the final_file_list
-        #Load the videos into the cover viewer
-        sql = "SELECT * FROM music_songs" # WHERE filename IN ("
-        if self.glossMgr.debug: print "Music SQL: " + sql
-            
-        results = self.dbMgr.run_sql(sql)
-        
-        #Check for null return
-        if results == None:
-            print "MusicPlayer: No connection to DB or no songs found in DB"
-            return None
-        
-        pixbuf = None
-        #Else add the entries in    
-        for record in results:
-            tempSong = song(self)
-            tempSong.import_from_mythObject(record)
-            self.songs.append(tempSong)
-            
-            
-            if not tempSong.get_image()is None:
-                pixbuf = tempSong.get_image()
-                break
-            #print filename
-            #tempSong.set_file(filename)
-        
-        if not pixbuf is None:
-            loader = gtk.gdk.PixbufLoader()
-            loader.write(pixbuf)
-            loader.close()
-            pixbuf = loader.get_pixbuf()
-            self.tmpImage = clutter.Texture()
-            self.tmpImage.set_pixbuf(pixbuf)
-            
-    """

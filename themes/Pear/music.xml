@@ -91,6 +91,9 @@
 	<texture id="music_default_artist_image">
 		<image>music/default_cover.png</image>
 	</texture>
+	<texture id="music_default_album_image">
+		<image>music/default_cover.png</image>
+	</texture>
 	
 	<image_frame id="music_main_image">
 		<image>None</image>

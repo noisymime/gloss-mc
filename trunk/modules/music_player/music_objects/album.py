@@ -22,3 +22,10 @@ class album:
             pixbuf = song.get_image_from_ID3()
             if not pixbuf is None:
                 return pixbuf
+        
+        #If nothing has been found return the default
+        return self.get_default_image()
+    
+    #Returns the pixbuf of the default artist image
+    def get_default_image(self):
+        return self.music_player.default_artist_cover

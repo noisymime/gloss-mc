@@ -91,5 +91,27 @@
 			<y>35%</y>
 		</position>
 	</image_frame>
-
+	
+	<progress_bar id="music_progress_bar">
+		<colour id="background">
+			<r>100</r>
+			<g>100</g>
+			<b>100</b>
+		</colour>
+		<colour id="foreground">
+			<r>255</r>
+			<g>255</g>
+			<b>255</b>
+		</colour>
+	
+		<dimensions type="relativeToStage">
+			<width>30%</width>
+			<height>10%</height>
+		</dimensions>
+		<position type="relativeToStage">
+			<x>10%</x>
+			<y>35%</y>
+		</position>
+	</progress_bar>
+	
 </gloss-theme>

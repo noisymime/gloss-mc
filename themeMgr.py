@@ -264,6 +264,20 @@ class ThemeMgr:
 			
 		return (int(x), int(y))
 	
+	def get_colour(self, element, name):
+		if element is None:
+			element = self.search_docs("colour", name).childNodes
+		#Quick check to make sure we found something
+		if element is None:
+			return None
+		
+		r = int(self.find_child_value(element, "r"))
+		g = int(self.find_child_value(element, "g"))
+		b = int(self.find_child_value(element, "b"))
+			    
+		colour = clutter.Color(r, g, b)
+		return colour
+	
 	def get_texture(self, name, parent, texture = None, element = None):
 		texture_src = None
 		if texture is None:
@@ -291,6 +305,7 @@ class ThemeMgr:
 		self.setup_actor(texture, element, parent)
 		
 		return texture
+		
 	
 	def get_font(self, name, element):
 		if element is None:
@@ -381,3 +396,21 @@ class ThemeMgr:
 		img_frame.set_position(int(x), int(y))
 		
 		return img_frame
+	
+	def get_label(self, id, parent = None, element = None, label = None):
+		if element is None:
+			element = self.search_docs("label", id).childNodes
+		#Quick check to make sure we found something
+		if element is None:
+			return None
+		
+		if label is None: label = clutter.Label()
+		if parent is None: parent = self.stage
+		
+		font_string = self.get_font("font", element)
+		label.set_font_name(font_string)
+		
+		self.setup_actor(label, element, parent)
+		
+		return label
+		

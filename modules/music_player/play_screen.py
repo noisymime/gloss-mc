@@ -1,5 +1,6 @@
 import clutter
 from modules.music_player.playlist import Playlist
+from multimedia.progress_bar import ProgressBar
 from ui_elements.image_frame import ImageFrame
 from ui_elements.image_clone import ImageClone
 from ui_elements.label_list import LabelList
@@ -17,11 +18,16 @@ class PlayScreen(clutter.Group):
         
         self.main_img = None
         self.song_list = LabelList(8)
-        self.playlist = Playlist(musicPlayer)
+        self.playlist = musicPlayer.playlist #Playlist(musicPlayer)
+        
+        controller = self.playlist.audio_controller
+        self.progress_bar = ProgressBar(controller)
+
         
         self.setup()
         
     def setup(self):
+        self.progress_bar.setup_from_theme_id(self.glossMgr.themeMgr, "music_progress_bar")
         self.song_list.setup_from_theme_id(self.glossMgr.themeMgr, "music_play_screen_songs")
         self.main_img_theme = self.glossMgr.themeMgr.get_imageFrame("music_playing_image")
         self.img_size = self.main_img_theme.img_size
@@ -77,6 +83,10 @@ class PlayScreen(clutter.Group):
         self.song_list.select_first()
         self.song_list.show()
         self.add(self.song_list)
+        
+        self.add(self.progress_bar)
+        self.progress_bar.set_position(400, 650)
+        self.progress_bar.display()
         
         self.show()
         self.stage.add(self)

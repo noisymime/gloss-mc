@@ -2,6 +2,9 @@ import clutter
 import gobject
 from multimedia.MediaOSD import osd
 
+
+# This is an abstract class
+# It should not be instantiated directly
 class MediaController(gobject.GObject):
     
     #Setup signals
@@ -42,3 +45,14 @@ class MediaController(gobject.GObject):
         #Until then use:
         self.media_element.set_property("position", int(new_pos))
         if self.use_osd: self.osd.shift_media(amount)
+        
+    def get_position_percent(self):
+        length = int(self.media_element.get_duration())
+        pos = int(self.media_element.get_property("position"))
+        
+        #Sanity check
+        if length == 0: return 0
+        
+        percent = float( float(pos) / float(length) )
+        
+        return percent

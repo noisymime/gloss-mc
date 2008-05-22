@@ -49,11 +49,7 @@ class Module:
         self.timeout_id = 0
         self.queue_id = 0
         
-        #There has be 3 of these labels, one left, center and right
-        self.artist_label_1 = clutter.Label()
-        self.artist_label_2 = clutter.Label()
-        self.artist_label_3 = clutter.Label()
-        self.artist_label_current = self.artist_label_1
+        self.heading = None
         
         self.setup_ui()
         
@@ -64,12 +60,18 @@ class Module:
         self.default_album_cover = self.glossMgr.themeMgr.get_texture("music_default_album_image", None, None).get_pixbuf()
         self.main_img = self.glossMgr.themeMgr.get_imageFrame("music_main_image")
         
+        colour = clutter.color_parse('White')
+        font_string = "Tahoma 30"
+        self.heading = musicHeading(colour, font_string)
+        self.heading.set_position(400, 250)
+        """
         self.artist_label_1.set_position(200, 200)
         self.artist_label_2.set_position(200, 200)
         self.artist_label_3.set_position(200, 200)
         self.artist_label_1.set_color(clutter.color_parse('White'))
         self.artist_label_2.set_color(clutter.color_parse('White'))
         self.artist_label_3.set_color(clutter.color_parse('White'))
+        """
     
     #Get the images dir setting our of the DB
     #But also creates the setting if it doesn't already exist
@@ -128,7 +130,7 @@ class Module:
                 self.playlist.add_songs(songs)
                 self.playlist.play()
                 
-                self.play_screen.append_playlist(self.playlist)
+                #self.play_screen.append_playlist(self.playlist)
                 self.play_screen.display(self.artistImageRow.get_current_texture())#.get_texture())
                 
                 self.current_context = self.CONTEXT_PLAY_SCR
@@ -181,7 +183,7 @@ class Module:
         self.conn_id = self.backend.connect("query-complete", self.update_for_albums, artist)
         self.backend.get_albums_by_artistID(artist.artistID)
         
-        self.transition_heading(self.direction, self.previous_music_object, artist, None)
+        self.heading.transition_heading(self.direction, self.previous_music_object, artist, None)
         #thread = threading.Thread(target=self.backend.get_albums_by_artistID, args=(artist.artistID,))
         #thread.start()
         
@@ -298,14 +300,52 @@ class Module:
         self.main_img.show()
         self.stage.add(self.main_img)
         
-        self.stage.add(self.artist_label_1)
-        self.artist_label_1.show()
-        self.stage.add(self.artist_label_2)
-        self.artist_label_2.show()
-        self.stage.add(self.artist_label_3)
-        self.artist_label_3.show()
+        self.stage.add(self.heading)
+        self.heading.show()
         
         self.timeline_display.start()
+                          
+        
+    def stop(self):
+        pass
+        
+    def pause(self):
+        pass
+        
+    def unpause(self):
+        pass
+    
+class musicHeading(clutter.Group):
+    DIRECTION_LEFT, DIRECTION_RIGHT = range(2)
+    
+    def __init__(self, colour = None, font_string = None):
+        clutter.Group.__init__(self)
+        
+        if colour is None: colour = clutter.color_parse('White')
+        if font_string is None: font_string = "Tahoma 30"
+        
+        #There has be 3 of these labels, one left, center and right
+        self.label_1 = clutter.Label()
+        self.label_2 = clutter.Label()
+        self.label_3 = clutter.Label()
+        
+        self.label_1.set_font_name(font_string)
+        self.label_2.set_font_name(font_string)
+        self.label_3.set_font_name(font_string)
+        
+        self.label_1.set_color(colour)
+        self.label_2.set_color(colour)
+        self.label_3.set_color(colour)
+        
+        self.label_current = self.label_1
+        
+        self.add(self.label_1)
+        self.add(self.label_2)
+        self.add(self.label_3)
+        
+        self.label_1.show()
+        self.label_2.show()
+        self.label_3.show()
         
     def transition_heading(self, direction, old_music_item, new_music_item, timeline = None):
         start_timeline = False
@@ -317,33 +357,33 @@ class Module:
         self.alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
 
         if direction == self.DIRECTION_LEFT:
-            if self.artist_label_current == self.artist_label_1: next_label = self.artist_label_2
-            elif self.artist_label_current == self.artist_label_2: next_label = self.artist_label_3
-            elif self.artist_label_current == self.artist_label_3: next_label = self.artist_label_1
+            if self.label_current == self.label_1: next_label = self.label_2
+            elif self.label_current == self.label_2: next_label = self.label_3
+            elif self.label_current == self.label_3: next_label = self.label_1
         else:
-            if self.artist_label_current == self.artist_label_1: next_label = self.artist_label_3
-            elif self.artist_label_current == self.artist_label_2: next_label = self.artist_label_1
-            elif self.artist_label_current == self.artist_label_3: next_label = self.artist_label_2
+            if self.label_current == self.label_1: next_label = self.label_3
+            elif self.label_current == self.label_2: next_label = self.label_1
+            elif self.label_current == self.label_3: next_label = self.label_2
         
         next_label.set_opacity(0)
         next_label.set_scale(0.5, 0.5)
         next_label.set_text(new_music_item.name)
         
-        if direction == self.DIRECTION_LEFT:
-            next_label.set_x( self.artist_label_current.get_x() + (self.artist_label_current.get_width()))
-            outgoing_x = self.artist_label_current.get_x() - int(self.artist_label_current.get_width()/2)
+        if direction == self.DIRECTION_RIGHT:
+            next_label.set_x( self.label_current.get_x() + (self.label_current.get_width()))
+            outgoing_x = self.label_current.get_x() - int(self.label_current.get_width()/2)
         else:
-            next_label.set_x( self.artist_label_current.get_x() - (next_label.get_width()))
-            outgoing_x = self.artist_label_current.get_x() + int(self.artist_label_current.get_width())
+            next_label.set_x( self.label_current.get_x() - (next_label.get_width()))
+            outgoing_x = self.label_current.get_x() + int(self.label_current.get_width())
             
-        incoming_x = self.artist_label_current.get_x() + int(self.artist_label_current.get_width()/2) - int(next_label.get_width()/2)
+        incoming_x = self.label_current.get_x() + int(self.label_current.get_width()/2) - int(next_label.get_width()/2)
         knots_incoming =(\
                          (next_label.get_x(), next_label.get_y()),
                          (incoming_x, next_label.get_y())
                          )
     
         knots_outgoing =(\
-                         (self.artist_label_current.get_x(), self.artist_label_current.get_y()),
+                         (self.label_current.get_x(), self.label_current.get_y()),
                          (outgoing_x, next_label.get_y())
                          )
         
@@ -357,9 +397,9 @@ class Module:
         self.behaviourIncomingPath.apply(next_label)
         self.behaviourIncomingOpacity.apply(next_label)
         self.behaviourIncomingScale.apply(next_label)
-        self.behaviourOutgoingPath.apply(self.artist_label_current)
-        self.behaviourOutgoingOpacity.apply(self.artist_label_current)
-        self.behaviourOutgoingScale.apply(self.artist_label_current)
+        self.behaviourOutgoingPath.apply(self.label_current)
+        self.behaviourOutgoingOpacity.apply(self.label_current)
+        self.behaviourOutgoingScale.apply(self.label_current)
         
         timeline.connect("completed", self.set_next_heading, next_label)
         
@@ -367,14 +407,4 @@ class Module:
             timeline.start()
         
     def set_next_heading(self, data, new_heading):
-        self.artist_label_current = new_heading
-                          
-        
-    def stop(self):
-        pass
-        
-    def pause(self):
-        pass
-        
-    def unpause(self):
-        pass
+        self.label_current = new_heading

@@ -109,4 +109,23 @@
 			<y>40%</y>
 		</position>
 	</image_frame>
+	
+	<label id="heading">
+		<font id="font">
+			<face>Tahoma</face>
+			<size id="default">30</size>
+			<size id="1024x768">38</size>
+			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
+		</font>
+	
+		<dimensions type="relativeToStage">
+			<width>25%</width>
+			<height>25%</height>
+		</dimensions>
+		<position type="relativeToStage">
+			<x>10%</x>
+			<y>40%</y>
+		</position>
+	</label>
 </gloss-theme>

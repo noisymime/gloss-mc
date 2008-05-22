@@ -13,14 +13,14 @@ Gloss was developed on Ubuntu so hence I can give the best instructions for how 
 === Binaries (apt-get) ===
   # If you're using Ubuntu Hardy, then you don't need to add anything, but if you have an earlier version you will need the add the Clutter repository: `echo "deb http://debian.o-hand.com gutsy/" | sudo tee -a /etc/apt/sources.list` (Replace gutsy with edgy/dapper/fiesty if required)
   # `sudo apt-get update`
-  # `sudo apt-get install libclutter-0.6-0 libclutter-gst-0.6-0 libclutter-cairo-0.6-0 python-clutter python-mysqldb subversion eyed3 gstreamer0.10-fluendo-mpegdemux jackd  gstreamer0.10-plugins-bad gstreamer0.10-plugins-ugly`
+  # `sudo apt-get install libclutter-0.6-0 libclutter-gst-0.6-0 libclutter-cairo-0.6-0 python-clutter python-mysqldb python-gst0.10 subversion eyed3 gstreamer0.10-fluendo-mpegdemux jackd  gstreamer0.10-plugins-bad gstreamer0.10-plugins-ugly`
 
 === SVN === 
 
 Using the SVN of Clutter is currently not recommended and may cause unpredictable behaviour. If you wish to compile from source, please use the release tarballs available at http://clutter-project.org/sourceshttp://clutter-project.org/sources
 The following instructions are a rough guide for Ubuntu Gutsy
 
-  # `sudo apt-get install libgtk2.0-dev gtk-doc-tools gcc libpango1.0-dev libsdl-pango-dev python automake1.9 subversion gstreamer0.10-fluendo-mpegdemux python-cairo-dev jackd python-mysqldb python-dev python-gtk2-dev python-gobject-dev libgstreamer-plugins-base0.10-dev python-gobject-doc gstreamer0.10-plugins-bad gstreamer0.10-plugins-bad-multiverse gstreamer0.10-plugins-ugly eyed3`
+  # `sudo apt-get install libgtk2.0-dev gtk-doc-tools gcc libpango1.0-dev libsdl-pango-dev python automake1.9 subversion gstreamer0.10-fluendo-mpegdemux python-cairo-dev jackd python-mysqldb python-dev python-gtk2-dev python-gst0.10 python-gobject-dev libgstreamer-plugins-base0.10-dev python-gobject-doc gstreamer0.10-plugins-bad gstreamer0.10-plugins-bad-multiverse gstreamer0.10-plugins-ugly eyed3`
   # `svn co http://svn.o-hand.com/repos/clutter/trunk clutter`
   # `cd clutter/clutter`
   # `./autogen.sh`

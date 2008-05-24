@@ -6,6 +6,7 @@ import gobject
 import pango
 import clutter
 from ui_elements.Spinner import Spinner
+from ui_elements.rounded_rectangle import RoundedRectangle
 
 class SplashScr(clutter.Group):
     font = "Lucida Grande "
@@ -26,12 +27,20 @@ class SplashScr(clutter.Group):
         self.add(self.centre_group)
         
         #THIS NEEDS THEMING!!!
+        """
         pixbuf = gtk.gdk.pixbuf_new_from_file("themes/splash_box.png")
         self.box = clutter.Texture()
         self.box.set_pixbuf(pixbuf)
         self.box.set_opacity(int(255 * 0.75))
         self.box.set_height(int(self.stage.get_height()* 0.15))
         self.centre_group.add(self.box)
+        """
+        width = int(self.stage.get_width()* 0.4)
+        height = int(self.stage.get_height()* 0.15)
+        self.box = RoundedRectangle(width, height, clutter.color_parse('White'))
+        #self.box.set_color(clutter.color_parse('White'))
+        self.box.set_opacity(int(255 * 0.55))
+        self.centre_group.add(self.box)        
        
         self.spinner = Spinner()
         height = int(self.box.get_height() * 0.90)

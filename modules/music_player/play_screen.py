@@ -85,7 +85,8 @@ class PlayScreen(clutter.Group):
         self.add(self.song_list)
         
         self.add(self.progress_bar)
-        self.progress_bar.set_position(400, 650)
+        x = (self.stage.get_width() - self.progress_bar.get_width())/2
+        self.progress_bar.set_position(x, 650)
         self.progress_bar.display()
         
         self.show()

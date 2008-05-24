@@ -105,8 +105,8 @@
 		</colour>
 	
 		<dimensions type="relativeToStage">
-			<width>30%</width>
-			<height>10%</height>
+			<width>90%</width>
+			<height>2%</height>
 		</dimensions>
 		<position type="relativeToStage">
 			<x>10%</x>

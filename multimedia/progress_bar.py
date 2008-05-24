@@ -1,5 +1,6 @@
 import clutter
 import gobject
+from ui_elements.rounded_rectangle import RoundedRectangle
 
 class ProgressBar(clutter.Group):
     
@@ -35,11 +36,18 @@ class ProgressBar(clutter.Group):
         #bgColour = themeMgr.get_colour(element, "background")
         #fgColour = themeMgr.get_colour(element, "foreground")
         
-        self.bg.set_color(bgColour)
-        self.bg.set_size(self.width, self.height)
         
+        self.bg.set_size(self.width, self.height)
+        #self.bg = RoundedRectangle(self.width, self.height)
+        self.bg.set_color(bgColour)
+        #self.bg.show()
+        #self.add(self.bg)
+        
+        self.fg = RoundedRectangle(20, self.height)
         self.fg.set_color(fgColour)
-        self.fg.set_size(20, self.height)
+        self.fg.show()
+        self.add(self.fg)
+        #self.fg.set_size(20, self.height)
         
     def display(self):
         self.displayed = True

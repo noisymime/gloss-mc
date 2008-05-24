@@ -1,10 +1,9 @@
 import clutter
-from themeMgr import ThemeMgr
-from ui_elements.Spinner import Spinner
-import pygtk
-import gtk
 import pango
 import copy
+from themeMgr import ThemeMgr
+from ui_elements.Spinner import Spinner
+from ui_elements.rounded_rectangle import RoundedRectangle
 
 class GlossMgr:
     theme_dir = "themes/"
@@ -301,11 +300,19 @@ class message():
         
         self.main_group = clutter.Group()
         
+        """
         pixbuf = gtk.gdk.pixbuf_new_from_file(self.theme_dir + "/splash_box.png")
         self.box = clutter.Texture()
         self.box.set_pixbuf(pixbuf)
         self.box.set_opacity(int(255 * 0.75))
         self.box.set_height(int(self.stage.get_height()* 0.3))
+        self.main_group.add(self.box)
+        """
+        
+        width = int(self.stage.get_width()* 0.4)
+        height = int(self.stage.get_height()* 0.3)
+        self.box = RoundedRectangle(width, height, clutter.color_parse('White'))
+        self.box.set_opacity(int(255 * 0.55))
         self.main_group.add(self.box)
 
         self.message = clutter.Label()

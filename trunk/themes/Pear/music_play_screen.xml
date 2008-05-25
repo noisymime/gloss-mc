@@ -114,4 +114,114 @@
 		</position>
 	</progress_bar>
 	
+	<!-- These labels make up the currently playing song details -->
+	<label id="music_play_screen_song_heading">
+		<font id="font">
+			<face>Tahoma</face>
+			<size id="default">30</size>
+			<size id="1024x768">38</size>
+			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
+		</font>
+	
+		<dimensions type="relativeToParent">
+			<width>50%</width>
+			<height>15%</height>
+		</dimensions>
+		<position type="relativeToParent">
+			<x>0</x>
+			<y>0</y>
+		</position>
+	</label>
+	<label id="music_play_screen_album_heading">
+		<font id="font">
+			<face>Tahoma</face>
+			<size id="default">30</size>
+			<size id="1024x768">38</size>
+			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
+		</font>
+	
+		<dimensions type="relativeToParent">
+			<width>50%</width>
+			<height>15%</height>
+		</dimensions>
+		<position type="relativeToParent">
+			<x>0</x>
+			<y>0</y>
+		</position>
+	</label>
+	<label id="music_play_screen_artist_heading">
+		<font id="font">
+			<face>Tahoma</face>
+			<size id="default">30</size>
+			<size id="1024x768">38</size>
+			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
+		</font>
+	
+		<dimensions type="relativeToParent">
+			<width>50%</width>
+			<height>15%</height>
+		</dimensions>
+		<position type="relativeToParent">
+			<x>0</x>
+			<y>0</y>
+		</position>
+	</label>
+	<label id="music_play_screen_song">
+		<font id="font">
+			<face>Tahoma</face>
+			<size id="default">30</size>
+			<size id="1024x768">38</size>
+			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
+		</font>
+	
+		<dimensions type="relativeToParent">
+			<width>50%</width>
+			<height>15%</height>
+		</dimensions>
+		<position type="relativeToParent">
+			<x>0</x>
+			<y>0</y>
+		</position>
+	</label>
+	<label id="music_play_screen_artist">
+		<font id="font">
+			<face>Tahoma</face>
+			<size id="default">30</size>
+			<size id="1024x768">38</size>
+			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
+		</font>
+	
+		<dimensions type="relativeToParent">
+			<width>50%</width>
+			<height>15%</height>
+		</dimensions>
+		<position type="relativeToParent">
+			<x>0</x>
+			<y>0</y>
+		</position>
+	</label>
+	<label id="music_play_screen_album">
+		<font id="font">
+			<face>Tahoma</face>
+			<size id="default">30</size>
+			<size id="1024x768">38</size>
+			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
+		</font>
+	
+		<dimensions type="relativeToParent">
+			<width>50%</width>
+			<height>15%</height>
+		</dimensions>
+		<position type="relativeToParent">
+			<x>0</x>
+			<y>0</y>
+		</position>
+	</label>
+	
 </gloss-theme>

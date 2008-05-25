@@ -1,6 +1,15 @@
+import gobject
 from multimedia.AudioController import AudioController
 
-class Playlist:
+class Playlist(gobject.GObject):
+    #Setup signals
+    __gsignals__ =  { 
+        "song-change": (
+            gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT,)),
+        "stopped": (
+            gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, [])
+        }
+    
     
     songs = []
     position = 0
@@ -9,6 +18,8 @@ class Playlist:
     
 
     def __init__(self, musicPlayer):
+        gobject.GObject.__init__(self)
+        
         self.musicPlayer = musicPlayer
         self.backend = musicPlayer.backend
         self.glossMgr = musicPlayer.glossMgr
@@ -29,6 +40,8 @@ class Playlist:
         if self.glossMgr.debug: print "Music_Player: Attempting to play file '%s'" % current_song_filename
         self.audio_controller.play_audio(current_song_uri)
         
+        self.emit("song-change", current_song)
+        
     #Called when the playback of one song finishes and the next is required
     def next_song(self, data = None):
         self.position += 1
@@ -37,6 +50,8 @@ class Playlist:
     def stop(self):
         if self.is_playing:
             self.audio_controller.stop_audio()
+            
+        self.emit("stopped")
         
     def add_song(self, song):
         self.songs.append(song)

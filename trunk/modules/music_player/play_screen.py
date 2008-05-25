@@ -19,6 +19,10 @@ class PlayScreen(clutter.Group):
         self.main_img = None
         self.song_list = LabelList(8)
         self.playlist = musicPlayer.playlist #Playlist(musicPlayer)
+        self.song_details = SongDetails(self)
+        
+        #Connect to "song-change" on playlist so any details can be updated
+        self.playlist.connect("song-change", self.set_song_cb)
         
         controller = self.playlist.audio_controller
         self.progress_bar = ProgressBar(controller)
@@ -84,6 +88,12 @@ class PlayScreen(clutter.Group):
         self.song_list.show()
         self.add(self.song_list)
         
+        #self.song_details.set_song(self.playlist.current_song)
+        self.song_details.set_opacity(0)
+        self.opacity_behaviour.apply(self.song_details)
+        self.song_details.show()
+        self.add(self.song_details)
+        
         self.add(self.progress_bar)
         x = (self.stage.get_width() - self.progress_bar.get_width())/2
         self.progress_bar.set_position(x, 650)
@@ -97,3 +107,59 @@ class PlayScreen(clutter.Group):
     def undisplay(self):
         self.playlist.stop()
         self.hide()
+        
+    def set_song(self, song):
+        self.song_details.set_song(song)
+        #***INSERT IMAGE UPDATE HERE***
+        
+    def set_song_cb(self, data, song):
+        self.set_song(song)
+        
+"""
+This is a Clutter group containing labels only that 
+describe the current song being played
+"""
+class SongDetails(clutter.Group):
+    
+    def __init__(self, playScreen, song=None):
+        clutter.Group.__init__(self)
+        
+        self.themeMgr = playScreen.glossMgr.themeMgr
+        self.backend = playScreen.musicPlayer.backend
+        
+        self.setup()
+        self.show_all()
+        
+    def setup(self):
+        #Create all the various labels
+        self.artist_heading = self.themeMgr.get_label("music_play_screen_artist_heading", parent = self)
+        self.album_heading = self.themeMgr.get_label("music_play_screen_album_heading", parent = self)
+        self.song_heading = self.themeMgr.get_label("music_play_screen_song_heading", parent = self)
+        
+        self.artist = self.themeMgr.get_label("music_play_screen_artist", parent = self)
+        self.album = self.themeMgr.get_label("music_play_screen_album", parent = self)
+        self.song = self.themeMgr.get_label("music_play_screen_song", parent = self)
+        self.song.set_color(clutter.Color(0xff, 0xff, 0xff, 0xdd))
+        
+        self.add(self.artist_heading)
+        self.add(self.album_heading)
+        self.add(self.song_heading)
+        self.add(self.artist)
+        self.add(self.album)
+        self.add(self.song)
+        
+    def set_song(self, song):
+        
+        self.song.set_text(song.name)
+        
+        artist = self.backend.get_artist_by_ID(song.artistID)
+        if artist is None:
+            self.artist.set_text("unknown artist")
+        else:
+            self.artist.set_text(artist.name)
+        
+        album = self.backend.get_album_by_ID(song.albumID)
+        if album is None:
+            self.album.set_text("unknown album")
+        else:
+            self.album.set_text(album.name)

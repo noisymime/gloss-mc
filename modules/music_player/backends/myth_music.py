@@ -25,7 +25,8 @@ class Backend(gobject.GObject):
         self.dbMgr = music_player.dbMgr
         
         self.directories = {}
-        self.cache_artists = []
+        self.cache_artists = {}
+        self.cache_albums = {}
         self.cache_albums_by_artistID = {}
         self.cache_songs_by_albumID = {}
         self.cache_songs_by_artistID = {}
@@ -51,7 +52,7 @@ class Backend(gobject.GObject):
     def get_artists(self, no_cache = False):
         #Check cache
         if (not no_cache) and (len(self.cache_artists) > 0):
-            return self.cache_artists
+            return self.cache_artists.values()
         
         #Load the sql
         sql = "SELECT * FROM music_artists ORDER BY artist_name"
@@ -75,10 +76,59 @@ class Backend(gobject.GObject):
             tempArtist.import_from_mythObject(record)
             artists.append(tempArtist)
             #self.artistImageRow.add_object(tempArtist)
-            time.sleep(0.01) #Arbitary sleep time to avoid CPU bound status
+            #time.sleep(0.01) #Arbitary sleep time to avoid CPU bound status
+            self.cache_artists[tempArtist.artistID] = tempArtist
         
-        self.cache_artists = artists
         return artists
+    
+    def get_artist_by_ID(self, id, no_cache = False):
+        #Check cache
+        if (not no_cache) and (len(self.cache_artists) > 0):
+            return self.cache_artists[id]
+        else:
+            self.get_artists()
+            self.cache_artists[id]
+            
+    #Returns a list of all album objects
+    def get_albums(self, no_cache = False):
+        #Check cache
+        if (not no_cache) and (len(self.cache_albums) > 0):
+            return self.cache_albums.values()
+        
+        #Load the sql
+        sql = "SELECT * FROM music_albums ORDER BY album_name"
+        if self.music_player.glossMgr.debug: print "Music Albums SQL: " + sql
+            
+        #results = self.dbMgr.run_sql(sql)
+        dbMgr = mythDB()
+        results = dbMgr.run_sql(sql)
+        dbMgr.close_db()
+        
+        #Check for null return
+        if results == None:
+            print "MusicPlayer: No connection to DB or no albums found in DB"
+            return None
+        
+        albums = []
+        #Else add the entries in    
+        for record in results:
+            tempAlbum = album(self.music_player)
+            tempAlbum.import_from_mythObject(record)
+            albums.append(tempAlbum)
+            #self.artistImageRow.add_object(tempArtist)
+            #time.sleep(0.01) #Arbitary sleep time to avoid CPU bound status
+            self.cache_albums[tempAlbum.albumID] = tempAlbum
+        
+        return albums
+    
+    #Return a specific album based on its ID
+    def get_album_by_ID(self, id, no_cache = False):
+        #Check cache
+        if (not no_cache) and (len(self.cache_albums) > 0):
+            return self.cache_albums[id]
+        else:
+            self.get_albums()
+            self.cache_albums[id]
     
     #Given an artistID, returns a list of albums for them
     def get_albums_by_artistID(self, id, no_cache = False):

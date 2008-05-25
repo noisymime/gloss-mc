@@ -12,7 +12,7 @@ Clutter element
 class RoundedRectangle(clutter.Group):
     
     ARC_TO_BEZIER = 0.55228475
-    RADIUS = 15
+    RADIUS = 5
     MARGIN = 1
     
     def __init__(self, width, height, colour = clutter.color_parse('Black')):
@@ -99,10 +99,12 @@ class RoundedRectangle(clutter.Group):
         del self.ct
     
     def set_width(self, new_width):
-        self.texture.set_width(new_width)
+        #self.texture.set_width(new_width)
+        #self.texture.set_clip(0, 0, new_width, self.height)
         self.width = new_width
         self.setup_rounded_context()
         self.refresh()
+        
         clutter.Group.set_width(self, new_width)
         
     def set_height(self, new_height):

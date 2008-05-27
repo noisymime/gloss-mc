@@ -155,8 +155,8 @@ class osd_channel(clutter.Group):
     prog_title_font_size = 20
     detail_font_size = 14
     
-    timeline = clutter.Timeline()
     fps = 20
+    timeline = clutter.Timeline()
     
     def __init__(self, glossMgr):
         clutter.Group.__init__(self)

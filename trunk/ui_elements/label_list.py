@@ -115,10 +115,10 @@ class LabelList(clutter.Group):
         
         #Update the displayMax and roll_point
         height = self.get_item_height()
-        self.displayMax = self.height / height
+        self.displayMax = (self.height / height) - 1
         #For the moment, the roll_point_x is just the ends of the list
         self.roll_point_min = 1
-        self.roll_point_max = self.displayMax - 1
+        self.roll_point_max = self.displayMax
         
     def on_key_press_event (self, event):
         self.input_queue.input(event)
@@ -228,12 +228,14 @@ class LabelList(clutter.Group):
                 self.items[i].scaleLabel(ListItem.SCALE_NONE, self.timeline)
         
         #Check we're at the top of the viewable list
-        if self.selected < self.roll_point_min:
+        if (self.selected < self.roll_point_min) and (self.displayMin > 0):
             #If yes, move the menu, leave the selection bar where is
-            self.rollList( self.items[self.displayMin-1], self.items[self.displayMax+1], self.timeline)
+            #self.rollList( self.items[self.displayMin-1], self.items[self.displayMax+1], self.DIRECTION_UP, self.timeline)
+            self.rollList( self.DIRECTION_UP, self.timeline)
         #Check if we're at the bottom of the viewable list
-        elif self.selected > self.roll_point_max:
-            self.rollList( self.items[self.displayMax+1], self.items[self.displayMin-1], self.timeline)
+        elif (self.selected > self.roll_point_max) and (self.displayMax < (len(self.items)-1)):
+            #self.rollList( self.items[self.displayMax+1], self.items[self.displayMin-1], self.DIRECTION_DOWN, self.timeline)
+            self.rollList( self.DIRECTION_DOWN, self.timeline)
         else:
             if not self.selector_bar is None:
                 #move the selection bar
@@ -284,22 +286,24 @@ class LabelList(clutter.Group):
         
     #When the menu needs to display a new item from the top or bottom, it rolls
     # The distance the menu moves is the distance (in pixels) between the incoming item and the selector bar
-    def rollList(self, incomingMenuItem, outgoingMenuItem, timeline):  
+    def rollList(self, direction, timeline):  
         #print "Rolling: " + incomingMenuItem.data + "<------" + outgoingMenuItem.data  
         (group_x, group_y) = self.item_group.get_position()
         #(bar_x, bar_y) = self.glossMgr.get_selector_bar().get_abs_position() # incomingMenuItem.get_menu().getMenuMgr().
         #(incoming_x, incoming_y) = self.glossMgr.get_selector_bar().get_true_abs_position(incomingMenuItem) #incomingMenuItem.get_abs_position()
-        incoming_y = incomingMenuItem.get_y()
-        outgoing_y = outgoingMenuItem.get_y()
+        #incoming_y = incomingMenuItem.get_y()
+        #outgoing_y = outgoingMenuItem.get_y()
         
-        if incoming_y > outgoing_y:  
+        #print "Selected: %s  Roll_min: %s  Roll_max: %s" % (self.selected, self.roll_point_min, self.roll_point_max)
+        
+        if direction == self.DIRECTION_DOWN:  
             #Then the incoming item is below the selector bar
             #height_diff = int(self.glossMgr.get_selector_bar().get_height() - incomingMenuItem.get_height()) #self.glossMgr.get_selector_bar().get_height())
             #print "height diff: " + str(height_diff)
             #gap = ((incoming_y - bar_y) - math.floor(height_diff/2)) * -1
             #gap = int(gap)
             #gap = -65
-            gap = self.item_height
+            gap = self.item_height * -1
             self.displayMin += 1
             self.displayMax += 1
             self.roll_point_min += 1
@@ -312,7 +316,7 @@ class LabelList(clutter.Group):
             gap = int(gap)
             #gap = 65
             """
-            gap = self.item_height * -1
+            gap = self.item_height
             self.displayMin -= 1
             self.displayMax -= 1
             self.roll_point_min -=1
@@ -328,16 +332,18 @@ class LabelList(clutter.Group):
             )
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
         self.behaviour_path = clutter.BehaviourPath(alpha, knots)
-        self.behaviour_opacity_outgoing = clutter.BehaviourOpacity(opacity_start=outgoingMenuItem.get_opacity(), opacity_end=0, alpha=alpha)
-        self.behaviour_opacity_incoming = clutter.BehaviourOpacity(opacity_start=0, opacity_end=outgoingMenuItem.get_opacity(), alpha=alpha)
+        #self.behaviour_opacity_outgoing = clutter.BehaviourOpacity(opacity_start=outgoingMenuItem.get_opacity(), opacity_end=0, alpha=alpha)
+        #self.behaviour_opacity_incoming = clutter.BehaviourOpacity(opacity_start=0, opacity_end=outgoingMenuItem.get_opacity(), alpha=alpha)
         
         self.behaviour_path.apply(self.item_group)
         self.behaviour_path.apply(self.background_group)
+        """
         self.behaviour_opacity_outgoing.apply(outgoingMenuItem)
         #The incoming opacity behaviour is only used if the incomingItem is NOT the currently selected one
         if not self.items[self.selected] == incomingMenuItem: 
             self.behaviour_opacity_incoming.apply(incomingMenuItem)
             #self.behaviour_opacity_incoming.apply(incomingMenutem)
+        """
         
 import gobject
 class ListItem(clutter.Group):

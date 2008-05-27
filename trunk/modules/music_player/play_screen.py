@@ -17,7 +17,7 @@ class PlayScreen(clutter.Group):
         self.stage = self.glossMgr.get_stage()
         
         self.main_img = None
-        self.song_list = LabelList(8)
+        self.song_list = LabelList()
         self.playlist = musicPlayer.playlist #Playlist(musicPlayer)
         self.song_details = SongDetails(self)
         
@@ -27,7 +27,7 @@ class PlayScreen(clutter.Group):
         controller = self.playlist.audio_controller
         self.progress_bar = ProgressBar(controller)
 
-        
+        self.displayed = False
         self.setup()
         
     def setup(self):
@@ -56,12 +56,12 @@ class PlayScreen(clutter.Group):
         self.backdrop.set_size(self.stage.get_width(), self.stage.get_height())
         self.backdrop.set_opacity(0)
         self.backdrop.show()
-        self.add(self.backdrop)
         self.opacity_behaviour.apply(self.backdrop)
         
+        if not self.main_img is None: self.remove(self.main_img)
         self.main_img = ImageClone(img_frame = image)
-        self.main_img.show()
         self.add(self.main_img)
+        self.main_img.show()
         
         x = int( self.main_img_theme.get_x() )
         y = int( self.main_img_theme.get_y() )
@@ -86,23 +86,31 @@ class PlayScreen(clutter.Group):
         self.song_list.set_opacity(0)
         self.song_list.select_first()
         self.song_list.show()
-        self.add(self.song_list)
+
         
         #self.song_details.set_song(self.playlist.current_song)
         self.song_details.set_opacity(0)
         self.opacity_behaviour.apply(self.song_details)
         self.song_details.show()
-        self.add(self.song_details)
-        
-        self.add(self.progress_bar)
+
         x = (self.stage.get_width() - self.progress_bar.get_width())/2
         self.progress_bar.set_position(x, 650)
         self.progress_bar.display()
+        
+        if not self.displayed:
+            self.first_run_display()
+            self.displayed = True
         
         self.show()
         self.stage.add(self)
         
         self.timeline.start()
+        
+    def first_run_display(self):
+        self.add(self.backdrop)
+        self.add(self.song_list)
+        self.add(self.song_details)
+        self.add(self.progress_bar)
         
     def undisplay(self):
         self.playlist.stop()
@@ -111,6 +119,8 @@ class PlayScreen(clutter.Group):
     def set_song(self, song):
         self.song_details.set_song(song)
         #***INSERT IMAGE UPDATE HERE***
+        image = song.get_image()
+        self.main_img.set_pixbuf(image)
         
     def set_song_cb(self, data, song):
         self.set_song(song)

@@ -282,13 +282,13 @@ class Module:
         self.opacity_behaviour_incoming.apply(self.artistImageRow)
         
         #Just a nasty temp label for outputting stuff
-        self.list1 = LabelList(5)
+        self.list1 = LabelList()
         self.list1.setup_from_theme_id(self.glossMgr.themeMgr, "music_albums")
         self.list1.input_queue.connect("queue-flushed", self.update_main_img)
         #self.list1.set_position(self.stage.get_width()/3, 350)
         self.stage.add(self.list1)
         
-        self.list2 = LabelList(5)
+        self.list2 = LabelList()
         self.list2.setup_from_theme_id(self.glossMgr.themeMgr, "music_songs")
         #self.list2.set_position( (600), 350)
         self.stage.add(self.list2)

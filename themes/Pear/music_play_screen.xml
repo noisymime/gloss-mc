@@ -115,6 +115,16 @@
 	</progress_bar>
 	
 	<!-- These labels make up the currently playing song details -->
+	<group id="music_play_screen_song_details">
+		<dimensions type="relativeToStage">
+			<width>25%</width>
+			<height>20%</height>
+		</dimensions>
+		<position type="relativeToParent">
+			<x>0</x>
+			<y>0</y>
+		</position>
+	</group>
 	<label id="music_play_screen_song_heading">
 		<font id="font">
 			<face>Tahoma</face>
@@ -132,6 +142,11 @@
 			<x>0</x>
 			<y>0</y>
 		</position>
+		<colour id="colour">
+			<r>100</r>
+			<g>100</g>
+			<b>100</b>
+		</colour>
 	</label>
 	<label id="music_play_screen_album_heading">
 		<font id="font">
@@ -148,8 +163,14 @@
 		</dimensions>
 		<position type="relativeToParent">
 			<x>0</x>
-			<y>0</y>
+			<y>40%</y>
 		</position>
+		
+		<colour id="colour">
+			<r>100</r>
+			<g>100</g>
+			<b>100</b>
+		</colour>
 	</label>
 	<label id="music_play_screen_artist_heading">
 		<font id="font">
@@ -166,9 +187,15 @@
 		</dimensions>
 		<position type="relativeToParent">
 			<x>0</x>
-			<y>0</y>
+			<y>20%</y>
 		</position>
+		<colour id="colour">
+			<r>100</r>
+			<g>100</g>
+			<b>100</b>
+		</colour>
 	</label>
+	
 	<label id="music_play_screen_song">
 		<font id="font">
 			<face>Tahoma</face>
@@ -183,9 +210,15 @@
 			<height>15%</height>
 		</dimensions>
 		<position type="relativeToParent">
-			<x>0</x>
+			<x>50%</x>
 			<y>0</y>
 		</position>
+		
+		<colour id="colour">
+			<r>100</r>
+			<g>100</g>
+			<b>100</b>
+		</colour>
 	</label>
 	<label id="music_play_screen_artist">
 		<font id="font">
@@ -201,9 +234,15 @@
 			<height>15%</height>
 		</dimensions>
 		<position type="relativeToParent">
-			<x>0</x>
-			<y>0</y>
+			<x>50%</x>
+			<y>20%</y>
 		</position>
+		
+		<colour id="colour">
+			<r>100</r>
+			<g>100</g>
+			<b>100</b>
+		</colour>
 	</label>
 	<label id="music_play_screen_album">
 		<font id="font">
@@ -219,9 +258,15 @@
 			<height>15%</height>
 		</dimensions>
 		<position type="relativeToParent">
-			<x>0</x>
-			<y>0</y>
+			<x>50%</x>
+			<y>40%</y>
 		</position>
+		
+		<colour id="colour">
+			<r>100</r>
+			<g>100</g>
+			<b>100</b>
+		</colour>
 	</label>
 	
 </gloss-theme>

@@ -136,11 +136,15 @@ class SongDetails(clutter.Group):
         
         self.themeMgr = playScreen.glossMgr.themeMgr
         self.backend = playScreen.musicPlayer.backend
+        self.stage = self.themeMgr.stage
         
         self.setup()
         self.show_all()
         
     def setup(self):
+        #Setup size / position properties of group
+        tmpGroup = self.themeMgr.get_group("music_play_screen_song_details", group = self)
+        
         #Create all the various labels
         self.artist_heading = self.themeMgr.get_label("music_play_screen_artist_heading", parent = self)
         self.album_heading = self.themeMgr.get_label("music_play_screen_album_heading", parent = self)
@@ -149,7 +153,11 @@ class SongDetails(clutter.Group):
         self.artist = self.themeMgr.get_label("music_play_screen_artist", parent = self)
         self.album = self.themeMgr.get_label("music_play_screen_album", parent = self)
         self.song = self.themeMgr.get_label("music_play_screen_song", parent = self)
-        self.song.set_color(clutter.Color(0xff, 0xff, 0xff, 0xdd))
+        #self.song.set_color(clutter.Color(0xff, 0xff, 0xff, 0xdd))
+        
+        self.artist_heading.set_text("artist: ")
+        self.song_heading.set_text("song: ")
+        self.album_heading.set_text("album: ")
         
         self.add(self.artist_heading)
         self.add(self.album_heading)

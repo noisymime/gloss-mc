@@ -230,15 +230,18 @@ class ThemeMgr:
 				if parent is None:
 					print "Theme error (get_position x): type must be specified when using percentage values"
 					return None
-				
-				x = (float(x[:-1]) / 100.0) * parent.get_width()
+				#this is a hack to get around the cases where the parent is a group (And hence has no valid wdith value)
+				if parent.get_width() == 0: x = (float(x[:-1]) / 100.0) * parent.width
+				else: x = (float(x[:-1]) / 100.0) * parent.get_width()
 				#print "width: " + str(width)
 			elif x == "center":
 				#Quick check on parent
 				if parent is None:
 					print "Theme error: type must be specified when using 'center' values"
 					return None
-				x = (parent.get_width() - actor.get_width)/2
+				#this is a hack to get around the cases where the parent is a group (And hence has no valid wdith value)
+				if parent.get_width() == 0: x = (parent.width - actor.get_width())/2
+				else: x = (parent.get_width() - actor.get_width())/2
 		else:
 			x = 0
 				
@@ -250,30 +253,40 @@ class ThemeMgr:
 				if parent is None:
 					print "Theme error (get_position y): type must be specified when using percentage values"
 					return None
-				
-				y = (float(y[:-1]) / 100.0) * parent.get_height()
+				#this is a hack to get around the cases where the parent is a group (And hence has no valid wdith value)
+				if parent.get_height() == 0: y = (float(y[:-1]) / 100.0) * parent.height
+				else: y = (float(y[:-1]) / 100.0) * parent.get_height()
 				#print "width: " + str(width)
 			elif y == "center":
 				#Quick check on parent
 				if parent is None:
 					print "Theme error: type must be specified when using 'center' values"
 					return None
-				y = (parent.get_height() - actor.get_height)/2
+				#this is a hack to get around the cases where the parent is a group (And hence has no valid wdith value)
+				if parent.get_height() == 0: y = (parent.height - actor.get_height)/2
+				else: y = (parent.get_height() - actor.get_height())/2
 		else:
 			y = 0
 			
 		return (int(x), int(y))
 	
-	def get_colour(self, element, name):
+	def get_colour(self, element, name, subnode = False):
 		if element is None:
 			element = self.search_docs("colour", name).childNodes
 		#Quick check to make sure we found something
 		if element is None:
 			return None
 		
-		r = int(self.find_child_value(element, "r"))
-		g = int(self.find_child_value(element, "g"))
-		b = int(self.find_child_value(element, "b"))
+		if subnode:
+			if self.find_child_value(element, "colour") is None: return None
+			r = int(self.find_child_value(element, "colour.r"))
+			g = int(self.find_child_value(element, "colour.g"))
+			b = int(self.find_child_value(element, "colour.b"))
+		else:
+			if self.find_child_value(element, "r") is None: return None
+			r = int(self.find_child_value(element, "r"))
+			g = int(self.find_child_value(element, "g"))
+			b = int(self.find_child_value(element, "b"))
 			    
 		colour = clutter.Color(r, g, b)
 		return colour
@@ -307,7 +320,7 @@ class ThemeMgr:
 		return texture
 		
 	
-	def get_font(self, name, element):
+	def get_font(self, name, element, subnode = False):
 		if element is None:
 			element = self.search_docs("font", name).childNodes
 		#Quick check to make sure we found something
@@ -408,9 +421,30 @@ class ThemeMgr:
 		if parent is None: parent = self.stage
 		
 		font_string = self.get_font("font", element)
+		colour = self.get_colour(element, "colour", subnode = True)
 		label.set_font_name(font_string)
 		
 		self.setup_actor(label, element, parent)
+		if not colour is None: label.set_color(colour)
 		
 		return label
+	
+	def get_group(self, id, parent = None, element = None, group = None):
+		if element is None:
+			element = self.search_docs("group", id).childNodes
+		#Quick check to make sure we found something
+		if element is None:
+			return None
 		
+		if group is None:
+			group = clutter.Group()
+		if parent is None:
+			parent = self.stage
+		
+		print self.find_child_value(element, "dimensions.width")
+		print self.get_dimensions(element, parent)
+		self.setup_actor(group, element, parent)
+		(group.width, group.height) = self.get_dimensions(element, parent)
+		print group.width
+		
+		return group

@@ -53,9 +53,21 @@ class Playlist(gobject.GObject):
             
         self.emit("stopped")
         
-    def add_song(self, song):
+    def append_song(self, song):
         self.songs.append(song)
         
-    def add_songs(self, songs):
+    def append_songs(self, songs):
         for song in songs:
             self.songs.append(song)
+            
+    def insert_song(self, position, song):
+        self.songs.insert(position, song)
+        
+    def insert_songs(self, position, songs):
+        x= position
+        for song in songs:
+            self.songs.insert(x, song)
+            x += 1
+            
+    def num_songs(self):
+        return len(self.songs)

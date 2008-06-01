@@ -10,6 +10,7 @@ from modules.music_player.playlist import Playlist
 from modules.music_player.play_screen import PlayScreen
 from ui_elements.image_clone import ImageClone
 from ui_elements.label_list import LabelList
+from ui_elements.option_dialog import OptionDialog
 
 class Module:
     CONTEXT_HEADINGS, CONTEXT_ROW, CONTEXT_ALBUM_LIST, CONTEXT_SONG_LIST, CONTEXT_PLAY_SCR = range(5)
@@ -18,6 +19,8 @@ class Module:
     title = "Music"
     num_columns = 6
     sleep_time = 0.3
+    required_schema_version = 1013
+    version_check = True #Gets set to false if the version check fails
     
     delay = 1
 
@@ -31,6 +34,16 @@ class Module:
         
         self.backend = Backend(self)
         self.playlist = Playlist(self)
+        
+        #Do a check of the DB schema version
+        dbSchema = self.dbMgr.get_setting("MusicDBSchemaVer")
+        if not dbSchema is None:
+            dbSchema = int(dbSchema)
+            if not dbSchema == self.required_schema_version:
+                print "Music DB Version error: Expected version %s, found version %s" % (self.required_schema_version, dbSchema)
+                print "Music Player will not be available"
+                self.version_check = False
+                return
         
         self.artistImageRow = MusicObjectRow(self.glossMgr, self.stage.get_width(), 200, self.num_columns, self)
         self.play_screen = PlayScreen(self)
@@ -126,8 +139,7 @@ class Module:
             elif (event.keyval == clutter.keysyms.Return):
                 artist = self.artistImageRow.get_current_object()
                 songs = self.backend.get_songs_by_artistID(artist.artistID)
-                self.playlist.clear_songs()
-                self.playlist.add_songs(songs)
+                self.query_playlist_add(songs)
                 self.playlist.play()
                 
                 #self.play_screen.append_playlist(self.playlist)
@@ -162,6 +174,35 @@ class Module:
                 self.play_screen.undisplay()
             else:
                 self.play_screen.on_key_press_event(stage, event)
+    
+    #When the user has selected some songs, this function is called to decide what to do with them
+    #Options:
+    #1) Append to current playlist
+    #2) Append to current playlist and play next
+    #3) Replace the current playlist
+    def query_playlist_add(self, songs):
+        #If the current playlist is empty, its a no brainer:
+        if self.playlist.num_songs() == 0:
+            self.playlist.append_songs(songs)
+            return
+        
+        option_dialog = OptionDialog(self.glossMgr)
+        opt1 = option_dialog.add_item("Append to current playlist")
+        opt2 = option_dialog.add_item("Append to current playlist and play next")
+        opt3 = option_dialog.add_item("Replace the current playlist")
+        
+        result = option_dialog.display("What would you like to do with these songs?")
+        
+        print "result: %s" % result
+        #Handle options
+        if result == opt1:
+            self.playlist.append_songs(songs)
+        if result == opt2:
+            self.playlist.insert_songs(self.playlist.position, songs)
+        if result == opt3:
+            self.playlist.stop()
+            self.playlist.clear()
+            self.paylist.append_songs(songs)
     
     #Fills self.list2 with songs from an album
     def process_songlist_from_album(self, list_item, album):
@@ -220,6 +261,12 @@ class Module:
 
         
     def begin(self, glossMgr):
+        #If the schema version check failed, we quit
+        if not self.version_check:
+            self.glossMgr.display_msg("Error: MythMusic", "MythMusic version check failed. Please check you are running the correct version.")
+            self.stop()
+            return
+        
         self.timeline_loading = clutter.Timeline(80,160)
         self.alpha = clutter.Alpha(self.timeline_loading, clutter.ramp_inc_func)
         self.opacity_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=self.alpha)
@@ -307,7 +354,7 @@ class Module:
                           
         
     def stop(self):
-        pass
+        self.glossMgr.currentPlugin = None
         
     def pause(self):
         pass

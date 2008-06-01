@@ -345,6 +345,9 @@ class LabelList(clutter.Group):
             #self.behaviour_opacity_incoming.apply(incomingMenutem)
         """
         
+    def get_current_item(self):
+        return self.items[self.selected]
+        
 import gobject
 class ListItem(clutter.Group):
     #Setup signals

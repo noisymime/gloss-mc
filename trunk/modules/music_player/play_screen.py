@@ -120,7 +120,7 @@ class PlayScreen(clutter.Group):
         self.song_details.set_song(song)
         #***INSERT IMAGE UPDATE HERE***
         image = song.get_image()
-        self.main_img.set_pixbuf(image)
+        if not image is None: self.main_img.set_pixbuf(image)
         
     def set_song_cb(self, data, song):
         self.set_song(song)

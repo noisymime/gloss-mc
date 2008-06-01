@@ -3,6 +3,7 @@ import os, socket
 import clutter
 
 class mythDB():
+    required_schema_version = 1214
 
     def __init__(self):
 
@@ -21,6 +22,14 @@ class mythDB():
             return None
         
         self.cursor = self.db.cursor()
+        
+        #Check the schema version
+        dbSchema = self.get_setting("DBSchemaVer")
+        if not dbSchema is None:
+            dbSchema = int(dbSchema)
+            if not dbSchema == self.required_schema_version:
+                print "DB Version error: Expected version %s, found version %s" % (self.required_schema_version, dbSchema)
+                print "Attempting to continue, however this will almost certainly fail"
             
     #Attempts to read the local mythtv config file to get the server, username and password
     def read_config(self):

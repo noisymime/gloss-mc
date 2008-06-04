@@ -24,31 +24,7 @@ class ImageFrame(clutter.Group):
         self.reflection = None
         #self.reflection = Texture_Reflection(self.main_pic)
 
-        self.set_pixbuf(pixbuf)
-        """
-        #pixbuf can be None, it just means that nothing appears initially
-        if pixbuf is None: 
-            self.add(self.main_pic)
-            
-            self.reflection = None
-                
-            return
-
-        pixbuf = self.resize_pixbuf(pixbuf)
-        
-        self.main_pic.set_pixbuf(pixbuf)
-        self.main_pic.set_position(self.x, self.y)
-        self.main_pic.show()  
-        
-        if use_reflection:
-            self.reflection = Texture_Reflection(self.main_pic)
-            self.add(self.reflection)
-            self.reflection.show()
-        else:
-            self.reflection = None
-            
-        """
-               
+        self.set_pixbuf(pixbuf)               
         self.add(self.main_pic)
         
     def resize_pixbuf(self, pixbuf):
@@ -72,7 +48,21 @@ class ImageFrame(clutter.Group):
         if self.quality == self.QUALITY_FAST: conversion_mode = gtk.gdk.INTERP_NEAREST #gtk.gdk.INTERP_TILES
         elif self.quality == self.QUALITY_NORMAL: conversion_mode = gtk.gdk.INTERP_BILINEAR
         elif self.quality == self.QUALITY_SLOW: conversion_mode = gtk.gdk.INTERP_HYPER
-        pixbuf = pixbuf.scale_simple(width, height, conversion_mode)
+        
+        #Check to see whether the dimensions are already within 10% of the new ones
+        """
+        height_max = int(pixbuf.get_height() * 1.1)
+        height_min = int(pixbuf.get_height() * 0.9)
+        width_max  = int(pixbuf.get_width() * 1.1)
+        width_min  = int(pixbuf.get_width() * 0.9)
+        #If not, perform the resize
+        if ((height < height_max) and (height > height_min)) or ((width < width_max) and (width > width_min)):
+        #Changed my mind, it has to be the exact right size
+        """
+        if (height == pixbuf.get_height()) or (width == pixbuf.get_width()):
+            return pixbuf
+        else:         
+            pixbuf = pixbuf.scale_simple(width, height, conversion_mode)
         
         return pixbuf
         
@@ -82,8 +72,8 @@ class ImageFrame(clutter.Group):
             if not self.reflection is None: self.reflection.hide()
             return
         else:
-            pixbuf = self.resize_pixbuf(pixbuf)
-            self.main_pic.set_pixbuf(pixbuf)
+            self.pixbuf = self.resize_pixbuf(pixbuf)
+            self.main_pic.set_pixbuf(self.pixbuf)
             self.main_pic.set_position(self.x, self.y)
             self.main_pic.show()
         

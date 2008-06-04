@@ -1,6 +1,6 @@
 import clutter
 import copy
-from themeMgr import ThemeMgr
+from utils.themeMgr import ThemeMgr
 from ui_elements.message import Message
 
 class GlossMgr:

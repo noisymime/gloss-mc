@@ -7,7 +7,7 @@ import pango
 import clutter
 import os
 from modules.video_player.elements.CoverItem import cover_item
-from InputQueue import InputQueue
+from utils.InputQueue import InputQueue
 
 class ImageRow(clutter.Group):
     DIRECTION_LEFT, DIRECTION_RIGHT = range(2)
@@ -131,7 +131,7 @@ class ImageRow(clutter.Group):
         if (edge_texture_incoming_no < len(self.textureLibrary)) and (edge_texture_incoming_no >= 0):
             edge_texture_incoming = self.textureLibrary[edge_texture_incoming_no]
             edge_texture_incoming.show()
-            self.images_group.add(edge_texture_incoming)
+            if edge_texture_incoming.get_parent() is None: self.images_group.add(edge_texture_incoming)
             
             self.behaviourEdgeIncomingOpacity = clutter.BehaviourOpacity(opacity_start=0, opacity_end=self.inactiveOpacity, alpha=alpha)
             self.behaviourEdgeIncomingOpacity.apply(edge_texture_incoming)
@@ -181,6 +181,10 @@ class ImageRow(clutter.Group):
         #Sanity check
         if len(self.textureLibrary) == 0: return
          
+        #Make sure the image group is at the beginning
+        pos_x = int(self.image_size/2) + (self.image_size * (self.center-1))
+        self.images_group.set_position(pos_x, int(self.image_size/2))
+        
         self.timeline = clutter.Timeline(self.frames, self.fps)
         self.input_queue.set_timeline(self.timeline)
     

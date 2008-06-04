@@ -27,19 +27,21 @@ class SplashScr(clutter.Group):
         self.add(self.centre_group)
         
         #THIS NEEDS THEMING!!!
-        """
-        pixbuf = gtk.gdk.pixbuf_new_from_file("themes/splash_box.png")
-        self.box = clutter.Texture()
-        self.box.set_pixbuf(pixbuf)
-        self.box.set_opacity(int(255 * 0.75))
-        self.box.set_height(int(self.stage.get_height()* 0.15))
-        self.centre_group.add(self.box)
-        """
         width = int(self.stage.get_width()* 0.4)
         height = int(self.stage.get_height()* 0.15)
         self.box = RoundedRectangle(width, height, clutter.color_parse('White'))
-        #self.box.set_color(clutter.color_parse('White'))
         self.box.set_opacity(int(255 * 0.55))
+        
+        """
+        backbox1 = RoundedRectangle(width+10, height+10, clutter.color_parse('Black'))
+        backbox1.set_opacity(200)
+        backbox1.set_position(-5, -5)
+        backbox2 = RoundedRectangle(width+12, height+12, clutter.color_parse('White'))
+        backbox2.set_position(-6, -6)
+        
+        self.centre_group.add(backbox2)
+        self.centre_group.add(backbox1)
+        """
         self.centre_group.add(self.box)        
        
         self.spinner = Spinner()

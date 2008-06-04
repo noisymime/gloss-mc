@@ -2,7 +2,7 @@ import clutter
 import pango
 import pygtk
 import gtk
-from InputQueue import InputQueue
+from utils.InputQueue import InputQueue
 
 class LabelList(clutter.Group):
     DIRECTION_UP, DIRECTION_DOWN = range(2)

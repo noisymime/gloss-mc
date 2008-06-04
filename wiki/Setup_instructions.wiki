@@ -1,6 +1,6 @@
 = Introduction =
 
-This page will give a very brief overview on how to get Gloss up and running on your system. It assumes you already have a working MythTV setup.
+This page will give a very brief overview on how to get Gloss up and running on your system. It assumes you already have a working MythTV setup using a version 0.21 backend.
 
 Note: If using Clutter 0.4.x please use SVN rev. 86 as anything past this has been updated for Clutter 0.6
 

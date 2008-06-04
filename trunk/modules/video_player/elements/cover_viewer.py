@@ -8,7 +8,7 @@ import clutter
 import os
 from modules.video_player.elements.CoverItem import cover_item
 from ui_elements.image_grid import ImageGrid
-from InputQueue import InputQueue
+from utils.InputQueue import InputQueue
 
 class coverViewer(ImageGrid):
     scaleFactor = 1.4

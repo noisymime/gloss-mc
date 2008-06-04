@@ -24,7 +24,7 @@ import gobject
 import os.path
 #import threading
 from SplashScr import SplashScr
-from themeMgr import ThemeMgr
+from utils.themeMgr import ThemeMgr
 
 #Import all the modules
 mod_dir = "modules"

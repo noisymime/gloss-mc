@@ -4,6 +4,7 @@ import gobject
 import os
 import threading
 from modules.music_player.music_objects.music_object import MusicObject
+from utils.ThumbnailMgr import ThumbnailMgr
 
 class artist(MusicObject):
     
@@ -37,7 +38,8 @@ class artist(MusicObject):
         print "Music_Player: DB Upgrade completed"
             
     
-    def get_image(self):
+    def get_image(self, size = None):
+        thumb_mgr = ThumbnailMgr()
         #If image is still equal to None it means that the artist_image column did not exist in the db, we should create it.
         if self.image is None:
             self.update_db()
@@ -46,7 +48,11 @@ class artist(MusicObject):
         if not self.image == "unset":
             filename = self.music_player.images_dir + "artists/" + self.image
             try:
-                pixbuf = gtk.gdk.pixbuf_new_from_file(filename)
+                #If a size has been given, we use the thumbnail mgr, else return the full thing
+                if not size is None:
+                    pixbuf = thumb_mgr.get_pixbuf(filename, size)
+                else:
+                    pixbuf = gtk.gdk.pixbuf_new_from_file(filename)
             except gobject.GError, e:
                 print "Music_Player: Attempted to open file '%s', but it does not exist. Using defualt image." % (filename)
                 return self.get_default_image()

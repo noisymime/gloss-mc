@@ -147,6 +147,10 @@ class Module:
                 
                 self.current_context = self.CONTEXT_PLAY_SCR
                 self.previous_context = self.CONTEXT_ROW
+            elif (event.keyval == clutter.keysyms.Escape):
+                return True
+                #self.stop()   
+            
                 
         elif self.current_context == self.CONTEXT_ALBUM_LIST:
             
@@ -354,7 +358,40 @@ class Module:
                           
         
     def stop(self):
+        #We hid it, we must unhid it
+        self.glossMgr.get_current_menu().get_current_item().get_main_texture().show()
+        self.loading_img.hide()
+        
+        self.timeline_remove = clutter.Timeline(20,40)
+        self.alpha = clutter.Alpha(self.timeline_remove, clutter.ramp_inc_func)
+        self.opacity_behaviour = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=self.alpha)
+        
+        self.remove_list = []
+        self.opacity_behaviour.apply(self.backdrop)
+        self.remove_list.append(self.backdrop)
+        self.opacity_behaviour.apply(self.artistImageRow)
+        self.remove_list.append(self.artistImageRow)
+        self.opacity_behaviour.apply(self.list1)
+        self.remove_list.append(self.list1)
+        self.opacity_behaviour.apply(self.list2)
+        self.remove_list.append(self.list2)
+        self.opacity_behaviour.apply(self.main_img)
+        self.remove_list.append(self.main_img)
+        self.opacity_behaviour.apply(self.heading)
+        self.remove_list.append(self.heading)
+        self.opacity_behaviour.apply(self.loading_img)
+        self.remove_list.append(self.loading_img)
+        
+        
+        self.timeline_remove.connect("completed", self.destroy)
+        self.timeline_remove.start()
+        
+        
+    def destroy(self, data):
         self.glossMgr.currentPlugin = None
+        
+        for actor in self.remove_list:
+            self.stage.remove(actor)
         
     def pause(self):
         pass

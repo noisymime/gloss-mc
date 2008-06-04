@@ -22,6 +22,7 @@ class MusicObjectRow(ImageRow):
         self.sleep = False
         
         self.objectLibrary = []
+        self.loaded_objects = 0
         self.timeline = None
         
     def add_object(self, object):
@@ -35,10 +36,13 @@ class MusicObjectRow(ImageRow):
         self.external_timeline = None
         
         self.emit("load-begin")
+        #Do a check so we don't reload anything that's already been done
+        if start < self.loaded_objects:
+            start = self.loaded_objects
         for i in range(start, end):
             object = self.objectLibrary[i]
             print "loading: " + object.name
-            pixbuf = object.get_image()
+            pixbuf = object.get_image(size = self.image_size)
             #If there is currently motion, we need to pause this work
             #if self.should_sleep():
             #    time.sleep(0.1)
@@ -66,6 +70,7 @@ class MusicObjectRow(ImageRow):
                 if as_thread: clutter.threads_leave()
 
             self.add_texture_group(tmpImage)
+            self.loaded_objects += 1
 
         self.emit("load-complete")
         return False

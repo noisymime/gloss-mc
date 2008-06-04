@@ -7,7 +7,7 @@ import pango
 import clutter
 import os
 from modules.video_player.elements.CoverItem import cover_item
-from InputQueue import InputQueue
+from utils.InputQueue import InputQueue
 
 class ImageGrid(clutter.Group):
     scaleFactor = 1.4

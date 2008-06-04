@@ -6,7 +6,7 @@ import time
 import math
 from ui_elements.ReflectionTexture import Texture_Reflection
 from interfaces.MenuItem import MenuItem
-from InputQueue import InputQueue
+from utils.InputQueue import InputQueue
 
 class Interface(clutter.Group):
     usePreviewEffects = True # Tells the modules to use any image preview effects where available

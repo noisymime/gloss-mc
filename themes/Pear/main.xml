@@ -90,30 +90,31 @@
 			<x>50%</x>
 			<y>25%</y>
 		</position>
+
 	
 		<label_list id="option_dialog_list">		
 			<font id="main">
 				<face>Tahoma</face>
-				<size id="default">30</size>
-				<size id="1024x768">38</size>
+				<size id="default">20</size>
+				<size id="1024x768">28</size>
 				<size id="800x600">30</size>
 				<size id="1920x1080">25</size>
 			</font>
 	
-			<dimensions type="relativeToStage">
-				<width>40%</width>
-				<height>40%</height>
+			<dimensions type="relativeToParent">
+				<width>80%</width>
+				<height>80%</height>
 			</dimensions>
-			<position type="relativeToStage">
-				<x>50%</x>
-				<y>25%</y>
+			<position type="relativeToParent">
+				<x>10%</x>
+				<y>10%</y>
 			</position>
 	
 			<!-- This determines the height of each item based on a percentage of the font size. 
 				 Eg: 1.00 means that each item will be the same height as the font,
 				     1.50 means that the item will be 1.x times the height as the font etc
 			 -->
-			<item_height_percent>1.00</item_height_percent>
+			<item_height_percent>1.20</item_height_percent>
 			
 			<!-- These are the opacity and scale values for the 3 possible steps in the menu
 			     Make all the values the same if you do not want these effects -->
@@ -166,4 +167,5 @@
 			
 		</label_list>
 	</group>
+
 </gloss-theme>

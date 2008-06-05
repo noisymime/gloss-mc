@@ -62,7 +62,18 @@ class image_previewer(clutter.Group):
         self.max_img_height = height
     
     def add_texture(self, texture_src):
-        self.textures.append(texture_src)
+        #Determine the largest size for the image
+        if self.max_img_height > self.max_img_width:
+            img_size = self.max_img_height
+        else:
+            img_size = self.max_img_width
+        
+        try:
+            pixbuf = gtk.gdk.pixbuf_new_from_file(texture_src)
+            texture = ImageFrame(pixbuf, img_size, use_reflection = True, quality = ImageFrame.QUALITY_FAST)
+            self.textures.append(texture)
+        except gobject.GError, e:
+            print "Could not load file: %s" % texture_src
     
     def start(self, data):
         if len(self.textures) == 0:
@@ -103,7 +114,7 @@ class image_previewer(clutter.Group):
             self.behaviour_opacity.apply(self.tex1)
             
         
-            self.add(self.tex1)
+            if self.text1.get_parent() is None: self.add(self.tex1)
             
             parent = self.get_parent()
             if parent is None:
@@ -115,8 +126,8 @@ class image_previewer(clutter.Group):
             self.show()
             self.timeline1.start()
             timeline_opacity.start()
-            gobject.idle_add(self.get_next_tex)
-            #self.nextTexture = self.get_rand_tex()
+            #gobject.idle_add(self.get_next_tex)
+            self.nextTexture = self.get_rand_tex()
         else:
             self.timeline1.start()
             self.timeline2.start()
@@ -151,16 +162,7 @@ class image_previewer(clutter.Group):
         
     def get_rand_tex(self):
         rand = random.randint(0, len(self.textures)-1)
-        
-        #Determine the largest size for the image
-        if self.max_img_height > self.max_img_width:
-            img_size = self.max_img_height
-        else:
-            img_size = self.max_img_width
-        
-        pixbuf = gtk.gdk.pixbuf_new_from_file(self.textures[rand])
-        texture = ImageFrame(pixbuf, img_size, use_reflection = True, quality = ImageFrame.QUALITY_FAST)
-        return texture
+        return self.textures[rand]
     
     def get_next_tex(self):
         self.nextTexture = self.get_rand_tex()
@@ -171,8 +173,11 @@ class image_previewer(clutter.Group):
         texture = self.nextTexture
         
         
+        
         #Remove the old texture
-        self.remove(self.frontTex)
+        if not self.frontTex.get_parent() is None:
+            self.frontTex.get_parent().remove(self.frontTex)
+        
         
         #Setup the path behaviour specific to this tex
         knots = self.get_texture_knots(texture)
@@ -182,37 +187,40 @@ class image_previewer(clutter.Group):
             self.tex1 = texture
             self.behave1 = clutter.BehaviourPath(self.alpha1, knots)
             self.behave1.apply(self.tex1)
+            self.behaviour_depth1.remove_all()
+            self.behaviour_rotate1.remove_all()
             self.behaviour_depth1.apply(self.tex1)
             self.behaviour_rotate1.apply(self.tex1)
             
-            self.frontTex.unrealize()
-            self.frontTex.destroy()
+            #self.frontTex.unrealize()
+            #self.frontTex.destroy()
             self.frontTex = self.tex2
             
         elif self.frontTex == self.tex2:
             self.tex2 = texture
             self.behave2 = clutter.BehaviourPath(self.alpha2, knots)
             self.behave2.apply(self.tex2)
+            self.behaviour_depth2.remove_all()
+            self.behaviour_rotate2.remove_all()
             self.behaviour_depth2.apply(self.tex2)
             self.behaviour_rotate2.apply(self.tex2)
             
-            self.frontTex.unrealize()
-            self.frontTex.destroy()
+            #self.frontTex.unrealize()
+            #self.frontTex.destroy()
             self.frontTex = self.tex3
             
         elif self.frontTex == self.tex3:
             self.tex3 = texture
             self.behave3 = clutter.BehaviourPath(self.alpha3, knots)
             self.behave3.apply(self.tex3)
+            self.behaviour_depth3.remove_all()
+            self.behaviour_rotate3.remove_all()
             self.behaviour_depth3.apply(self.tex3)
             self.behaviour_rotate3.apply(self.tex3)
             
-            self.frontTex.unrealize()
-            self.frontTex.destroy()
+            #self.frontTex.unrealize()
+            #self.frontTex.destroy()
             self.frontTex = self.tex1
-            
-            #texture.lower(self.tex1)
-            #texture.lower(self.tex2)
             
         #Special opacity behaviour to bring texture in
         timeline_opacity = clutter.Timeline(20, self.fps)
@@ -222,10 +230,10 @@ class image_previewer(clutter.Group):
         self.behaviour_opacity.apply(texture)
         timeline_opacity.start()
         
-        self.add(texture)
+        if texture.get_parent() is None: self.add(texture)
         texture.show()
-        gobject.idle_add(self.get_next_tex)
-        #self.nextTexture = self.get_rand_tex()
+        #gobject.idle_add(self.get_next_tex)
+        self.nextTexture = self.get_rand_tex()
         
     def get_texture_knots(self, texture):
         knots = (\

@@ -17,30 +17,27 @@ This file is part of the Gloss Mythtv Frontend.
 
 import sys
 import clutter 
-#import gobject
 import pygtk
 import gtk
 import gobject
 import os.path
-#import threading
 from SplashScr import SplashScr
 from utils.themeMgr import ThemeMgr
-
-#Import all the modules
-mod_dir = "modules"
-module_list = os.listdir(mod_dir)
-
-modules = []
-for fs_object in module_list:
-    path = mod_dir + "/" + fs_object
-    if os.path.isdir(path) and (not fs_object[0] == "."):
-        tmp_dir = mod_dir+"/"+fs_object+"/"+fs_object
-        print "Found Module: " + fs_object
-        modules.append(__import__(tmp_dir))
-        
-#from Menu import Menu
 from GlossMgr import GlossMgr
 from myth.MythMySQL import mythDB
+
+modules = []
+def find_modules():
+        #Import all the modules
+        mod_dir = "modules"
+        module_list = os.listdir(mod_dir)
+
+        for fs_object in module_list:
+            path = mod_dir + "/" + fs_object
+            if os.path.isdir(path) and (not fs_object[0] == "."):
+                tmp_dir = mod_dir+"/"+fs_object+"/"+fs_object
+                print "Found Module: " + fs_object
+                modules.append(__import__(tmp_dir))
 
 class MainApp:
     def __init__ (self, args):
@@ -135,6 +132,11 @@ class MainApp:
         clutter.main()
 
 def main (args):
+    path = os.path.dirname(sys.argv[0])
+    abs_path = os.path.abspath(path)
+    os.chdir(abs_path)
+    find_modules()
+ 
     app = MainApp(args)
     #app.loadGloss()
     app.run()

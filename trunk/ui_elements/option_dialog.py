@@ -5,6 +5,12 @@ from ui_elements.label_list import LabelList
 from ui_elements.rounded_rectangle import RoundedRectangle
 
 class OptionDialog(clutter.Group):
+    #Setup signals
+    __gsignals__ =  { 
+        "option_selected": (
+            gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gobject.TYPE_INT,))
+        }
+    
     theme_dir = "themes"
     
     font = "Lucida Grande "
@@ -86,10 +92,6 @@ class OptionDialog(clutter.Group):
         self.behaviour_backdrop.apply(self.backdrop)
         self.timeline.start()
 
-        #This may look a little odd, but it essentially just waits until and option has been selected
-        #Then returns the ID of that option
-        self.lock.acquire(False)
-        self.lock.acquire(False)
         return self.label_list.get_current_item().get_data()
         
     def hide(self):

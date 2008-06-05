@@ -1,5 +1,6 @@
 import clutter
 import pango
+import gobject
 from threading import Semaphore
 from ui_elements.label_list import LabelList
 from ui_elements.rounded_rectangle import RoundedRectangle
@@ -7,7 +8,7 @@ from ui_elements.rounded_rectangle import RoundedRectangle
 class OptionDialog(clutter.Group):
     #Setup signals
     __gsignals__ =  { 
-        "option_selected": (
+        "option-selected": (
             gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gobject.TYPE_INT,))
         }
     
@@ -21,7 +22,6 @@ class OptionDialog(clutter.Group):
         clutter.Group.__init__(self)
         self.glossMgr = glossMgr
         self.stage = glossMgr.stage
-        self.lock = Semaphore()
         
         self.backdrop = clutter.Rectangle()
         self.backdrop.set_color(clutter.color_parse('Black'))
@@ -59,7 +59,7 @@ class OptionDialog(clutter.Group):
     def setup(self):
         themeMgr = self.glossMgr.themeMgr
         themeMgr.get_group("option_dialog", group = self)
-        self.label_list.setup_from_theme_id(themeMgr, "option_dialog_list")
+        result = self.label_list.setup_from_theme_id(themeMgr, "option_dialog_list", parent = self)
 
     def add_item(self, text):
         tmpItem = self.label_list.add_item(text)
@@ -92,7 +92,7 @@ class OptionDialog(clutter.Group):
         self.behaviour_backdrop.apply(self.backdrop)
         self.timeline.start()
 
-        return self.label_list.get_current_item().get_data()
+        #return self.label_list.get_current_item().get_data()
         
     def hide(self):
         self.active = False
@@ -114,6 +114,6 @@ class OptionDialog(clutter.Group):
         if event.keyval == clutter.keysyms.Up or event.keyval == clutter.keysyms.Down:
             self.label_list.on_key_press_event
         elif event.keyval == clutter.keysyms.Return:
-            self.lock.release()
+            self.emit("option_selected", self.label_list.selected)
             self.hide()
             self.glossMgr.ui_overide = None

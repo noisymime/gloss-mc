@@ -140,12 +140,7 @@ class Module:
                 artist = self.artistImageRow.get_current_object()
                 songs = self.backend.get_songs_by_artistID(artist.artistID)
                 self.query_playlist_add(songs)
-                self.playlist.play()
-                
-                #self.play_screen.append_playlist(self.playlist)
-                self.play_screen.display(self.artistImageRow.get_current_texture())#.get_texture())
-                
-                self.current_context = self.CONTEXT_PLAY_SCR
+
                 self.previous_context = self.CONTEXT_ROW
             elif (event.keyval == clutter.keysyms.Escape):
                 return True
@@ -188,25 +183,40 @@ class Module:
         #If the current playlist is empty, its a no brainer:
         if self.playlist.num_songs() == 0:
             self.playlist.append_songs(songs)
+            self.playlist.play()
+            self.current_context = self.CONTEXT_PLAY_SCR
+            self.play_screen.display(self.artistImageRow.get_current_texture())
             return
         
         option_dialog = OptionDialog(self.glossMgr)
-        opt1 = option_dialog.add_item("Append to current playlist")
-        opt2 = option_dialog.add_item("Append to current playlist and play next")
-        opt3 = option_dialog.add_item("Replace the current playlist")
+        self.query_options = []
+        self.query_options.append(option_dialog.add_item("Append to current playlist"))
+        self.query_options.append(option_dialog.add_item("Append to current playlist and play next"))
+        self.query_options.append(option_dialog.add_item("Replace the current playlist"))
         
-        result = option_dialog.display("What would you like to do with these songs?")
+        option_dialog.connect("option-selected", self.option_dialog_cb, songs)
+        option_dialog.display("What would you like to do with these songs?")
         
+
+            
+    def option_dialog_cb(self, data, result, songs):
         print "result: %s" % result
         #Handle options
-        if result == opt1:
+        if result == self.query_options[0]:
             self.playlist.append_songs(songs)
-        if result == opt2:
+        if result == self.query_options[1]:
             self.playlist.insert_songs(self.playlist.position, songs)
-        if result == opt3:
+        if result == self.query_options[2]:
             self.playlist.stop()
             self.playlist.clear()
             self.paylist.append_songs(songs)
+        
+        self.playlist.play()
+        
+        #self.play_screen.append_playlist(self.playlist)
+        self.current_context = self.CONTEXT_PLAY_SCR
+        self.play_screen.display(self.artistImageRow.get_current_texture())#.get_texture())
+        
     
     #Fills self.list2 with songs from an album
     def process_songlist_from_album(self, list_item, album):

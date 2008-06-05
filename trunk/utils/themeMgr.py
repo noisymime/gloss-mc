@@ -441,10 +441,10 @@ class ThemeMgr:
 		if parent is None:
 			parent = self.stage
 		
-		print self.find_child_value(element, "dimensions.width")
-		print self.get_dimensions(element, parent)
+		#print self.find_child_value(element, "dimensions.width")
+		#print self.get_dimensions(element, parent)
 		self.setup_actor(group, element, parent)
 		(group.width, group.height) = self.get_dimensions(element, parent)
-		print group.width
+		#print group.width
 		
 		return group

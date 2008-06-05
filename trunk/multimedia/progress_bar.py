@@ -43,11 +43,11 @@ class ProgressBar(clutter.Group):
         #self.bg.show()
         #self.add(self.bg)
         
-        self.fg = RoundedRectangle(20, self.height)
+        self.fg = clutter.Rectangle() #RoundedRectangle(20, self.height)
         self.fg.set_color(fgColour)
         self.fg.show()
         self.add(self.fg)
-        #self.fg.set_size(20, self.height)
+        self.fg.set_size(0, self.height)
         
     def display(self):
         self.displayed = True

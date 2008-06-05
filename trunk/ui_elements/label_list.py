@@ -56,9 +56,11 @@ class LabelList(clutter.Group):
         #Selector bar image, moves with selections to show current item
         self.selector_bar = None
     
-    def setup_from_theme_id(self, themeMgr, id):
-        element = themeMgr.search_docs("label_list", id).childNodes
-        img_element = themeMgr.search_docs("label_list", id).getElementsByTagName("texture")
+    def setup_from_theme_id(self, themeMgr, id, parent=None):
+        context = "label_list"
+        
+        element = themeMgr.search_docs(context, id).childNodes
+        img_element = themeMgr.search_docs(context, id).getElementsByTagName("texture")
         #Quick check to make sure we found something
         if element is None:
             return None
@@ -81,8 +83,9 @@ class LabelList(clutter.Group):
         self.fps = int(themeMgr.find_child_value(element, "transition_fps"))
         self.frames = int(themeMgr.find_child_value(element, "transition_frames"))
         
-        themeMgr.setup_actor(self, element, themeMgr.stage)
-        (self.width, self.height) = themeMgr.get_dimensions(element, themeMgr.stage)
+        if parent is None: parent = themeMgr.stage
+        themeMgr.setup_actor(self, element, parent)
+        (self.width, self.height) = themeMgr.get_dimensions(element, parent)
         
         #Set the up/down images
         #This assumes images go in the bottom right corner, will add flexibility later
@@ -119,6 +122,8 @@ class LabelList(clutter.Group):
         #For the moment, the roll_point_x is just the ends of the list
         self.roll_point_min = 1
         self.roll_point_max = self.displayMax
+        
+        return True
         
     def on_key_press_event (self, event):
         self.input_queue.input(event)

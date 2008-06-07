@@ -3,6 +3,15 @@ import copy
 from utils.themeMgr import ThemeMgr
 from ui_elements.message import Message
 
+"""The core control class for Gloss
+
+GlossMgr handles and controls the input. It maintains the status of any modules / plugins
+as well as the interface that is to be used. All input goes through GlossMgr, which in turns passes it
+to the correct module. It also stores certain global properties (Eg a 'debug' flag). The GlossMgr instance is passed to all modules so that they my reference this data
+"""
+__author__ =  'Josh Stewart (noisymime)'
+__version__=  '0.1'
+
 class GlossMgr:
     theme_dir = "themes/"
 

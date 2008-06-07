@@ -291,10 +291,12 @@ class ThemeMgr:
 		colour = clutter.Color(r, g, b)
 		return colour
 	
-	def get_texture(self, name, parent, texture = None, element = None):
+	def get_texture(self, name, parent=None, texture=None, element=None):
 		texture_src = None
 		if texture is None:
 			texture = clutter.Texture()
+		if parent is None:
+			parent = self.stage
 
 		#Element can be supplied but if not, we search through everything
 		if element is None:	element = self.search_docs("texture", name).childNodes

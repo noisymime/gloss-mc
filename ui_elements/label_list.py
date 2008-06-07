@@ -35,7 +35,7 @@ class LabelList(clutter.Group):
         #There are 3 subgroups:
         # 1) item_group: Contains the labels themselves
         # 2) background_group: Contains the background images
-        # 3) display_group: Contains groups 1 & 2
+        # 3) display_group: Contains groups 1 & 2. Display group can optionally have a clip applied to it
         # Group 3 is then added to self 
         self.item_group = clutter.Group()
         self.item_group.show()
@@ -48,11 +48,8 @@ class LabelList(clutter.Group):
         self.display_group.add(self.item_group)
         
         self.inactive_item_background = None
-
-        
         self.image_down = None
         self.image_up = None
-        
         #Selector bar image, moves with selections to show current item
         self.selector_bar = None
     
@@ -87,10 +84,11 @@ class LabelList(clutter.Group):
         themeMgr.setup_actor(self, element, parent)
         (self.width, self.height) = themeMgr.get_dimensions(element, parent)
         
-        #Set the up/down images
+        #Set the up/down images + the selector bar
         #This assumes images go in the bottom right corner, will add flexibility later
         img_element_up = themeMgr.find_element(img_element, "id", "image_up")
         img_element_down = themeMgr.find_element(img_element, "id", "image_down")
+        img_element_selector_bar = themeMgr.find_element(img_element, "id", "selector_bar")
         if not img_element_up is None:
             img_element_up = img_element_up.childNodes
             self.image_up = themeMgr.get_texture("image_up", self, element = img_element_up)
@@ -105,6 +103,11 @@ class LabelList(clutter.Group):
             self.image_down.set_position( self.width-self.image_down.get_width()-self.image_up.get_width(), self.height+1)
             self.image_down.show()
             self.add(self.image_down)
+        if not img_element_selector_bar is None:
+            img_element_selector_bar = img_element_selector_bar.childNodes
+            self.selector_bar = themeMgr.get_texture("selector_bar", parent=self, element=img_element_selector_bar)
+            self.selector_bar.show()
+            self.add(self.selector_bar)
             
         
         self.display_group.set_clip(0, 0, self.width, self.height)
@@ -193,10 +196,6 @@ class LabelList(clutter.Group):
     def display(self):
         if self.displayMax > len(self.items):
             self.displayMax = len(self.items)
-            #self.displaySize = self.displayMax - self.displayMin
-        
-        #for i in range(self.displaySize):
-        #    self.menuItems[i].show()
         
         self.show()
         
@@ -222,14 +221,20 @@ class LabelList(clutter.Group):
         #This horrible loop does all the scaling
         #This includes, the selected item and the ones on either side of it
         for i in range(len(self.items)):
-            #print str(i)
             if i == self.selected:
+                #Currently selected item
                 self.items[i].scaleLabel(ListItem.SCALE_FULL, self.timeline)
             elif (i == self.selected-1) and (i >= self.displayMin):
+                #Item above the selected
                 self.items[i].scaleLabel(ListItem.SCALE_MEDIUM, self.timeline)
             elif (i == self.selected+1) and (i <= self.displayMax-1):
+                #Item below the selected
                 self.items[i].scaleLabel(ListItem.SCALE_MEDIUM, self.timeline)
+            elif (i < self.displayMin) or (i > self.displayMax):
+                #Item is off screen
+                self.items[i].scaleLabel(ListItem.SCALE_OFFSCREEN, self.timeline)
             else:
+                #All other items
                 self.items[i].scaleLabel(ListItem.SCALE_NONE, self.timeline)
         
         #Check we're at the top of the viewable list
@@ -241,10 +246,12 @@ class LabelList(clutter.Group):
         elif (self.selected > self.roll_point_max) and (self.displayMax < (len(self.items)-1)):
             #self.rollList( self.items[self.displayMax+1], self.items[self.displayMin-1], self.DIRECTION_DOWN, self.timeline)
             self.rollList( self.DIRECTION_DOWN, self.timeline)
-        else:
-            if not self.selector_bar is None:
-                #move the selection bar
-                self.selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
+        
+        if not self.selector_bar is None:
+            #move the selector bar
+            abs_item = self.selected - self.displayMin
+            abs_y = abs_item * self.item_height
+            self.selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
 
         self.timeline.start()
             
@@ -363,7 +370,7 @@ class ListItem(clutter.Group):
             gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, [])
         }
     
-    SCALE_NONE, SCALE_MEDIUM, SCALE_FULL = range(3) 
+    SCALE_NONE, SCALE_MEDIUM, SCALE_FULL, SCALE_OFFSCREEN = range(4) 
     
     #Default values for zoom and opacity
     opacity_step_full = 255
@@ -373,8 +380,8 @@ class ListItem(clutter.Group):
     scale_step_medium = 0.5
     scale_step_none = 0.4
 
-    def __init__ (self, font, label_left = "", label_right = "", label_list = None, max_width = None):
-        clutter.Group.__init__ (self) #, menu, itemLabel, y)
+    def __init__ (self, font, label_left="", label_right="", label_list=None, max_width=None):
+        clutter.Group.__init__ (self)
         self.set_anchor_point_from_gravity(clutter.GRAVITY_WEST)
         
         self.label_left = clutter.Label()
@@ -401,14 +408,9 @@ class ListItem(clutter.Group):
         self.currentOpacity = 255
         self.data = label_left #By default the items data is simply its label
         
-        #The width is the length of the selector bar minus its offset
-        #width = self.glossMgr.get_selector_bar().get_width() + self.glossMgr.get_selector_bar().get_x_offset()
-        #self.set_width(width)
-        
         self.label_left.set_ellipsize(pango.ELLIPSIZE_END)
         
         #Text is actually scaled down in 'regular' position so that it doesn't get jaggies when zoomed in
-        #self.set_scale(self.zoomLevel, self.zoomLevel)
         self.currentZoom = self.scale_step_medium
         self.currentOpacity = self.opacity_step_medium
         self.set_scale(self.currentZoom, self.currentZoom)
@@ -418,12 +420,6 @@ class ListItem(clutter.Group):
         if not max_width is None:
             self.label_left.set_width( max_width - self.label_right.get_width() )
             self.label_left.set_ellipsize(pango.ELLIPSIZE_END)
-        """
-        #(label_width, label_height) = self.label.get_size()
-        label_x = 0 #x #self.stage.get_width() - label_width - 50
-        label_y = y #self.stage.get_height() - label_height
-        self.set_position(0, y)
-        """
         
     def scaleLabel(self, level, timeline):
        
@@ -433,18 +429,21 @@ class ListItem(clutter.Group):
 
         
         if level == self.SCALE_FULL:
-            zoomTo = self.scale_step_full #self.menu.zoomStep0
-            opacityTo = self.opacity_step_full #self.menu.opacityStep0
+            zoomTo = self.scale_step_full
+            opacityTo = self.opacity_step_full
             self.emit("selected")
-        if level == self.SCALE_MEDIUM:
-            zoomTo = self.scale_step_medium #self.menu.zoomStep1
-            opacityTo = self.opacity_step_medium #self.menu.opacityStep1
+        elif level == self.SCALE_MEDIUM:
+            zoomTo = self.scale_step_medium
+            opacityTo = self.opacity_step_medium
             self.emit("deselected")
-            #self.itemTexturesGroup.hide_all()
-        if level == self.SCALE_NONE:
-            zoomTo = self.scale_step_none #self.menu.zoomStep2
-            opacityTo = self.opacity_step_none #self.menu.opacityStep2
-            
+        elif level == self.SCALE_NONE:
+            zoomTo = self.scale_step_none
+            opacityTo = self.opacity_step_none
+        elif level == self.SCALE_OFFSCREEN:
+            zoomTo = self.scale_step_none
+            opacityTo = 0
+        
+        #Do a check for any actual changes. If there's no change, just return without applying any behaviours    
         if (zoomTo == self.currentZoom) and (opacityTo == self.currentOpacity):
             return None
     
@@ -454,12 +453,8 @@ class ListItem(clutter.Group):
         self.behaviourScale.apply(self)
         self.behaviourOpacity.apply(self)
         
-        #timeline.connect('completed', self.scale_end_event, zoomTo, opacityTo)
         self.currentZoom = zoomTo
         self.currentOpacity = opacityTo
-
-    def scale_end_event(self, data, zoomTo, opacityTo):
-        pass
         
     def get_zoom_level(self):
         return self.zoomLevel

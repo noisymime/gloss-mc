@@ -6,6 +6,7 @@ import random
 import math
 from ReflectionTexture import Texture_Reflection
 from ui_elements.image_frame import ImageFrame
+from utils.ThumbnailMgr import ThumbnailMgr
 
 class image_previewer(clutter.Group):
     tex1 = None
@@ -56,6 +57,8 @@ class image_previewer(clutter.Group):
         self.behaviour_depth2 = clutter.BehaviourDepth(depth_start=-800, depth_end=200, alpha=self.alpha2)
         self.behaviour_depth3 = clutter.BehaviourDepth(depth_start=-800, depth_end=200, alpha=self.alpha3)
         
+        self.thumbMgr = ThumbnailMgr()
+        
     #This max boundaries for the preview image size
     def set_max_img_dimensions(self, width, height):
         self.max_img_width = width
@@ -69,8 +72,9 @@ class image_previewer(clutter.Group):
             img_size = self.max_img_width
         
         try:
-            pixbuf = gtk.gdk.pixbuf_new_from_file(texture_src)
-            texture = ImageFrame(pixbuf, img_size, use_reflection = True, quality = ImageFrame.QUALITY_FAST)
+            #pixbuf = gtk.gdk.pixbuf_new_from_file(texture_src)
+            #texture = ImageFrame(pixbuf, img_size, use_reflection = True, quality = ImageFrame.QUALITY_FAST)
+            texture = self.thumbMgr.get_image_frame(texture_src, img_size)
             self.textures.append(texture)
         except gobject.GError, e:
             print "Could not load file: %s" % texture_src
@@ -114,7 +118,7 @@ class image_previewer(clutter.Group):
             self.behaviour_opacity.apply(self.tex1)
             
         
-            if self.text1.get_parent() is None: self.add(self.tex1)
+            if self.tex1.get_parent() is None: self.add(self.tex1)
             
             parent = self.get_parent()
             if parent is None:

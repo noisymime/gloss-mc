@@ -488,7 +488,7 @@ class Module:
                     #print imgPath
                     
                     #Only add a max of 15 images to the previewer
-                    if preview_count < 15:
+                    if preview_count < 10:
                         img_previewer.add_texture(imgPath)
                         preview_count += 1
     

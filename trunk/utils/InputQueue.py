@@ -44,7 +44,7 @@ class InputQueue(gobject.GObject):
         self.action_west = None
         
         self.current_acceleration_step = 0
-        self.stage = clutter.stage_get_default()
+        #self.stage = clutter.stage_get_default()
         self.poll_time = None
         self.release_timeout_id = None
         self.timeline = None
@@ -179,7 +179,7 @@ class InputQueue(gobject.GObject):
         #print "Acceleration finished"
         return False
         
-    def decelerate(self, actor = None, event = None):
+    def decelerate(self, actor=None, event=None):
         #print "Key released: %s" % str(gtk.gdk.keyval_name(event.keyval))
         if self.current_acceleration_step > 0:
             self.current_acceleration_step -= 1

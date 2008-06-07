@@ -87,10 +87,33 @@
 			<height>40%</height>
 		</dimensions>
 		<position type="relativeToStage">
-			<x>50%</x>
-			<y>25%</y>
+			<x>center</x>
+			<y>center</y>
 		</position>
 
+		<label id="dialog_heading">
+			<font id="font">
+				<face>Tahoma</face>
+				<size id="default">30</size>
+				<size id="1024x768">38</size>
+				<size id="800x600">30</size>
+				<size id="1920x1080">25</size>
+			</font>
+		
+			<dimensions type="relativeToParent">
+				<width>90%</width>
+				<height>15%</height>
+			</dimensions>
+			<position type="relativeToParent">
+				<x>center</x>
+				<y>2%</y>
+			</position>
+			<colour id="colour">
+				<r>10</r>
+				<g>10</g>
+				<b>10</b>
+			</colour>
+		</label>
 	
 		<label_list id="option_dialog_list">		
 			<font id="main">
@@ -107,7 +130,7 @@
 			</dimensions>
 			<position type="relativeToParent">
 				<x>10%</x>
-				<y>10%</y>
+				<y>20%</y>
 			</position>
 	
 			<!-- This determines the height of each item based on a percentage of the font size. 
@@ -134,8 +157,8 @@
 					<width>100%</width>
 					<height>100%</height>
 				</dimensions>
-				<position type="blah">
-					<x>0</x>
+				<position type="relativeToParent">
+					<x>-10</x>
 					<y>0</y>
 				</position>
 			</texture>

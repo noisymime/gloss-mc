@@ -200,7 +200,6 @@ class Module:
 
             
     def option_dialog_cb(self, data, result, songs):
-        print "result: %s" % result
         #Handle options
         if result == self.query_options[0]:
             self.playlist.append_songs(songs)
@@ -208,8 +207,8 @@ class Module:
             self.playlist.insert_songs(self.playlist.position, songs)
         if result == self.query_options[2]:
             self.playlist.stop()
-            self.playlist.clear()
-            self.paylist.append_songs(songs)
+            self.playlist.clear_songs()
+            self.playlist.append_songs(songs)
         
         self.playlist.play()
         

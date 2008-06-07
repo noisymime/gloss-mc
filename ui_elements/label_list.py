@@ -7,14 +7,15 @@ from utils.InputQueue import InputQueue
 class LabelList(clutter.Group):
     DIRECTION_UP, DIRECTION_DOWN = range(2)
     
-    fps = 35
-    frames = 25
+    fps = 70
+    frames = 50
 
-    #Default font
+    #Default values
     font_string = "Tahoma 30"
     item_height_percent = 1.00
     width = 0
     item_height = 0
+    use_clip = True
     
     def __init__(self):
         clutter.Group.__init__(self)
@@ -79,6 +80,8 @@ class LabelList(clutter.Group):
         
         self.fps = int(themeMgr.find_child_value(element, "transition_fps"))
         self.frames = int(themeMgr.find_child_value(element, "transition_frames"))
+        clip = themeMgr.find_child_value(element, "use_clip")
+        if not clip is None: self.use_clip = (clip == "True")
         
         if parent is None: parent = themeMgr.stage
         themeMgr.setup_actor(self, element, parent)
@@ -106,12 +109,14 @@ class LabelList(clutter.Group):
         if not img_element_selector_bar is None:
             img_element_selector_bar = img_element_selector_bar.childNodes
             self.selector_bar = themeMgr.get_texture("selector_bar", parent=self, element=img_element_selector_bar)
+            self.selector_bar.y_offset = self.selector_bar.get_y()
+            self.selector_bar.set_width(self.width)
             self.selector_bar.show()
+            self.selector_bar.set_opacity(0)
             self.add(self.selector_bar)
             
-        
-        self.display_group.set_clip(0, 0, self.width, self.height)
-        #self.background_group.set_clip(0, 0, self.width, self.height)
+        #This will default to true if not set in the theme
+        if self.use_clip: self.display_group.set_clip(0, 0, self.width, self.height)
         
         #Get the item background img
         img_element_item = themeMgr.find_element(img_element, "id", "inactive_background")
@@ -215,6 +220,7 @@ class LabelList(clutter.Group):
                 self.selected -= 1
                 
         self.timeline = clutter.Timeline (self.frames, self.fps)
+        alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
         self.input_queue.set_timeline(self.timeline)
 
         
@@ -250,8 +256,14 @@ class LabelList(clutter.Group):
         if not self.selector_bar is None:
             #move the selector bar
             abs_item = self.selected - self.displayMin
-            abs_y = abs_item * self.item_height
-            self.selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
+            abs_y = abs_item * self.item_height + self.selector_bar.y_offset
+            knots = (\
+                     (self.selector_bar.get_x(), self.selector_bar.get_y()),
+                     (self.selector_bar.get_x(), abs_y)
+                     )
+            self.behaviour_path_bar = clutter.BehaviourPath(knots=knots, alpha=alpha)
+            self.behaviour_path_bar.apply(self.selector_bar)
+            #self.selector_bar().selectItem(self.menuItems[self.selected], self.timeline)
 
         self.timeline.start()
             
@@ -261,12 +273,15 @@ class LabelList(clutter.Group):
     def move_down(self):
         self.move_selection(self.DIRECTION_DOWN)
                         
-    def select_first(self, frames = 1, fps = 75):
+    def select_first(self, frames=1, fps=75, timeline=None):
         if self.input_queue.is_in_queue():
             "ERROR: Timeline should NOT be playing here!"
             return
                
-        self.timeline = clutter.Timeline(frames, fps)
+        if timeline is None:self.timeline = clutter.Timeline(frames, fps)
+        else: self.timeline = timeline
+        
+        alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
         self.input_queue.set_timeline(self.timeline)
         self.selected = 0
         for i in range(0,len(self.items)):
@@ -277,18 +292,30 @@ class LabelList(clutter.Group):
             else:
                 self.items[i].scaleLabel(ListItem.SCALE_NONE, self.timeline)
                 
-        self.timeline.start()
+        #Show the selector bar
+        if not self.selector_bar is None:
+            self.behaviour_opacity = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
+            self.behaviour_opacity.apply(self.selector_bar)
+               
+        #Timeline only gets started if it was created in this function
+        if timeline is None: self.timeline.start()
         
     #Just calls the above function with different arguements to result in the first item being selected in a 'prettier' manner
-    def select_first_elegant(self):
-        self.select_first(frames=self.frames, fps=self.fps)
+    def select_first_elegant(self, timeline=None):
+        self.select_first(frames=self.frames, fps=self.fps, timeline=timeline)
         
     def select_none(self, frames = 1, fps = 75):
         self.timeline = clutter.Timeline(frames, fps)
+        alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
         self.input_queue.set_timeline(self.timeline)
         self.selected = None
         for i in range(0,len(self.items)):
             self.items[i].scaleLabel(ListItem.SCALE_NONE, self.timeline)
+        
+        #Hide the selector bar
+        if not self.selector_bar is None:
+            self.behaviour_opacity = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=alpha)
+            self.behaviour_opacity.apply(self.selector_bar)
         
         self.selected = 0
         self.timeline.start()

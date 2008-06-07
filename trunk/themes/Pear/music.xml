@@ -21,13 +21,25 @@
 		</font>
 
 		<dimensions type="relativeToStage">
-			<width>40%</width>
+			<width>30%</width>
 			<height>40%</height>
 		</dimensions>
 		<position type="relativeToStage">
 			<x>40%</x>
 			<y>50%</y>
 		</position>
+		
+		<texture id="selector_bar">
+			<image>active_bar.png</image>
+			<dimensions type="relativeToSelf">
+				<width>100%</width>
+				<height>relative</height>
+			</dimensions>
+			<position type="relativeToParent">
+				<x>-20</x>
+				<y>-10%</y>
+			</position>
+		</texture>
 
 		<!-- This determines the height of each item based on a percentage of the font size. 
 			 Eg: 1.00 means that each item will be the same height as the font,
@@ -44,8 +56,8 @@
 		<scale_step1>0.8</scale_step1>
 		<scale_step2>0.8</scale_step2>
 		
-		<transition_fps>30</transition_fps>
-		<transition_frames>10</transition_frames>
+		<transition_fps>80</transition_fps>
+		<transition_frames>20</transition_frames>
 
 
 	</label_list>

@@ -75,6 +75,7 @@ class image_previewer(clutter.Group):
             #pixbuf = gtk.gdk.pixbuf_new_from_file(texture_src)
             #texture = ImageFrame(pixbuf, img_size, use_reflection = True, quality = ImageFrame.QUALITY_FAST)
             texture = self.thumbMgr.get_image_frame(texture_src, img_size)
+            texture.set_reflection(True)
             self.textures.append(texture)
         except gobject.GError, e:
             print "Could not load file: %s" % texture_src

@@ -185,7 +185,7 @@ class ThemeMgr:
 			parent = None
 			
 		
-		(x, y) = self.get_position(element, parent)
+		(x, y) = self.get_position(element, parent, actor=actor)
 		actor.set_position(int(x), int(y))
 		
 		#now set the opacity
@@ -221,7 +221,7 @@ class ThemeMgr:
 		return (width, height)
 			
 	#Given an element, returns (x, y) coords for it
-	def get_position(self, element, parent):
+	def get_position(self, element, parent, actor=None):
 		#set the x coord
 		x = self.find_child_value(element, "position.x")
 		if (not x == "default") and (not x is None):

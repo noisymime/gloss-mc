@@ -57,9 +57,17 @@ class OptionDialog(clutter.Group):
         self.setup()
         
     def setup(self):
+        id = "option_dialog"
         themeMgr = self.glossMgr.themeMgr
-        themeMgr.get_group("option_dialog", group = self)
+        themeMgr.get_group(id, group = self)
         result = self.label_list.setup_from_theme_id(themeMgr, "option_dialog_list", parent = self)
+        
+        label_element = themeMgr.search_docs("group", id).getElementsByTagName("label")
+        label_element = themeMgr.find_element(label_element, "id", "dialog_heading")
+        if not label_element is None:
+            label_element = label_element.childNodes
+            themeMgr.get_label("image_up", self, element=label_element, label=self.message)
+        
 
     def add_item(self, text):
         tmpItem = self.label_list.add_item(text)
@@ -87,9 +95,12 @@ class OptionDialog(clutter.Group):
         self.timeline = clutter.Timeline(10,30)
         alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
         self.behaviour_group = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
-        self.behaviour_backdrop = clutter.BehaviourOpacity(opacity_start=0, opacity_end=180, alpha=alpha)
+        self.behaviour_backdrop = clutter.BehaviourOpacity(opacity_start=0, opacity_end=230, alpha=alpha)
         self.behaviour_group.apply(self)
         self.behaviour_backdrop.apply(self.backdrop)
+
+        self.label_list.select_first(timeline=self.timeline)
+        
         self.timeline.start()
 
         #return self.label_list.get_current_item().get_data()
@@ -111,8 +122,8 @@ class OptionDialog(clutter.Group):
         self.stage.remove(self)
         
     def on_key_press_event (self, stage, event):
-        if event.keyval == clutter.keysyms.Up or event.keyval == clutter.keysyms.Down:
-            self.label_list.on_key_press_event
+        if (event.keyval == clutter.keysyms.Up) or (event.keyval == clutter.keysyms.Down):
+            self.label_list.on_key_press_event(event)
         elif event.keyval == clutter.keysyms.Return:
             self.emit("option_selected", self.label_list.selected)
             self.hide()

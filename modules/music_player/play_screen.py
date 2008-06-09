@@ -37,10 +37,10 @@ class PlayScreen(clutter.Group):
         self.img_size = self.main_img_theme.img_size
         
     def on_key_press_event(self, stage, event):
-        if (event.keyval == clutter.keysyms.Up):
+        if (event.keyval == clutter.keysyms.Up) or (event.keyval == clutter.keysyms.Down):
             self.song_list.input_queue.input(event)
-        elif (event.keyval == clutter.keysyms.Down):
-            self.song_list.input_queue.input(event)
+        elif (event.keyval == clutter.keysyms.Return):
+            self.playlist.play(self.song_list.selected)
         
     def append_playlist(self, playlist):
         self.playlist.add_songs(playlist.songs)

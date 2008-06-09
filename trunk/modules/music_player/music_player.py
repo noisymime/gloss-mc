@@ -1,6 +1,7 @@
 import pygtk
 import gobject
 import gtk
+import pango
 import clutter
 import threading
 from modules.music_player.backends.myth_music import Backend
@@ -76,7 +77,8 @@ class Module:
         colour = clutter.color_parse('White')
         font_string = "Tahoma 30"
         self.heading = musicHeading(colour, font_string)
-        self.heading.set_position(400, 250)
+        self.heading.set_width(self.stage.get_width())
+        self.heading.set_position(0, 250)
         """
         self.artist_label_1.set_position(200, 200)
         self.artist_label_2.set_position(200, 200)
@@ -163,6 +165,11 @@ class Module:
                 self.list1.input_queue.input(event)
                 #if self.artist_queue_id == 0: self.artist_queue_id = self.list1.input_queue.connect("queue-flushed", self.update_main_img)
                 #self.update_main_img()
+            elif (event.keyval == clutter.keysyms.Return):
+                album = self.current_albums[self.list1.selected]
+                songs = self.backend.get_songs_by_albumID(album.albumID)
+                self.query_playlist_add(songs)
+                self.previous_context = self.CONTEXT_ALBUM_LIST
                 
         elif self.current_context == self.CONTEXT_SONG_LIST:
             pass
@@ -189,9 +196,9 @@ class Module:
         #If the current playlist is empty, its a no brainer:
         if self.playlist.num_songs() == 0:
             self.playlist.append_songs(songs)
+            self.play_screen.display(self.artistImageRow.get_current_texture())
             self.playlist.play()
             self.current_context = self.CONTEXT_PLAY_SCR
-            self.play_screen.display(self.artistImageRow.get_current_texture())
             return
         
         option_dialog = OptionDialog(self.glossMgr)
@@ -378,6 +385,11 @@ class Module:
         self.stage.add(self.heading)
         self.heading.show()
         
+        #Set the initial album
+        self.direction = self.DIRECTION_LEFT
+        self.previous_music_object = None
+        self.load_albums(None)
+        
         self.timeline_display.start()
                           
         
@@ -441,6 +453,10 @@ class musicHeading(clutter.Group):
         self.label_2.set_font_name(font_string)
         self.label_3.set_font_name(font_string)
         
+        self.label_1.set_alignment(pango.ALIGN_CENTER)
+        self.label_2.set_alignment(pango.ALIGN_CENTER)
+        self.label_3.set_alignment(pango.ALIGN_CENTER)
+        
         self.label_1.set_color(colour)
         self.label_2.set_color(colour)
         self.label_3.set_color(colour)
@@ -459,7 +475,7 @@ class musicHeading(clutter.Group):
         start_timeline = False
         if timeline is None:
             #Completely generic timeline definition
-            timeline = clutter.Timeline(20, 30)
+            timeline = clutter.Timeline(20, 90)
             start_timeline = True
             
         self.alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
@@ -516,3 +532,12 @@ class musicHeading(clutter.Group):
         
     def set_next_heading(self, data, new_heading):
         self.label_current = new_heading
+        
+    def set_width(self, width):
+        self.width = width
+        self.label_1.set_width(width)
+        self.label_2.set_width(width)
+        self.label_3.set_width(width)
+        
+    def get_width(self):
+        return self.width

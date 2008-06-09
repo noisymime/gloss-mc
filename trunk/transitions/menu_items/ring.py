@@ -36,12 +36,15 @@ class Transition:
         #*************************************************************************8
         #Do the outgoing group
         knots_outgoing = (\
-                  ( int(-newGroup.get_width()), int(oldGroup.get_y() * 0.8) ),\
+                  ( oldGroup.get_x(), oldGroup.get_y() ),\
                   ( int(oldGroup.get_x()/2) , int(oldGroup.get_y() * 0.9) ),\
-                  ( oldGroup.get_x(), oldGroup.get_y() )\
+                  ( int(-oldGroup.get_width()), int(oldGroup.get_y() * 0.8) )\
                   )
+
+        self.behaviour_outgoing_bspline = clutter.BehaviourPath(knots=knots_outgoing, alpha=alpha)
+        self.behaviour_outgoing_bspline.apply(oldGroup)
         
-        self.behaviour_outgoing_scale = clutter.BehaviourScale(x_scale_start=1, y_scale_start=1, x_scale_end=0, y_scale_end=0, alpha=alpha)
+        self.behaviour_outgoing_scale = clutter.BehaviourScale(x_scale_start=1, y_scale_start=1, x_scale_end=2, y_scale_end=2, alpha=alpha)
         self.behaviour_outgoing_scale.apply(oldGroup)
         #self.behaviour_outgoing_depth = clutter.BehaviourDepth(depth_start=oldGroup.get_depth(), depth_end=1000, alpha=alpha)
         #self.behaviour_outgoing_depth.apply(oldGroup)

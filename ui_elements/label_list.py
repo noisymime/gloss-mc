@@ -20,6 +20,7 @@ class LabelList(clutter.Group):
     def __init__(self):
         clutter.Group.__init__(self)
         self.items = []
+        self.bg_items = []
         
         #Setup input queue controller
         self.input_queue = InputQueue()
@@ -171,6 +172,7 @@ class LabelList(clutter.Group):
             bg_img.set_width(self.width)
             bg_img.set_position(0, item_y)
             self.background_group.add(bg_img)
+            self.bg_items.append(bg_img)
             
         
         newItem = ListItem(self.font_string, itemLabel, label_list = self, max_width = self.width)
@@ -326,42 +328,32 @@ class LabelList(clutter.Group):
     #When the menu needs to display a new item from the top or bottom, it rolls
     # The distance the menu moves is the distance (in pixels) between the incoming item and the selector bar
     def rollList(self, direction, timeline):  
-        #print "Rolling: " + incomingMenuItem.data + "<------" + outgoingMenuItem.data  
+        
+        
+        
+        
         (group_x, group_y) = self.item_group.get_position()
-        #(bar_x, bar_y) = self.glossMgr.get_selector_bar().get_abs_position() # incomingMenuItem.get_menu().getMenuMgr().
-        #(incoming_x, incoming_y) = self.glossMgr.get_selector_bar().get_true_abs_position(incomingMenuItem) #incomingMenuItem.get_abs_position()
-        #incoming_y = incomingMenuItem.get_y()
-        #outgoing_y = outgoingMenuItem.get_y()
-        
-        #print "Selected: %s  Roll_min: %s  Roll_max: %s" % (self.selected, self.roll_point_min, self.roll_point_max)
-        
         if direction == self.DIRECTION_DOWN:  
             #Then the incoming item is below the selector bar
-            #height_diff = int(self.glossMgr.get_selector_bar().get_height() - incomingMenuItem.get_height()) #self.glossMgr.get_selector_bar().get_height())
-            #print "height diff: " + str(height_diff)
-            #gap = ((incoming_y - bar_y) - math.floor(height_diff/2)) * -1
-            #gap = int(gap)
-            #gap = -65
             gap = self.item_height * -1
             self.displayMin += 1
             self.displayMax += 1
             self.roll_point_min += 1
             self.roll_point_max += 1
+        
+            outgoing_item = self.items[self.displayMin-1]
+            incoming_item = self.items[self.displayMax+1]
+            
         else:
             #Then the incoming item is above the selector bar
-            """
-            height_diff = int(self.glossMgr.get_selector_bar().get_height() - incomingMenuItem.get_height()) #self.glossMgr.get_selector_bar().get_height())
-            gap = bar_y - incoming_y + math.ceil(height_diff/2)
-            gap = int(gap)
-            #gap = 65
-            """
             gap = self.item_height
             self.displayMin -= 1
             self.displayMax -= 1
             self.roll_point_min -=1
             self.roll_point_max -=1
         
-        
+            incoming_item = self.items[self.displayMin-1]
+            outgoing_item = self.items[self.displayMax+1]
         
         #print "Gap: " + str(gap)
         new_y = (group_y + gap)
@@ -371,16 +363,18 @@ class LabelList(clutter.Group):
             )
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
         self.behaviour_path = clutter.BehaviourPath(alpha, knots)
-        #self.behaviour_opacity_outgoing = clutter.BehaviourOpacity(opacity_start=outgoingMenuItem.get_opacity(), opacity_end=0, alpha=alpha)
-        #self.behaviour_opacity_incoming = clutter.BehaviourOpacity(opacity_start=0, opacity_end=outgoingMenuItem.get_opacity(), alpha=alpha)
+        
+        self.behaviour_opacity_outgoing = clutter.BehaviourOpacity(opacity_start=outgoing_item.get_opacity(), opacity_end=0, alpha=alpha)
+        self.behaviour_opacity_incoming = clutter.BehaviourOpacity(opacity_start=0, opacity_end=outgoing_item.get_opacity(), alpha=alpha)
         
         self.behaviour_path.apply(self.item_group)
         self.behaviour_path.apply(self.background_group)
+        
         """
-        self.behaviour_opacity_outgoing.apply(outgoingMenuItem)
+        self.behaviour_opacity_outgoing.apply(outgoing_item)
         #The incoming opacity behaviour is only used if the incomingItem is NOT the currently selected one
-        if not self.items[self.selected] == incomingMenuItem: 
-            self.behaviour_opacity_incoming.apply(incomingMenuItem)
+        if not self.items[self.selected] == incoming_item: 
+            self.behaviour_opacity_incoming.apply(incoming_item)
             #self.behaviour_opacity_incoming.apply(incomingMenutem)
         """
         

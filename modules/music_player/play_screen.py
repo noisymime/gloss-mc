@@ -58,30 +58,35 @@ class PlayScreen(clutter.Group):
         self.backdrop.show()
         self.opacity_behaviour.apply(self.backdrop)
         
-        if not self.main_img is None: self.remove(self.main_img)
-        self.main_img = ImageClone(img_frame = image)
-        self.add(self.main_img)
-        self.main_img.show()
         
-        x = int( self.main_img_theme.get_x() )
-        y = int( self.main_img_theme.get_y() )
-        knots = (\
-                 (int(self.main_img.get_x()), int(self.main_img.get_y()) ),\
-                 (x, y)\
-                 )
-        self.path_behaviour = clutter.BehaviourPath(knots = knots, alpha = self.alpha)
-        self.path_behaviour.apply(self.main_img)
+        if not image is None:
+            if not self.main_img is None: self.remove(self.main_img)
+            self.main_img = ImageClone(img_frame = image)
+            self.add(self.main_img)
+            self.main_img.show()
+            
+            x = int( self.main_img_theme.get_x() )
+            y = int( self.main_img_theme.get_y() )
+            knots = (\
+                     (int(self.main_img.get_x()), int(self.main_img.get_y()) ),\
+                     (x, y)\
+                     )
+            self.path_behaviour = clutter.BehaviourPath(knots = knots, alpha = self.alpha)
+            self.path_behaviour.apply(self.main_img)
+            
+            
+            #Calculate the required scale factor
+            (x_scale_start, y_scale_start) = self.main_img.get_scale()
+            x_scale_end = float(self.img_size) / float(self.main_img.get_width())
+            y_scale_end = float(self.img_size) / float(self.main_img.get_height())
+            self.scale_behaviour = clutter.BehaviourScale(x_scale_start = x_scale_start, x_scale_end = x_scale_end, y_scale_start = y_scale_start, y_scale_end = y_scale_end, alpha = self.alpha)
+            self.scale_behaviour.apply(self.main_img)
         
-        
-        #Calculate the required scale factor
-        (x_scale_start, y_scale_start) = self.main_img.get_scale()
-        x_scale_end = float(self.img_size) / float(self.main_img.get_width())
-        y_scale_end = float(self.img_size) / float(self.main_img.get_height())
-        self.scale_behaviour = clutter.BehaviourScale(x_scale_start = x_scale_start, x_scale_end = x_scale_end, y_scale_start = y_scale_start, y_scale_end = y_scale_end, alpha = self.alpha)
-        self.scale_behaviour.apply(self.main_img)
-        
+        #Clear the song list and readd from playlist
+        self.song_list.clear()
         for song in self.playlist.songs:
             self.song_list.add_item(song.name)
+            
         self.opacity_behaviour.apply(self.song_list)
         self.song_list.set_opacity(0)
         self.song_list.select_first()
@@ -124,6 +129,10 @@ class PlayScreen(clutter.Group):
         
     def set_song_cb(self, data, song):
         self.set_song(song)
+        
+    def clear_songs(self):
+        self.song_list.clear()
+        
         
 """
 This is a Clutter group containing labels only that 

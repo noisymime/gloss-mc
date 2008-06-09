@@ -30,9 +30,16 @@ class Playlist(gobject.GObject):
         self.songs = None
         self.songs = []
         
-    def play(self):
+    def play(self, song_no=None):
+        """Begins playback of a song in the playlist
+        
+        Argument keywords:
+        song_no -- The song number in the playlist to play. If not given, the playlist will go onto the next song automtically
+        """
+        
         if len(self.songs) == 0: return
-        if self.position > len(self.songs): return
+        if not song_no is None: self.position = song_no
+        if self.position >= len(self.songs): return
         
         current_song = self.songs[self.position]
         current_song_filename = self.musicPlayer.base_dir + "/" + current_song.directory + "/" + current_song.filename
@@ -43,7 +50,7 @@ class Playlist(gobject.GObject):
         self.emit("song-change", current_song)
         
     #Called when the playback of one song finishes and the next is required
-    def next_song(self, data = None):
+    def next_song(self, data=None):
         self.position += 1
         self.play()
         
@@ -64,7 +71,7 @@ class Playlist(gobject.GObject):
         self.songs.insert(position, song)
         
     def insert_songs(self, position, songs):
-        x= position
+        x = position
         for song in songs:
             self.songs.insert(x, song)
             x += 1

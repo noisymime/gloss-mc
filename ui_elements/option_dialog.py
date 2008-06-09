@@ -34,6 +34,7 @@ class OptionDialog(clutter.Group):
         self.box.set_opacity(int(255 * 0.55))
         self.add(self.box)
 
+        #These are pretty much all default values that get overridden in setup() anyway
         self.message = clutter.Label()
         self.message.set_font_name(self.font + str(self.message_font_size))
         self.message.set_color(clutter.color_parse('White'))
@@ -42,7 +43,8 @@ class OptionDialog(clutter.Group):
         self.message.set_position(pos_x, pos_y)
         width = int(self.box.get_width() * 0.80) #Width is 80% of the box, giving 10% gap each side
         self.message.set_width(width)
-        self.message.set_ellipsize(pango.ELLIPSIZE_END)
+        #self.message.set_ellipsize(pango.ELLIPSIZE_END)
+        self.message.set_line_wrap(True)
         self.message.set_text("")
         self.add(self.message)
         

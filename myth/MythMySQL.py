@@ -19,7 +19,7 @@ class mythDB():
             print "Error %d: %s" % (e.args[0], e.args[1])
             clutter.main_quit()
             self.connected = False
-            return None
+            return
         
         self.cursor = self.db.cursor()
         
@@ -37,9 +37,9 @@ class mythDB():
         if not os.path.exists(conf_file):
             conf_file = "/etc/mythtv/mysql.txt"
             if not os.path.exists(conf_file):
-                print "ERROR: No config file found at ~/.mythtv/mysql.txt!"
+                print "ERROR: No config file found at ~/.mythtv/mysql.txt or /etc/mythtv/mysql.txt!"
                 print "No connection to MythTV Database can be made. Quitting"
-                clutter.main_quit()
+                #clutter.main_quit()
                 return False
   
         f=open(conf_file, 'r')

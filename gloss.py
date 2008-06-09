@@ -55,7 +55,9 @@ class MainApp:
         #Create a master mySQL connection
         self.dbMgr = mythDB()
         if not self.dbMgr.connected:
+            self.connected = False
             return
+        self.connected = True
         
         #Do an initial lookup for GUI size
         width = int(self.dbMgr.get_setting("GuiWidth"))
@@ -139,7 +141,7 @@ def main (args):
  
     app = MainApp(args)
     #app.loadGloss()
-    app.run()
+    if app.connected: app.run()
 
     
     return 0

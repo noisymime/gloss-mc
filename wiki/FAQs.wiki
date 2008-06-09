@@ -11,6 +11,9 @@
 ---
 
 == Getting things running ==
+*Q: What version of Myth TV does Gloss work with?*
+ 0.21
+
 *Q: What are the package requirements to get Gloss running?*
  You'll need the following packages:
  * libclutter-0.6-x
@@ -34,3 +37,10 @@ class Message():
 SyntaxError:Invalid syntax`
 }}}
  This is usually to do with the version of python that you are running. A few areas of Gloss use syntax (Such as above) that is only valid under Python 2.5 and the error above will generally appear for Python 2.4
+
+*Q: What about this error:*
+{{{
+ERROR: No config file found at ~/.mythtv/mysql.txt or /etc/mythtv/mysql.txt!
+No connection to MythTV Database can be made. Quitting
+}}}
+ Strangely enough, this means exactly what it says. Even though the regular 0.21 MythTV frontend supports upnp detection of the backend, Gloss doesn't (yet) have this function. You need to create a file called mysql.txt in either of the locations specified that lists the location of the backend. 

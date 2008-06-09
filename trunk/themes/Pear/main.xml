@@ -22,21 +22,23 @@
 		<item_gap>0</item_gap>
 		<num_visible_elements>4</num_visible_elements>
 
-		<!-- The following properties all relate to the image / textures that accompany each menu item -->
-		<menu_item_texture>
-			<use_image_reflections>0</use_image_reflections>
-			<image_y_rotation>0</image_y_rotation>
-			<image_transition>
-				<name>ring</name>
-				<options>None</options>
-			</image_transition>
-
+				<!-- The following properties all relate to the image / textures that accompany each menu item -->
+		<image_frame id="menu_item_texture">
+			<dimensions type="relativeToStage">
+				<width>40%</width>
+				<height>relative</height>
+			</dimensions>
 			<position type="relativeToStage">
-				<x>5%</x>
+				<x>8%</x>
 				<y>20%</y>
 			</position>
 			
-		</menu_item_texture>
+			<use_reflections>False</use_reflections>
+		</image_frame>
+		<image_transition>
+				<name>ring</name>
+				<options>None</options>
+		</image_transition>
 		
 		<!-- These are the opacity and scale values for the 3 possible steps in the menu
 		     Make all the values the same if you do not want these effects -->

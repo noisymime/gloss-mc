@@ -4,7 +4,8 @@ import gtk
 import pango
 import time
 import math
-from ui_elements.ReflectionTexture import Texture_Reflection
+from ui_elements.image_frame import ImageFrame
+#from ui_elements.ReflectionTexture import Texture_Reflection
 from interfaces.MenuItem import MenuItem
 from utils.InputQueue import InputQueue
 
@@ -66,30 +67,15 @@ class Interface(clutter.Group):
         menu.opacityStep2 = int(themeMgr.find_child_value(element, "opacity_step2"))
         
         #setup the menu_image properties
-        menu.useReflection = "True" == (themeMgr.find_child_value(element, "menu_item_texture.use_image_reflections"))
-        menu.menu_image_rotation = int(themeMgr.find_child_value(element, "menu_item_texture.image_y_rotation"))
-        menu_image_node = themeMgr.get_subnode(element, "menu_item_texture")
-        if not menu_image_node is None:
-            #Set the position
-            (x, y) = themeMgr.get_position(menu_image_node, self.stage)
-            menu.menu_image_x = int(x)
-            menu.menu_image_y = int(y)
-            
-            """
-            #Set the size
-            (width, height) = self.get_dimensions(menu_image_node, self.stage)
-            if width is None:
-                print "no size change"
-                menu.menu_image_width = None
-                menu.menu_image_height = None
-            else:
-                menu.menu_image_width = int(width)
-                menu.menu_image_height = int(height)
-            """
+        tmp_frame = themeMgr.get_imageFrame("menu_item_texture")
+        self.menu_image_size = int(tmp_frame.img_size)
+        self.use_reflection = tmp_frame.use_reflection
+        self.menu_image_x = tmp_frame.get_x()
+        self.menu_image_y = tmp_frame.get_y()
         
         #Setup the menu image transition
-        image_transition = themeMgr.find_child_value(element, "menu_item_texture.image_transition.name")
-        transition_options = themeMgr.find_child_value(element, "menu_item_texture.image_transition.options")
+        image_transition = themeMgr.find_child_value(element, "image_transition.name")
+        transition_options = themeMgr.find_child_value(element, "image_transition.options")
         transition_path = "transitions/menu_items/" + str(image_transition)
         try:
             menu.menu_item_transition = __import__(transition_path).Transition(self.glossMgr)

@@ -2,7 +2,7 @@ import clutter
 import pango
 import gtk
 import pygtk
-from ui_elements.ReflectionTexture import Texture_Reflection
+from ui_elements.image_frame import ImageFrame
 
 class MenuItem (clutter.Label):
     zoomLevel = 0.5
@@ -50,7 +50,7 @@ class MenuItem (clutter.Label):
         self.onStage = False
 
         
-    def add_image_from_path(self, path, x, y, width = None, height = None):
+    def add_image_from_path(self, path, x, y, width=None, height=None):
         tempTexture = clutter.Texture()
         pixbuf = gtk.gdk.pixbuf_new_from_file(path)
         tempTexture.set_pixbuf(pixbuf)
@@ -66,25 +66,19 @@ class MenuItem (clutter.Label):
         if texture is None: print "NO TEXTURE!"
         if self.main_texture is None: 
             self.main_texture = texture
-        """
-        Removing as this is currently already handled in individual module files
-        #Set the image to the size in the theme
-        if not self.menu.menu_image_height is None:
-            texture.set_height(self.menu.menu_image_height)
-        if not self.menu.menu_image_width is None:            
-            texture.set_width(self.menu.menu_image_width)
-        """
+            
+        pixbuf = texture.get_pixbuf()
+        size = self.menu.menu_image_size
+        reflection = self.menu.use_reflection
+        texture = ImageFrame(pixbuf, size, reflection)
         
         #Rotate appropriately
+        """
         rotation = self.menu.menu_image_rotation
         x_rotation = (texture.get_width())
         texture.set_rotation(clutter.Y_AXIS, rotation, x_rotation, 0, 0)
+        """
         self.itemTexturesGroup.add(texture)        
-        
-        #If reflection is turned on in the theme, add a reflection texture
-        if self.menu.useReflection:
-            self.reflectionTexture = Texture_Reflection(texture)
-            self.itemTexturesGroup.add(self.reflectionTexture)
         
         self.itemTexturesGroup.show_all()
         

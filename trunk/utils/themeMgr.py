@@ -358,7 +358,7 @@ class ThemeMgr:
 		
 		(width, height) = self.get_dimensions(element, self.stage)
 		if (not width is None) and (not height is None):
-			if width > height:
+			if (width > height) or (height == "relative"):
 				size = width
 			else:
 				size = height

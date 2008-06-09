@@ -118,9 +118,9 @@
 		<label_list id="option_dialog_list">		
 			<font id="main">
 				<face>Tahoma</face>
-				<size id="default">20</size>
-				<size id="1024x768">28</size>
-				<size id="800x600">30</size>
+				<size id="default">12</size>
+				<size id="1024x768">12</size>
+				<size id="800x600">10</size>
 				<size id="1920x1080">25</size>
 			</font>
 	

@@ -2,8 +2,16 @@ import clutter
 import copy
 from utils.themeMgr import ThemeMgr
 from ui_elements.message import Message
+from ui_elements.Spinner import Spinner
 
 """The core control class for Gloss
+
+GlossMgr handles and controls the input. It maintains the status of any modules / plugins
+as well as the interface that is to be used. All input goes through GlossMgr, which in turns passes it
+to the correct module. It also stores certain global properties (Eg a 'debug' flag). The GlossMgr instance is passed to all modules so that they my reference this data
+"""
+__author__ =  'Josh Stewart (noisymime)'
+__version__=  '0.1'"""The core control class for Gloss
 
 GlossMgr handles and controls the input. It maintains the status of any modules / plugins
 as well as the interface that is to be used. All input goes through GlossMgr, which in turns passes it
@@ -51,6 +59,12 @@ class GlossMgr:
         self.currentPlugin = None
         
     def addMenu(self, newMenu):
+        """Adds a new menu to the main interface
+        
+        Arguments:
+        newMenu -- The new menu to be added to the interface
+        
+        """
         self.menus.append(newMenu)
         #If this is the first menu, make it the active one
         if self.currentMenu == None:
@@ -79,6 +93,17 @@ class GlossMgr:
         return self.themeMgr
                 
     def on_key_press_event (self, stage, event):
+        """Handles *all* input in Gloss
+        
+        In 'normal' mode, this will pass the event to the menu item and select it accordingly. If the key is 'Return' then it will start the currently selected module
+        Exceptions to this:
+        1) If the UI Overide variable is set, the event is sent to it. This is used for things such as UI prompts (messages) and option dialogs that need to have UI focus above all else
+        2) If there is a plugin running, the input event gets sent through to its 'on_key_press_event()' method. If this method returns True, GlossMgr assumes the plugin to have terminated. 
+        
+        Arguments:
+        stage -- The primary stage object
+        event -- The Clutter event object
+        """
         #Firstly check whether any messages are currently displayed
         if not self.ui_overide is None:
             self.ui_overide.on_key_press_event(stage, event)
@@ -135,8 +160,9 @@ class GlossMgr:
                     self.currentMenu = self.menuHistory[-1]
         #print event.hardware_keycode
         
-    #Kills any currently running plugin/s
     def kill_plugin(self):
+        """Kills any currently running plugin/module"""
+        
         if not self.currentPlugin is None:
             self.currentPlugin.stop()
             self.currentPlugin = None
@@ -177,6 +203,7 @@ class GlossMgr:
         
         
 class MenuSelector(clutter.Texture):
+    """This class will shortly be removed in the rewrite of the ListMenu interface, ignore it for now."""
     x_offset = -50
     height_percent = 1
     position_0 = None

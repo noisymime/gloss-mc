@@ -174,12 +174,18 @@ class Module:
             else:
                 self.play_screen.on_key_press_event(stage, event)
     
-    #When the user has selected some songs, this function is called to decide what to do with them
-    #Options:
-    #1) Append to current playlist
-    #2) Append to current playlist and play next
-    #3) Replace the current playlist
+
     def query_playlist_add(self, songs):
+        """Called when songs are to be added to the current playlist
+        #When the user has selected some songs, this function is called to decide what to do with them
+        #Options:
+        #1) Append to current playlist
+        #2) Append to current playlist and play next
+        #3) Replace the current playlist
+        
+        Arguments:
+        songs -- an array of song objects to be added
+        """
         #If the current playlist is empty, its a no brainer:
         if self.playlist.num_songs() == 0:
             self.playlist.append_songs(songs)
@@ -192,6 +198,7 @@ class Module:
         self.query_options = []
         self.query_options.append(option_dialog.add_item("Append to current playlist"))
         self.query_options.append(option_dialog.add_item("Append to current playlist and play next"))
+        self.query_options.append(option_dialog.add_item("Append to current playlist and play now"))
         self.query_options.append(option_dialog.add_item("Replace the current playlist"))
         
         option_dialog.connect("option-selected", self.option_dialog_cb, songs)
@@ -203,18 +210,26 @@ class Module:
         #Handle options
         if result == self.query_options[0]:
             self.playlist.append_songs(songs)
+            self.play_screen.display(None)
         if result == self.query_options[1]:
-            self.playlist.insert_songs(self.playlist.position, songs)
+            self.playlist.insert_songs(self.playlist.position+1, songs)
+            self.play_screen.display(None)
         if result == self.query_options[2]:
+            self.playlist.insert_songs(self.playlist.position+1, songs)
+            self.playlist.play(song_no=self.playlist.position+1)
+            self.play_screen.display(self.artistImageRow.get_current_texture())
+        if result == self.query_options[3]:
             self.playlist.stop()
             self.playlist.clear_songs()
             self.playlist.append_songs(songs)
-        
-        self.playlist.play()
+            self.play_screen.clear_songs()
+            self.playlist.play()
+            self.play_screen.display(self.artistImageRow.get_current_texture())
+
         
         #self.play_screen.append_playlist(self.playlist)
         self.current_context = self.CONTEXT_PLAY_SCR
-        self.play_screen.display(self.artistImageRow.get_current_texture())#.get_texture())
+        #.get_texture())
         
     
     #Fills self.list2 with songs from an album

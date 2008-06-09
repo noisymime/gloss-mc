@@ -1,0 +1,20 @@
+= Gloss FAQs =
+
+== About Gloss ==
+
+Q: Do you just want to rip off Apple? 
+A: No, but I do think a lot of Apple products both look good and have very intuitive interfaces. Gloss' interface, is all changeable in its theme files, so there's no reason why it has to look like anything else at all.
+
+Q: Why didn't you integrate this with the existing Myth frontend?
+A: A couple of reasons, mostly technical. The first and foremost is that the existing frontend is based on Qt while Clutter, Gloss' OpenGL framework, uses GTK. Its not impossible to mix the two, but if nothing else it means that there'd be 2 large stacks being loaded everytime you started the frontend. I also really like python :)
+
+---
+
+== Getting things running ==
+Q: What are the package requirements to get Gloss running? 
+A: You'll need the following packages:
+
+Q: I get the following error:
+`class Message():
+                  ^
+SyntaxError:Invalid syntax`

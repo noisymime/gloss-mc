@@ -44,3 +44,6 @@ ERROR: No config file found at ~/.mythtv/mysql.txt or /etc/mythtv/mysql.txt!
 No connection to MythTV Database can be made. Quitting
 }}}
  Strangely enough, this means exactly what it says. Even though the regular 0.21 MythTV frontend supports upnp detection of the backend, Gloss doesn't (yet) have this function. You need to create a file called mysql.txt in either of the locations specified that lists the location of the backend. 
+
+*Q: I get big white boxes over everything!:*
+ This is an upstream problem with Clutter + Compiz Fusion + Intel integrated graphics. The easiest way to fix this is to turn off compiz fusion. 

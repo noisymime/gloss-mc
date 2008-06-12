@@ -229,7 +229,7 @@ class VideoController(MediaController):
         
         texture.set_size(width, height)
         
-    def pause_video(self, use_backdrop):
+    def pause_video(self, use_backdrop=False):
         if use_backdrop:
             #Use the overlay to go over show
             if self.overlay == None:

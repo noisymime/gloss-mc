@@ -314,7 +314,7 @@ class Module:
         self.stage.add(self.backdrop)
         self.opacity_behaviour.apply(self.backdrop)
         
-        self.loading_img = ImageClone(glossMgr.get_current_menu().get_current_item().get_main_texture())
+        self.loading_img = ImageClone(img_frame=glossMgr.get_current_menu().get_current_item().get_main_texture())
         self.loading_img.show()
         self.stage.add(self.loading_img)
         glossMgr.get_current_menu().get_current_item().get_main_texture().hide()

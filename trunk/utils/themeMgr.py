@@ -12,7 +12,7 @@ class ThemeMgr:
 	currentTheme = "default"
 	currentTheme = "Pear"
 	#currentTheme = "Mich"
-	#currentTheme = "Gloxygen"
+	currentTheme = "Gloxygen"
 	
 	def __init__(self, glossMgr):
 		self.stage = glossMgr.stage
@@ -322,7 +322,7 @@ class ThemeMgr:
 		return texture
 		
 	
-	def get_font(self, name, element, subnode = False):
+	def get_font(self, name, element=None):
 		if element is None:
 			element = self.search_docs("font", name).childNodes
 		#Quick check to make sure we found something

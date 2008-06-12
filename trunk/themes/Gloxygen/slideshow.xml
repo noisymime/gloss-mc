@@ -1,0 +1,22 @@
+<gloss-theme>
+	<texture id="slideshow_menu_image">
+		<image>slideshow/gallery.png</image>
+		<dimensions type="relativeToSelf">
+			<width>100%</width>
+			<height>relative</height>
+		</dimensions>
+		<position type="relativeToParent">
+			<x>0</x>
+			<y>0</y>
+		</position>
+	</texture>
+	
+	<!-- This is a maximum size restruction for the image preview (If used) -->
+	<preview_image id="main">
+		<dimensions type="relativeToStage">
+			<width>40%</width>
+			<height>40%</height>
+		</dimensions>
+	</preview_image>
+
+</gloss-theme>

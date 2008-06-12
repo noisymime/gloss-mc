@@ -9,6 +9,12 @@
 			<size id="800x600">30</size>
 			<size id="1920x1080">25</size>
 		</font>
+		
+		<colour id="stage">
+			<r>180</r>
+			<g>180</g>
+			<b>180</b>
+		</colour>
 
 		<dimensions type="relativeToStage">
 			<width>40%</width>

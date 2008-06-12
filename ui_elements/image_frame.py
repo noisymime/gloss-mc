@@ -67,6 +67,7 @@ class ImageFrame(clutter.Group):
         return pixbuf
         
     def set_pixbuf(self, pixbuf):
+        self.orig_pixbuf = pixbuf
         if pixbuf is None:
             self.main_pic.hide()
             if not self.reflection is None: self.reflection.hide()

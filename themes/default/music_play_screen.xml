@@ -1,0 +1,272 @@
+<gloss-theme>
+
+	<label_list id="music_play_screen_songs">		
+		<font id="main">
+			<face>Tahoma</face>
+			<size id="default">30</size>
+			<size id="1024x768">38</size>
+			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
+		</font>
+
+		<dimensions type="relativeToStage">
+			<width>40%</width>
+			<height>40%</height>
+		</dimensions>
+		<position type="relativeToStage">
+			<x>50%</x>
+			<y>25%</y>
+		</position>
+
+		<!-- This determines the height of each item based on a percentage of the font size. 
+			 Eg: 1.00 means that each item will be the same height as the font,
+			     1.50 means that the item will be 1.x times the height as the font etc
+		 -->
+		<item_height_percent>1.00</item_height_percent>
+		
+		<!-- These are the opacity and scale values for the 3 possible steps in the menu
+		     Make all the values the same if you do not want these effects -->
+		<opacity_step0>255</opacity_step0>
+		<opacity_step1>135</opacity_step1>
+		<opacity_step2>135</opacity_step2>
+		<scale_step0>1</scale_step0>
+		<scale_step1>1</scale_step1>
+		<scale_step2>1</scale_step2>
+		
+		<transition_fps>30</transition_fps>
+		<transition_frames>10</transition_frames>
+
+		<texture id="inactive_background">
+			<image>music/songlist_off.png</image>
+			<dimensions type="relativeToParent">
+				<width>100%</width>
+				<height>100%</height>
+			</dimensions>
+			<position type="blah">
+				<x>0</x>
+				<y>0</y>
+			</position>
+		</texture>
+		
+		<texture id="image_up">
+			<image>up.png</image>
+			<dimensions type="relativeToStage">
+				<width>3%</width>
+				<height>3%</height>
+			</dimensions>
+			<position type="relativeToSelf">
+				<x>0</x>
+				<y>0</y>
+			</position>
+		</texture>
+		
+		<texture id="image_down">
+			<image>down.png</image>
+			<dimensions type="relativeToStage">
+				<width>3%</width>
+				<height>3%</height>
+			</dimensions>
+			<position type="blah">
+				<x>0</x>
+				<y>0</y>
+			</position>
+		</texture>
+		<inactive_background>music/songlist_off.png</inactive_background>
+		
+		
+
+	</label_list>
+
+	<image_frame id="music_playing_image">
+		<image>None</image>
+		<use_reflections>True</use_reflections>
+		
+		
+		<dimensions type="relativeToStage">
+			<width>30%</width>
+			<height>30%</height>
+		</dimensions>
+		<position type="relativeToStage">
+			<x>10%</x>
+			<y>35%</y>
+		</position>
+	</image_frame>
+	
+	<progress_bar id="music_progress_bar">
+		<colour id="background">
+			<r>100</r>
+			<g>100</g>
+			<b>100</b>
+		</colour>
+		<colour id="foreground">
+			<r>255</r>
+			<g>255</g>
+			<b>255</b>
+		</colour>
+	
+		<dimensions type="relativeToStage">
+			<width>90%</width>
+			<height>2%</height>
+		</dimensions>
+		<position type="relativeToStage">
+			<x>10%</x>
+			<y>35%</y>
+		</position>
+	</progress_bar>
+	
+	<!-- These labels make up the currently playing song details -->
+	<group id="music_play_screen_song_details">
+		<dimensions type="relativeToStage">
+			<width>25%</width>
+			<height>20%</height>
+		</dimensions>
+		<position type="relativeToParent">
+			<x>0</x>
+			<y>0</y>
+		</position>
+	</group>
+	<label id="music_play_screen_song_heading">
+		<font id="font">
+			<face>Tahoma</face>
+			<size id="default">30</size>
+			<size id="1024x768">38</size>
+			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
+		</font>
+	
+		<dimensions type="relativeToParent">
+			<width>50%</width>
+			<height>15%</height>
+		</dimensions>
+		<position type="relativeToParent">
+			<x>0</x>
+			<y>0</y>
+		</position>
+		<colour id="colour">
+			<r>100</r>
+			<g>100</g>
+			<b>100</b>
+		</colour>
+	</label>
+	<label id="music_play_screen_album_heading">
+		<font id="font">
+			<face>Tahoma</face>
+			<size id="default">30</size>
+			<size id="1024x768">38</size>
+			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
+		</font>
+	
+		<dimensions type="relativeToParent">
+			<width>50%</width>
+			<height>15%</height>
+		</dimensions>
+		<position type="relativeToParent">
+			<x>0</x>
+			<y>40%</y>
+		</position>
+		
+		<colour id="colour">
+			<r>100</r>
+			<g>100</g>
+			<b>100</b>
+		</colour>
+	</label>
+	<label id="music_play_screen_artist_heading">
+		<font id="font">
+			<face>Tahoma</face>
+			<size id="default">30</size>
+			<size id="1024x768">38</size>
+			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
+		</font>
+	
+		<dimensions type="relativeToParent">
+			<width>50%</width>
+			<height>15%</height>
+		</dimensions>
+		<position type="relativeToParent">
+			<x>0</x>
+			<y>20%</y>
+		</position>
+		<colour id="colour">
+			<r>100</r>
+			<g>100</g>
+			<b>100</b>
+		</colour>
+	</label>
+	
+	<label id="music_play_screen_song">
+		<font id="font">
+			<face>Tahoma</face>
+			<size id="default">30</size>
+			<size id="1024x768">38</size>
+			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
+		</font>
+	
+		<dimensions type="relativeToParent">
+			<width>50%</width>
+			<height>15%</height>
+		</dimensions>
+		<position type="relativeToParent">
+			<x>50%</x>
+			<y>0</y>
+		</position>
+		
+		<colour id="colour">
+			<r>100</r>
+			<g>100</g>
+			<b>100</b>
+		</colour>
+	</label>
+	<label id="music_play_screen_artist">
+		<font id="font">
+			<face>Tahoma</face>
+			<size id="default">30</size>
+			<size id="1024x768">38</size>
+			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
+		</font>
+	
+		<dimensions type="relativeToParent">
+			<width>50%</width>
+			<height>15%</height>
+		</dimensions>
+		<position type="relativeToParent">
+			<x>50%</x>
+			<y>20%</y>
+		</position>
+		
+		<colour id="colour">
+			<r>100</r>
+			<g>100</g>
+			<b>100</b>
+		</colour>
+	</label>
+	<label id="music_play_screen_album">
+		<font id="font">
+			<face>Tahoma</face>
+			<size id="default">30</size>
+			<size id="1024x768">38</size>
+			<size id="800x600">30</size>
+			<size id="1920x1080">25</size>
+		</font>
+	
+		<dimensions type="relativeToParent">
+			<width>50%</width>
+			<height>15%</height>
+		</dimensions>
+		<position type="relativeToParent">
+			<x>50%</x>
+			<y>40%</y>
+		</position>
+		
+		<colour id="colour">
+			<r>100</r>
+			<g>100</g>
+			<b>100</b>
+		</colour>
+	</label>
+	
+</gloss-theme>

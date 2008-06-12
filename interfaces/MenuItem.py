@@ -64,8 +64,7 @@ class MenuItem (clutter.Label):
     def add_image_from_texture(self, texture):
         
         if texture is None: print "NO TEXTURE!"
-        if self.main_texture is None: 
-            self.main_texture = texture
+
             
         pixbuf = texture.get_pixbuf()
         size = self.menu.menu_image_size
@@ -78,8 +77,10 @@ class MenuItem (clutter.Label):
         x_rotation = (texture.get_width())
         texture.set_rotation(clutter.Y_AXIS, rotation, x_rotation, 0, 0)
         """
-        self.itemTexturesGroup.add(texture)        
+        if self.main_texture is None: 
+            self.main_texture = texture
         
+        self.itemTexturesGroup.add(texture)                
         self.itemTexturesGroup.show_all()
         
     def set_data(self, data):

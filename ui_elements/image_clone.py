@@ -21,8 +21,11 @@ class ImageClone(ImageFrame):
                 size = height
             else:
                 size = width
+            size = img_frame.img_size
             (anchor_x, anchor_y) = img_frame.get_anchor_point()
             use_reflection = img_frame.use_reflection
+            opacity = img_frame.get_opacity()
+            (abs_x, abs_y) = img_frame.main_pic.get_abs_position()
         else:
             pixbuf = texture.get_pixbuf()
             (width, height) = texture.get_abs_size()
@@ -31,15 +34,16 @@ class ImageClone(ImageFrame):
             else:
                 size = width
             (anchor_x, anchor_y) = texture.get_anchor_point()
+            opacity = texture.get_opacity()
+            (abs_x, abs_y) = texture.get_abs_position()
             
         ImageFrame.__init__(self, pixbuf, size, use_reflection = use_reflection)
         #self.set_anchor_point(anchor_x, anchor_y)
         #clutter.CloneTexture.__init__(self, texture)
         
-        (width, height) = texture.get_abs_size()
+        #(width, height) = texture.get_abs_size()
         #self.set_size(width, height)
-        self.set_opacity(texture.get_opacity())
-        (abs_x, abs_y) = texture.get_abs_position()
+        self.set_opacity(opacity)
         self.set_position(abs_x, abs_y)
         
         """

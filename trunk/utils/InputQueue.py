@@ -21,6 +21,7 @@ class InputQueue(gobject.GObject):
         }
     
     accelerating = False
+    use_acceleration = True
     current_acceleration_factor = 1
     acceleration_factor_base = 10 #Timelines will run at regular speed times this when accelerated
     acceleration_threshold = 3 #The queue size at which accleration kicks in (Make this higher to increase the delay before acceleration takes place)
@@ -127,6 +128,7 @@ class InputQueue(gobject.GObject):
             absolute_queue_size = self.queue_north + self.queue_east + self.queue_south + self.queue_west
             if absolute_queue_size > self.acceleration_threshold:
                 if not self.accelerating:
+                    self.accelerating = True
                     self.accelerate()
             #print "Queue Size: N=%s E=%s S=%s W=%s" % (self.queue_north, self.queue_east, self.queue_south, self.queue_west)
             
@@ -164,6 +166,9 @@ class InputQueue(gobject.GObject):
             return False
         
     def accelerate(self):
+        if not self.accelerating:
+            return False
+        
         self.accelerating = True
         if self.current_acceleration_step < self.acceleration_steps:
             self.current_acceleration_step +=1

@@ -53,6 +53,9 @@ class Interface(clutter.Group):
         menu.item_gap = int(themeMgr.find_child_value(element, "item_gap"))
         menu.displayMax = int(themeMgr.find_child_value(element, "num_visible_elements"))
         
+        colour = themeMgr.get_colour(element, "menu", subnode=True)
+        if not colour is None: self.stage.set_color(colour)
+        
         #Grab the font
         font_node = themeMgr.get_subnode(element, "font")
         fontString = themeMgr.get_font("main", font_node)

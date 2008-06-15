@@ -6,7 +6,7 @@ import time
 import math
 from ui_elements.ReflectionTexture import Texture_Reflection
 from interfaces.MenuItem import MenuItem
-from InputQueue import InputQueue
+from utils.InputQueue import InputQueue
 
 class Interface(clutter.Group):
     usePreviewEffects = False # Tells the modules NOT to use any effects on the images
@@ -27,8 +27,6 @@ class Interface(clutter.Group):
         self.input_queue = InputQueue()
         self.input_queue.set_action(InputQueue.NORTH, self.selectPrevious)
         self.input_queue.set_action(InputQueue.SOUTH, self.selectNext)
-        
-        self.glossMgr.addMenu(self)
         
     def setup_ui(self, themeMgr, name, menu):
         element = themeMgr.search_docs("menu", name).childNodes
@@ -72,6 +70,9 @@ class Interface(clutter.Group):
         #Finally set general actor properties (position etc)
         #themeMgr.setup_actor(menu.getItemGroup(), element, themeMgr.stage)
         themeMgr.setup_actor(menu, element, themeMgr.stage)
+        
+    def on_key_press_event(self, event):
+        self.input_queue.input(event)
         
     def addItem(self, itemLabel):
         if self.itemGroup.get_n_children() == 0:
@@ -266,5 +267,5 @@ class Interface(clutter.Group):
 class WheelListItem(MenuItem):
 
     def __init__ (self, menu, itemLabel):
-        MenuItem.__init__ (self, menu, itemLabel, 0)
+        MenuItem.__init__ (self, menu, itemLabel)
         self.glossMgr = menu.glossMgr

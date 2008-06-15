@@ -122,10 +122,8 @@ class image_previewer(clutter.Group):
             if self.tex1.get_parent() is None: self.add(self.tex1)
             
             parent = self.get_parent()
-            if parent is None:
-                print "Parent is none!"
+            if not parent is None: parent.show()
             
-            parent.show()
             self.frontTex = self.tex1
             self.tex1.show()
             self.show()

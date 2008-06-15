@@ -23,12 +23,14 @@ class Transition:
         knots_exiting = (\
                 (fromMenu.get_x(), fromMenu.get_y()),\
                 #(-oldGroup.get_x(), int(fromMenu.getStage().get_height()/2))
-                (-fromMenu.get_x(), fromMenu.get_group_y())\
+                #(-fromMenu.get_x(), fromMenu.get_group_y())\
+                (-fromMenu.get_x(), fromMenu.get_y())\
                 )
         self.exit_behaviour_path = clutter.BehaviourPath(knots=knots_exiting, alpha=self.alpha)
-
+        
         #self.exit_behaviour_scale.apply(oldGroup)
-        self.exit_behaviour_opacity.apply(fromMenu.get_current_item().itemTexturesGroup)
+        #self.exit_behaviour_opacity.apply(fromMenu.get_current_item().itemTexturesGroup)
+        self.exit_behaviour_opacity.apply(fromMenu.image_group)
         self.exit_behaviour_opacity.apply(fromMenu)
         self.exit_behaviour_path.apply(fromMenu)
         
@@ -52,7 +54,8 @@ class Transition:
                 )
         self.entrance_behaviour_path = clutter.BehaviourPath(self.alpha, knots_entering)
         
-        self.entrance_behaviour_opacity.apply(toMenu.get_current_item().itemTexturesGroup)
+        
+        self.entrance_behaviour_opacity.apply(toMenu.image_group)#get_current_item().get_item_textures())
         self.entrance_behaviour_opacity.apply(toMenu)
         self.entrance_behaviour_path.apply(toMenu)
 
@@ -60,14 +63,24 @@ class Transition:
         toMenu.display()
         
         #Finally, move the selector bar
-        (bar_x, bar_y) = self.glossMgr.selector_bar.position_0
-        self.glossMgr.selector_bar.move_to(bar_x, bar_y, self.timeline)
-        toMenu.selectFirst(False)
-        
+        fromMenu.get_selector_bar().hide()
+        bar = toMenu.get_selector_bar()
+        if not bar is None:
+            bar.show()
+            (begin_x, begin_y) = fromMenu.get_selector_bar().get_position()
+            begin_x = -int(self.stage.get_width() - fromMenu.get_x())
+            (finish_x, finish_y) = toMenu.get_selector_bar().get_position()
+            knots_selector_bar = (\
+                                  (begin_x, begin_y),\
+                                  (finish_x, finish_y)
+                                  )
+            self.selector_behaviour_path = clutter.BehaviourPath(self.alpha, knots_selector_bar)
+            self.selector_behaviour_path.apply(bar)
+
         self.timeline.start()
         self.glossMgr.currentMenu = toMenu
         
     def slide_complete(self, timeline, fromMenu):
-        self.stage.remove(fromMenu)
+        fromMenu.undisplay()
         #self.stage.remove(fromMenu.get_current_item().itemTexturesGroup)
-        fromMenu.get_current_item().itemTexturesGroup.get_parent().remove(fromMenu.get_current_item().itemTexturesGroup)
+        #fromMenu.get_current_item().itemTexturesGroup.get_parent().remove(fromMenu.get_current_item().itemTexturesGroup)

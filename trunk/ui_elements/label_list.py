@@ -152,7 +152,7 @@ class LabelList(clutter.Group):
         
         return self.item_height
     
-    def add_item(self, itemLabel):
+    def add_item(self, itemLabel, newItem=None):
         if len(self.items) == 0:
             self.displayMax = self.height / self.label_height
             label_width = 0
@@ -163,6 +163,7 @@ class LabelList(clutter.Group):
         
         item_y = len(self.items) * self.item_height
         label_y = item_y + ((self.item_height - self.label_height)/2)
+        label_y += int(self.item_height/2)
         label_y = int(label_y)
         
         #If a background pic is specified in the theme, clone it and add
@@ -174,15 +175,9 @@ class LabelList(clutter.Group):
             self.background_group.add(bg_img)
             self.bg_items.append(bg_img)
             
-        
-        newItem = ListItem(self.font_string, itemLabel, label_list = self, max_width = self.width)
+        if newItem is None: newItem = ListItem(self.font_string, itemLabel, label_list = self, max_width = self.width)
         newItem.set_position(0, label_y)
-        """
-        if len(self.items) < self.displaySize:
-            newItem.show()            
-            if not self.image_down is None: self.image_down.set_opacity(255)
-            if not self.inactive_item_background is None: bg_img.show()
-        """
+
         newItem.show()            
         if not self.image_down is None: self.image_down.set_opacity(255)
         if not self.inactive_item_background is None: bg_img.show()
@@ -206,7 +201,7 @@ class LabelList(clutter.Group):
         
         self.show()
         
-    def move_selection(self, direction):
+    def move_selection(self, direction, timeline=None):
 
         if direction == self.DIRECTION_DOWN:
             #Check if we're at the last item in the list
@@ -221,7 +216,8 @@ class LabelList(clutter.Group):
             else:
                 self.selected -= 1
                 
-        self.timeline = clutter.Timeline (self.frames, self.fps)
+        if timeline is None: self.timeline = clutter.Timeline (self.frames, self.fps)
+        else: self.timeline = timeline
         alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
         self.input_queue.set_timeline(self.timeline)
 
@@ -298,6 +294,16 @@ class LabelList(clutter.Group):
         if not self.selector_bar is None:
             self.behaviour_opacity = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
             self.behaviour_opacity.apply(self.selector_bar)
+            """
+            #move the selector bar
+            abs_y = self.selector_bar.y_offset
+            knots = (\
+                     (self.selector_bar.get_x(), self.selector_bar.get_y()),
+                     (self.selector_bar.get_x(), abs_y)
+                     )
+            self.behaviour_path_bar = clutter.BehaviourPath(knots=knots, alpha=alpha)
+            self.behaviour_path_bar.apply(self.selector_bar)
+            """
                
         #Timeline only gets started if it was created in this function
         if timeline is None: self.timeline.start()
@@ -340,10 +346,11 @@ class LabelList(clutter.Group):
             self.displayMax += 1
             self.roll_point_min += 1
             self.roll_point_max += 1
-        
+            
+            """
             outgoing_item = self.items[self.displayMin-1]
             incoming_item = self.items[self.displayMax+1]
-            
+            """
         else:
             #Then the incoming item is above the selector bar
             gap = self.item_height
@@ -351,10 +358,10 @@ class LabelList(clutter.Group):
             self.displayMax -= 1
             self.roll_point_min -=1
             self.roll_point_max -=1
-        
+            """
             incoming_item = self.items[self.displayMin-1]
             outgoing_item = self.items[self.displayMax+1]
-        
+            """
         #print "Gap: " + str(gap)
         new_y = (group_y + gap)
         knots = (\
@@ -364,8 +371,8 @@ class LabelList(clutter.Group):
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
         self.behaviour_path = clutter.BehaviourPath(alpha, knots)
         
-        self.behaviour_opacity_outgoing = clutter.BehaviourOpacity(opacity_start=outgoing_item.get_opacity(), opacity_end=0, alpha=alpha)
-        self.behaviour_opacity_incoming = clutter.BehaviourOpacity(opacity_start=0, opacity_end=outgoing_item.get_opacity(), alpha=alpha)
+        #self.behaviour_opacity_outgoing = clutter.BehaviourOpacity(opacity_start=outgoing_item.get_opacity(), opacity_end=0, alpha=alpha)
+        #self.behaviour_opacity_incoming = clutter.BehaviourOpacity(opacity_start=0, opacity_end=outgoing_item.get_opacity(), alpha=alpha)
         
         self.behaviour_path.apply(self.item_group)
         self.behaviour_path.apply(self.background_group)
@@ -378,8 +385,10 @@ class LabelList(clutter.Group):
             #self.behaviour_opacity_incoming.apply(incomingMenutem)
         """
         
-    def get_current_item(self):
-        return self.items[self.selected]
+    def get_current_item(self, offset=0):
+        selection = self.selected + offset
+        if (selection < 0) or (selection >= len(self.items)): return None
+        return self.items[self.selected+offset]
         
 import gobject
 class ListItem(clutter.Group):
@@ -403,7 +412,8 @@ class ListItem(clutter.Group):
 
     def __init__ (self, font, label_left="", label_right="", label_list=None, max_width=None):
         clutter.Group.__init__ (self)
-        self.set_anchor_point_from_gravity(clutter.GRAVITY_WEST)
+        self.set_anchor_point_from_gravity(clutter.GRAVITY_NORTH)
+        #self.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
         
         self.label_left = clutter.Label()
         self.label_right = clutter.Label()
@@ -434,6 +444,7 @@ class ListItem(clutter.Group):
         #Text is actually scaled down in 'regular' position so that it doesn't get jaggies when zoomed in
         self.currentZoom = self.scale_step_medium
         self.currentOpacity = self.opacity_step_medium
+        self.set_anchor_point_from_gravity(clutter.GRAVITY_WEST)
         self.set_scale(self.currentZoom, self.currentZoom)
         self.set_opacity(self.currentOpacity)
         

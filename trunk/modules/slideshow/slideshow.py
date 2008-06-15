@@ -494,7 +494,7 @@ class Module:
     
                 #new_file_list = os.listdir(dirPath)
                 if tempMenu.usePreviewEffects:
-                    tempItem.itemTexturesGroup = img_previewer
+                    tempItem.menu_item.itemTexturesGroup = img_previewer
                     img_previewer.set_position(tempItem.menu.menu_image_x, tempItem.menu.menu_image_y)
                 else:
                     if not len(img_list) == 0:
@@ -502,5 +502,6 @@ class Module:
                 
                 tempItem.setAction(self)
 
+        tempMenu.selectFirst()
         return tempMenu
         

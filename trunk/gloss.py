@@ -94,7 +94,8 @@ class MainApp:
 
         #Update splash status msg
         self.splashScreen.set_msg("Creating menus")
-        MainMenu = self.glossMgr.create_menu() 
+        MainMenu = self.glossMgr.create_menu()
+        self.glossMgr.addMenu(MainMenu)
         #Update splash status msg
         self.splashScreen.set_msg("Connecting to MythTV server")        
         

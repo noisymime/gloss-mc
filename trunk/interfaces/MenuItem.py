@@ -8,7 +8,7 @@ class MenuItem (clutter.Label):
     zoomLevel = 0.5
     opacityStep = 120
 
-    def __init__ (self, menu, itemLabel, y):
+    def __init__ (self, menu, itemLabel, y=0):
         clutter.Label.__init__ (self)
         glossMgr = menu.glossMgr
         self.menu = menu
@@ -29,11 +29,6 @@ class MenuItem (clutter.Label):
         self.set_color(self.color)
         self.currentOpacity = 255
         self.data = itemLabel #By default the items data is simply its label
-        
-        if not glossMgr.get_selector_bar().get_pixbuf() is None:
-            #The width is the length of the selector bar minus its offset
-            width = glossMgr.get_selector_bar().get_width() + glossMgr.get_selector_bar().get_x_offset()
-            self.set_width(width)
 
         self.set_ellipsize(pango.ELLIPSIZE_END)
         #Text is actually scaled down in 'regular' position so that it doesn't get jaggies when zoomed in
@@ -79,7 +74,6 @@ class MenuItem (clutter.Label):
         """
         if self.main_texture is None: 
             self.main_texture = texture
-        
         self.itemTexturesGroup.add(texture)                
         self.itemTexturesGroup.show_all()
         

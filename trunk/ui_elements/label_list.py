@@ -234,9 +234,9 @@ class LabelList(clutter.Group):
             elif (i == self.selected+1) and (i <= self.displayMax-1):
                 #Item below the selected
                 self.items[i].scaleLabel(ListItem.SCALE_MEDIUM, self.timeline)
-            elif (i < self.displayMin) or (i > self.displayMax):
+            #elif (i < self.displayMin) or (i > self.displayMax):
                 #Item is off screen
-                self.items[i].scaleLabel(ListItem.SCALE_OFFSCREEN, self.timeline)
+            #    self.items[i].scaleLabel(ListItem.SCALE_OFFSCREEN, self.timeline)
             else:
                 #All other items
                 self.items[i].scaleLabel(ListItem.SCALE_NONE, self.timeline)
@@ -333,10 +333,7 @@ class LabelList(clutter.Group):
         
     #When the menu needs to display a new item from the top or bottom, it rolls
     # The distance the menu moves is the distance (in pixels) between the incoming item and the selector bar
-    def rollList(self, direction, timeline):  
-        
-        
-        
+    def rollList(self, direction, timeline):          
         
         (group_x, group_y) = self.item_group.get_position()
         if direction == self.DIRECTION_DOWN:  

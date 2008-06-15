@@ -49,12 +49,6 @@ class GlossMgr:
         background.show()
         
         self.stage.add(background)
-        
-        #Setup the selector bar
-        self.selector_bar = MenuSelector(self)
-        self.selector_bar.show_all()        
-        self.stage.add(self.selector_bar)
-        
 
         self.currentPlugin = None
         
@@ -78,14 +72,10 @@ class GlossMgr:
             tmpLabel.set_text("AAA")
             tmpLabel.set_font_name(self.currentMenu.font)
             #Selector bar height is 20% larger than the labels
-            self.selector_bar.set_height( int(tmpLabel.get_height()*self.selector_bar.height_percent) )
-            self.selector_bar.set_menu(self.currentMenu)
+            #self.selector_bar.set_height( int(tmpLabel.get_height()*self.selector_bar.height_percent) )
+            #self.selector_bar.set_menu(self.currentMenu)
             tmpLabel = None
 
-        
-    def get_selector_bar(self):
-        return self.selector_bar
-        
     def get_stage(self):
         return self.stage
         
@@ -118,10 +108,10 @@ class GlossMgr:
             
         # If none of these things, the menu needs to do something
         if event.keyval == clutter.keysyms.Up: #Up button pressed
-            self.currentMenu.input_queue.input(event)
+            self.currentMenu.on_key_press_event(event)
             #self.currentMenu.selectPrevious()
         if event.keyval == clutter.keysyms.Down: #Down button pressed
-            self.currentMenu.input_queue.input(event)
+            self.currentMenu.on_key_press_event(event)
             #self.currentMenu.selectNext()
         if event.keyval == clutter.keysyms.q:
             self.stage.show_cursor()
@@ -200,119 +190,4 @@ class GlossMgr:
         
     def create_menu(self):
         return self.interface.Interface(self)
-        
-        
-class MenuSelector(clutter.Texture):
-    """This class will shortly be removed in the rewrite of the ListMenu interface, ignore it for now."""
-    x_offset = -50
-    height_percent = 1
-    position_0 = None
-    blank = True
-
-    def __init__ (self, glossMgr):
-        clutter.Texture.__init__ (self)
-        self.glossMgr = glossMgr
-        glossMgr.themeMgr.get_texture("selector_bar", glossMgr.stage, self)
-        self.set_position(0, self.get_y())
-        if not self.get_pixbuf() is None:
-            self.x_offset = int(glossMgr.themeMgr.get_value("texture", "selector_bar", "position.x"))
-            self.height_percent = float(glossMgr.themeMgr.get_value("texture", "selector_bar", "height_percent")) / float(100)
-            self.blank = False
-        else:
-            self.position_0 = (0, 0)
-        
-    #This is a utility function that gets the coordinates of an that has been scaled
-    def get_true_abs_position(self, selectee):
-        #This whole clone label thing is a HORRIBLE hack but is there to compensate for the movement caused by scaling using GRAVITY_WEST
-        #Essentially a clone of the selectee is made and scaled to its final position to retrieve the final abs_position coords
-        cloneLabel = clutter.Label()
-        cloneLabel.set_text(selectee.get_text())
-        cloneLabel.set_font_name(selectee.get_font_name())
-        (scale_x, scale_y) = selectee.get_scale()
-        cloneLabel.set_anchor_point_from_gravity(clutter.GRAVITY_WEST)
-        cloneLabel.set_scale(scale_x, scale_y)
-        selectee.get_parent().add(cloneLabel)
-        
-        cloneLabel.set_position(selectee.get_x(), selectee.get_y())
-        
-        #Now that all the cloning is done, find out what the scale is to become and set it on the clone
-        scale = selectee.currentZoom
-        cloneLabel.set_scale(scale, scale)
-        
-        return cloneLabel.get_abs_position()
-
-    def selectItem(self, selectee, timeline):
-                
-        
-        #Now get the end position of the clone
-        (x, y) = self.get_true_abs_position(selectee)
-        #print (x, y)
-        
-        #Do some minor adjustments for centering etc
-        x = x + self.x_offset
-        y = y - int( (self.get_height()-selectee.get_height())/2 )
-        
-        #Yet another little hack, but this stores the position of the first element
-        if self.position_0 is None:
-            self.position_0 = (x, y)
-
-        #Move the bar
-        self.move_to(x, y, timeline)
-        
-    def move_to(self, x, y, timeline):  
-        knots = (\
-                (self.get_x(), self.get_y()),\
-                (x, y)\
-                )
-                
-        self.alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
-        self.behaviour = clutter.BehaviourPath(self.alpha, knots)
-        
-        self.behaviour.apply(self)
-        
-    def set_menu(self, menu):
-        self.menu = menu
-        
-    def set_spinner(self, state):
-        #Make sure we're not blank first
-        if self.blank:
-            return
-        
-        self.timeline = clutter.Timeline(25, 25)
-        self.alpha = clutter.Alpha(self.timeline, clutter.ramp_inc_func)
-        self.behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=self.alpha)
-        if state:
-            self.spinner = Spinner()
-            
-            height = self.get_height() - int(self.get_height() * 0.11)
-            #Height has to be even otherwise spinner rotates on a slightly off axis
-            if (height % 2) == 1:
-                height = height -1
-            
-            width = height
-            self.spinner.set_size(width, height)
-            
-            (x, y) = self.get_abs_position()
-            x = x + self.get_width() - int(self.get_width() * 0.13)
-            y = y + int(self.get_height() * 0.03)
-            self.spinner.set_position(x, y)
-            
-            self.spinner.set_opacity(0)
-            self.spinner.show()
-            self.glossMgr.get_stage().add(self.spinner)
-            self.behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=self.alpha)
-            self.spinner.start()
-        else:
-            self.behaviour = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=self.alpha)
-            self.timeline.connect('completed', self.spinner_end_event)
-        
-        self.behaviour.apply(self.spinner)
-        self.timeline.start()
-        
-    def spinner_end_event(self, data):
-        self.glossMgr.get_stage().remove(self.spinner)
-        self.spinner = None
-        
-    def get_x_offset(self):
-        return self.x_offset
         

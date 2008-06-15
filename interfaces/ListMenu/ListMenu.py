@@ -41,7 +41,7 @@ class Interface(clutter.Group):
         self.timeline = clutter.Timeline(15, 75) #This timeline is used on any movements that occur when changing items
         self.input_queue.set_timeline(self.timeline)
         self.timeline_completed=True
-        self.glossMgr.addMenu(self)
+        
         
     #Sets up the UI from the theme
     def setup_ui(self, themeMgr, name, menu):
@@ -145,6 +145,10 @@ class Interface(clutter.Group):
     def getItemGroup(self):
         return self.itemGroup
     
+    def on_key_press_event(self, event):
+        self.input_queue.input(event)
+
+    
     #Returns the newly selected item
     def selectNext(self):
 
@@ -245,7 +249,7 @@ class Interface(clutter.Group):
 
             self.timeline.start()
                         
-    def selectFirst(self, moveBar):
+    def selectFirst(self, moveBar=False):
         if self.timeline.is_playing:
             "ERROR: Timeline should NOT be playing here!"
                

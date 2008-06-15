@@ -91,6 +91,7 @@ class ImageFrame(clutter.Group):
         if self.reflection == toggle:
             return
         
+        self.use_reflection = toggle
         if not self.reflection is None:
             self.remove(self.reflection)
             self.reflection = None

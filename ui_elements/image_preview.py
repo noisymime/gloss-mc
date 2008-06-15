@@ -6,6 +6,7 @@ import random
 import math
 from ReflectionTexture import Texture_Reflection
 from ui_elements.image_frame import ImageFrame
+from ui_elements.image_clone import ImageClone
 from utils.ThumbnailMgr import ThumbnailMgr
 
 class image_previewer(clutter.Group):
@@ -164,8 +165,21 @@ class image_previewer(clutter.Group):
                 effect.start()
         
     def get_rand_tex(self):
+        max_iterations = 20
+        iteration = 0
         rand = random.randint(0, len(self.textures)-1)
-        return self.textures[rand]
+        rand = self.textures[rand]
+        while (not rand == self.tex1) and (not rand == self.tex2) and (not rand == self.tex3) and (iteration < max_iterations):
+            rand = random.randint(0, len(self.textures)-1)
+            rand = self.textures[rand]
+            iteration += 1
+        
+        if iteration == max_iterations:
+            #If here, it means there wasn't enough images to have 3 different ones
+            #We use a clone to avoid flickering
+            rand = ImageClone(img_frame = rand)
+        
+        return rand
     
     def get_next_tex(self):
         self.nextTexture = self.get_rand_tex()

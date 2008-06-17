@@ -40,8 +40,6 @@ class Module:
     def begin(self, glossMgr):
         self.glossMgr = glossMgr
         #self.buffer_file_reader = open("test.mpg","r")
-        self.spinning = True
-        glossMgr.get_selector_bar().set_spinner(True)
         self.loading_scr = SplashScr(self.stage)
         self.loading_scr.set_msg("Starting TV...")
         self.loading_scr.backdrop.set_opacity(180)
@@ -53,7 +51,6 @@ class Module:
             self.myConn = MythBackendConnection(self, self.server, self.port)
         except RuntimeError, e:
             self.loading_scr.remove_elegant()
-            glossMgr.get_selector_bar().set_spinner(False)
             self.glossMgr.display_msg("Error", str(e.args[0]))
             glossMgr.kill_plugin()
             return
@@ -63,17 +60,8 @@ class Module:
         
         self.isRunning = True
         
-    def begin_playback(self, fd):#buffer_file):
-        if self.spinning: 
-            self.glossMgr.get_selector_bar().set_spinner(False)
-            self.spinning = False
-        
-        
-        #uri = "file://" + os.getcwd() +"/" + buffer_file
-        #f = open(os.getcwd() +"/" + buffer_file, 'r')
+    def begin_playback(self, fd):
         uri = "fd://" + str(fd)
-        #uri = str(fd)
-        #print uri
         self.videoController.play_video(uri, self)
         
     def stop(self):

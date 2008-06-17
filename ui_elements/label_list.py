@@ -2,6 +2,7 @@ import clutter
 import pango
 import pygtk
 import gtk
+import math
 from utils.InputQueue import InputQueue
 
 class LabelList(clutter.Group):
@@ -115,9 +116,6 @@ class LabelList(clutter.Group):
             self.selector_bar.show()
             self.selector_bar.set_opacity(0)
             self.add(self.selector_bar)
-            
-        #This will default to true if not set in the theme
-        if self.use_clip: self.display_group.set_clip(0, 0, self.width, self.height)
         
         #Get the item background img
         img_element_item = themeMgr.find_element(img_element, "id", "inactive_background")
@@ -127,11 +125,17 @@ class LabelList(clutter.Group):
         
         #Update the displayMax and roll_point
         height = self.get_item_height()
-        self.displayMax = (self.height / height) - 1
+        
+        self.displayMax = math.floor(self.height / height)
         #For the moment, the roll_point_x is just the ends of the list
         self.roll_point_min = 1
-        self.roll_point_max = self.displayMax
-        
+        self.roll_point_max = self.displayMax-1
+        self.displaySize = self.displayMax - self.displayMin
+
+        #This will default to true if not set in the theme
+        if self.use_clip: self.display_group.set_clip(0, 0, self.width, self.height)
+
+        print "Group height: %s, Item height: %s, No items: %s" % (self.height, height, self.displaySize)        
         return True
         
     def on_key_press_event (self, event):
@@ -247,7 +251,7 @@ class LabelList(clutter.Group):
             #self.rollList( self.items[self.displayMin-1], self.items[self.displayMax+1], self.DIRECTION_UP, self.timeline)
             self.rollList( self.DIRECTION_UP, self.timeline)
         #Check if we're at the bottom of the viewable list
-        elif (self.selected > self.roll_point_max) and (self.displayMax < (len(self.items)-1)):
+        elif (self.selected >= self.roll_point_max) and (self.displayMax < (len(self.items))):
             #self.rollList( self.items[self.displayMax+1], self.items[self.displayMin-1], self.DIRECTION_DOWN, self.timeline)
             self.rollList( self.DIRECTION_DOWN, self.timeline)
         

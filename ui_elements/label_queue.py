@@ -56,6 +56,7 @@ class LabelQueue(clutter.Group):
         #Score is used when adding / removing items as it is a two stage process (eg 2 timelines)
         self.score = clutter.Score()
         self.score.connect("completed", self.flush_backlog)
+        self.score.append(clutter.Timeline(20,20)) # Seems to be a bug in Clutter 0.6 if score.remove_all() is called before a timeline has been added, so just add an unusued timeline here
         self.backlog = []
     
     def setup_from_theme_id(self, themeMgr, id, parent=None):
@@ -139,12 +140,12 @@ class LabelQueue(clutter.Group):
         return self.timeline
     
     def add_item(self, itemLabel, newItem=None):
-        """
+        
         if self.score.is_playing():
             self.backlog.append(itemLabel)
             return
         self.score.remove_all()
-        """
+        
         if len(self.items) == 0:
             #self.displayMax = self.height / self.label_height
             label_width = 0
@@ -153,23 +154,18 @@ class LabelQueue(clutter.Group):
             if self.display_group.get_parent() is None:
                 self.add(self.display_group)
         
-        if newItem is None: newItem = QueueItem(self.font_string, itemLabel, label_queue = self, max_width = self.width)
+        if newItem is None: newItem = QueueItem(self.font_string, self, label=itemLabel)
         newItem.set_background(clutter.CloneTexture(self.inactive_item_background), self.item_width_percent, self.item_height_percent)
-        """
-        newItem = clutter.Label()
-        newItem.set_text("blahdslkfjdsl")
-        newItem.show()
-        newItem.set_color(clutter.color_parse('White'))
-        """
+
         item_height = newItem.get_height()
         
         if self.orientation == self.ORIENTATION_TOP:
             item_y = 0
         elif self.orientation == self.ORIENTATION_BOTTOM:
-            running_y = 0
+            running_y = int(self.height + (item_height/2))
             for item in self.items:
                 running_y += (item.get_height())
-            item_y = running_y
+            item_y = int(running_y)
         newItem.show()
         newItem.set_position(0, item_y)
         newItem.set_opacity(0)
@@ -191,9 +187,9 @@ class LabelQueue(clutter.Group):
                 tmp_behaviour.apply(item)
                 self.behaviours.append(tmp_behaviour)
         elif self.orientation == self.ORIENTATION_BOTTOM:
-            knots = (
+            knots = (\
                      (self.item_group.get_x(), self.item_group.get_y()),\
-                     (self.item_group.get_x(), self.item_group.get_y()-item_height)\
+                     (self.item_group.get_x(), int(self.item_group.get_y()-item_height))\
                      )
             tmp_behaviour = clutter.BehaviourPath(alpha1, knots)
             tmp_behaviour.apply(self.item_group)
@@ -433,7 +429,7 @@ class QueueItem(clutter.Group):
     opacity_step_medium = 135
     opacity_step_none = 50
 
-    def __init__ (self, font, label="", label_queue=None, max_width=None):
+    def __init__ (self, font, label_queue, label=""):
         clutter.Group.__init__ (self)
         self.set_anchor_point_from_gravity(clutter.GRAVITY_NORTH)
         #self.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
@@ -442,12 +438,12 @@ class QueueItem(clutter.Group):
         self.label = clutter.Label()
         
         #Takes the scale and opacity values from a label list, if given
-        if not label_queue is None:
-            self.opacity_step_full = label_queue.opacityStep0
-            self.opacity_step_medium = label_queue.opacityStep1
-            self.opacity_step_none = label_queue.opacityStep2
-            
-            self.label.set_width(max_width)
+        self.opacity_step_full = label_queue.opacityStep0
+        self.opacity_step_medium = label_queue.opacityStep1
+        self.opacity_step_none = label_queue.opacityStep2
+        
+        self.label_queue = label_queue
+        self.label.set_width(label_queue.width)
             
         #setup the label/s
         self.add(self.label)
@@ -495,7 +491,7 @@ class QueueItem(clutter.Group):
         
     def set_background(self, texture, width_percent, height_percent):
         if self.background is None:
-            texture.set_width(int(self.label.get_width() * width_percent))
+            texture.set_width(int(self.label_queue.width * width_percent))
             texture.set_height(int(self.label.get_height() * height_percent))
         else:
             texture.set_width(self.background.get_width())
@@ -508,7 +504,8 @@ class QueueItem(clutter.Group):
         self.label.set_position(label_x, label_y)
 
         self.add(self.background)
-        self.lower_child(self.background, self.label)
+        self.lower_child(self.label, self.background)
+        self.background.show()
         
     def set_data(self, data):
         self.data = data

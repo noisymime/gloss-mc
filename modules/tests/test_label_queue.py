@@ -18,7 +18,7 @@ class Module(clutter.Group):
         self.backdrop.set_height(self.stage.get_height())
         self.add(self.backdrop)
         
-        self.queue = LabelQueue()
+        self.queue = LabelQueue(orientation=LabelQueue.ORIENTATION_BOTTOM)
         self.queue.setup_from_theme_id(glossMgr.themeMgr, "tests_label_queue")
         self.add(self.queue)
         
@@ -33,13 +33,6 @@ class Module(clutter.Group):
             return True
         
     def begin(self, glossMgr):
-        """
-        self.label = clutter.Label()
-        self.label.set_text("blahdslkfjdsl")
-        self.label.show()
-        self.label.set_color(clutter.color_parse('White'))
-        self.add(self.label)
-        """
         
         self.backdrop.set_opacity(0)
         self.backdrop.show()

@@ -166,10 +166,8 @@ class Module:
 
         for fs_object in module_list:
             file = tests_dir + "/" + fs_object
-            print file[-8:]
             if (file[-3:] == ".py") and (not file[-8:] == "tests.py"):
                 file = file.rstrip(".py")
-                print file
                 test = __import__(file).Module(self.glossMgr, self.dbMgr)
                 self.tests.append(test)
                 tempItem = tempMenu.addItem(fs_object)

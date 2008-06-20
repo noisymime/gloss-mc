@@ -5,8 +5,9 @@ import gtk
 import math
 from utils.InputQueue import InputQueue
 
-class LabelList(clutter.Group):
+class LabelQueue(clutter.Group):
     DIRECTION_UP, DIRECTION_DOWN = range(2)
+    ORIENTATION_TOP, ORIENTATION_BOTTOM = range(2)
     
     fps = 70
     frames = 50
@@ -18,10 +19,10 @@ class LabelList(clutter.Group):
     item_height = 0
     use_clip = True
     
-    def __init__(self):
+    def __init__(self, orientation=ORIENTATION_TOP):
         clutter.Group.__init__(self)
         self.items = []
-        self.bg_items = []
+        self.orientation = orientation
         
         #Setup input queue controller
         self.input_queue = InputQueue()
@@ -35,19 +36,15 @@ class LabelList(clutter.Group):
         self.roll_point_min = 1 #The item number at which point the list will roll down
         self.roll_point_max = self.displaySize -1 #The item number at which point the list will roll up
         
-        #There are 3 subgroups:
+        #There are 2 subgroups:
         # 1) item_group: Contains the labels themselves
-        # 2) background_group: Contains the background images
-        # 3) display_group: Contains groups 1 & 2. Display group can optionally have a clip applied to it
-        # Group 3 is then added to self 
+        # 2) display_group: Contains groups 1 & 2. Display group can optionally have a clip applied to it
+        # Group 2 is then added to self 
         self.item_group = clutter.Group()
         self.item_group.show()
-        self.background_group = clutter.Group()
-        self.background_group.show()
         self.display_group = clutter.Group()
         self.display_group.show()
         
-        self.display_group.add(self.background_group)
         self.display_group.add(self.item_group)
         
         self.inactive_item_background = None
@@ -55,9 +52,14 @@ class LabelList(clutter.Group):
         self.image_up = None
         #Selector bar image, moves with selections to show current item
         self.selector_bar = None
+        
+        #Score is used when adding / removing items as it is a two stage process (eg 2 timelines)
+        self.score = clutter.Score()
+        self.score.connect("completed", self.flush_backlog)
+        self.backlog = []
     
     def setup_from_theme_id(self, themeMgr, id, parent=None):
-        context = "label_list"
+        context = "label_queue"
         
         element = themeMgr.search_docs(context, id).childNodes
         img_element = themeMgr.search_docs(context, id).getElementsByTagName("texture")
@@ -66,6 +68,7 @@ class LabelList(clutter.Group):
             return None
         
         self.item_height_percent = float(themeMgr.find_child_value(element, "item_height_percent"))
+        self.item_width_percent = float(themeMgr.find_child_value(element, "item_width_percent"))
         
         #Grab the font
         font_node = themeMgr.get_subnode(element, "font")
@@ -73,9 +76,6 @@ class LabelList(clutter.Group):
         self.font_string = fontString
         
         #Set the selection effect steps
-        self.zoomStep0 = float(themeMgr.find_child_value(element, "scale_step0"))
-        self.zoomStep1 = float(themeMgr.find_child_value(element, "scale_step1"))
-        self.zoomStep2 = float(themeMgr.find_child_value(element, "scale_step2"))
         self.opacityStep0 = int(themeMgr.find_child_value(element, "opacity_step0"))
         self.opacityStep1 = int(themeMgr.find_child_value(element, "opacity_step1"))
         self.opacityStep2 = int(themeMgr.find_child_value(element, "opacity_step2"))
@@ -123,10 +123,7 @@ class LabelList(clutter.Group):
             img_element_item = img_element_item.childNodes
             self.inactive_item_background = themeMgr.get_texture("inactive_background", self, element = img_element_item)
         
-        #Update the displayMax and roll_point
-        height = self.get_item_height()
-        
-        self.displayMax = math.floor(self.height / height)
+        #self.displayMax = math.floor(self.height / height)
         #For the moment, the roll_point_x is just the ends of the list
         self.roll_point_min = 1
         self.roll_point_max = self.displayMax-1
@@ -141,53 +138,82 @@ class LabelList(clutter.Group):
         self.input_queue.input(event)
         return self.timeline
     
-    def get_item_height(self):
-        if not self.item_height == 0:
-            return self.item_height
-        
-        #Perform a cheap hack to figure out the height of a label
-        tempLabel = clutter.Label()            
-        tempLabel.set_font_name(self.font_string)
-        tempLabel.set_text("S")
-
-        self.label_height = tempLabel.get_height()
-        self.item_height = int(self.label_height * self.item_height_percent)
-        
-        return self.item_height
-    
     def add_item(self, itemLabel, newItem=None):
+        """
+        if self.score.is_playing():
+            self.backlog.append(itemLabel)
+            return
+        self.score.remove_all()
+        """
         if len(self.items) == 0:
-            self.displayMax = self.height / self.label_height
+            #self.displayMax = self.height / self.label_height
             label_width = 0
     
             #This has to go hear for layering purposes
             if self.display_group.get_parent() is None:
                 self.add(self.display_group)
         
-        item_y = len(self.items) * self.item_height
-        label_y = item_y + ((self.item_height - self.label_height)/2)
-        label_y += int(self.item_height/2)
-        label_y = int(label_y)
+        if newItem is None: newItem = QueueItem(self.font_string, itemLabel, label_queue = self, max_width = self.width)
+        newItem.set_background(clutter.CloneTexture(self.inactive_item_background), self.item_width_percent, self.item_height_percent)
+        """
+        newItem = clutter.Label()
+        newItem.set_text("blahdslkfjdsl")
+        newItem.show()
+        newItem.set_color(clutter.color_parse('White'))
+        """
+        item_height = newItem.get_height()
         
-        #If a background pic is specified in the theme, clone it and add
-        if not self.inactive_item_background is None:
-            bg_img = clutter.CloneTexture(self.inactive_item_background)
-            bg_img.set_height(self.item_height)
-            bg_img.set_width(self.width)
-            bg_img.set_position(0, item_y)
-            self.background_group.add(bg_img)
-            self.bg_items.append(bg_img)
-            
-        if newItem is None: newItem = ListItem(self.font_string, itemLabel, label_list = self, max_width = self.width)
-        newItem.set_position(0, label_y)
-
-        newItem.show()            
-        if not self.image_down is None: self.image_down.set_opacity(255)
-        if not self.inactive_item_background is None: bg_img.show()
+        if self.orientation == self.ORIENTATION_TOP:
+            item_y = 0
+        elif self.orientation == self.ORIENTATION_BOTTOM:
+            running_y = 0
+            for item in self.items:
+                running_y += (item.get_height())
+            item_y = running_y
+        newItem.show()
+        newItem.set_position(0, item_y)
+        newItem.set_opacity(0)
         self.items.append(newItem)
-        
         self.item_group.add(newItem)
+        
+        #Setup behaviours
+        timeline1 = clutter.Timeline(20,30)
+        alpha1 = clutter.Alpha(timeline1, clutter.ramp_inc_func)
+        self.behaviours = []
+        if self.orientation == self.ORIENTATION_TOP:
+            #All items must be moved down by the new items height
+            for item in self.items:
+                knots = (\
+                         (item.get_x(), item.get_y()),\
+                         (item.get_x(), int(item.get_y()+item_height) )\
+                         )
+                tmp_behaviour = clutter.BehaviourPath(alpha1, knots)
+                tmp_behaviour.apply(item)
+                self.behaviours.append(tmp_behaviour)
+        elif self.orientation == self.ORIENTATION_BOTTOM:
+            knots = (
+                     (self.item_group.get_x(), self.item_group.get_y()),\
+                     (self.item_group.get_x(), self.item_group.get_y()-item_height)\
+                     )
+            tmp_behaviour = clutter.BehaviourPath(alpha1, knots)
+            tmp_behaviour.apply(self.item_group)
+            self.behaviours.append(tmp_behaviour)
+
+        timeline2 = clutter.Timeline(20,30)
+        alpha2 = clutter.Alpha(timeline2, clutter.ramp_inc_func)
+        self.behaviour_opacity_newitem = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha2)
+        self.behaviour_opacity_newitem.apply(newItem)
+        
+        self.score.append(timeline1)
+        self.score.append(timeline2, timeline1)
+        self.score.start()
+        #timeline1.start()
         return newItem
+    
+    def flush_backlog(self, data):
+        if len(self.backlog) > 0:
+            nextLabel = self.backlog.pop()
+            self.add_item(nextLabel)
     
     #Removes all items from the list
     def clear(self):
@@ -391,7 +417,7 @@ class LabelList(clutter.Group):
         return self.items[self.selected+offset]
         
 import gobject
-class ListItem(clutter.Group):
+class QueueItem(clutter.Group):
     #Setup signals
     __gsignals__ =  { 
         "selected": (
@@ -400,96 +426,89 @@ class ListItem(clutter.Group):
             gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, [])
         }
     
-    SCALE_NONE, SCALE_MEDIUM, SCALE_FULL, SCALE_OFFSCREEN = range(4) 
+    STATE_SELECTED, STATE_NEXT, STATE_UNSELECTED, STATE_OFFSCREEN = range(4)
     
     #Default values for zoom and opacity
     opacity_step_full = 255
     opacity_step_medium = 135
     opacity_step_none = 50
-    scale_step_full = 1
-    scale_step_medium = 0.5
-    scale_step_none = 0.4
 
-    def __init__ (self, font, label_left="", label_right="", label_list=None, max_width=None):
+    def __init__ (self, font, label="", label_queue=None, max_width=None):
         clutter.Group.__init__ (self)
         self.set_anchor_point_from_gravity(clutter.GRAVITY_NORTH)
         #self.set_anchor_point_from_gravity(clutter.GRAVITY_CENTER)
         
-        self.label_left = clutter.Label()
-        self.label_right = clutter.Label()
+        self.background = None
+        self.label = clutter.Label()
         
         #Takes the scale and opacity values from a label list, if given
-        if not label_list is None:
-            self.opacity_step_full = label_list.opacityStep0
-            self.opacity_step_medium = label_list.opacityStep1
-            self.opacity_step_none = label_list.opacityStep2
-            self.scale_step_full = label_list.zoomStep0
-            self.scale_step_medium = label_list.zoomStep1
-            self.scale_step_none = label_list.zoomStep2
+        if not label_queue is None:
+            self.opacity_step_full = label_queue.opacityStep0
+            self.opacity_step_medium = label_queue.opacityStep1
+            self.opacity_step_none = label_queue.opacityStep2
             
-            self.set_width(label_list.get_width())
+            self.label.set_width(max_width)
             
         #setup the label/s
-        self.add(self.label_left)
-        self.label_left.show()
-        self.label_left.set_font_name(font)
-        self.label_left.set_text(label_left)
+        self.add(self.label)
+        self.label.show()
+        self.label.set_font_name(font)
+        self.label.set_text(label)
         self.color = clutter.Color(0xff, 0xff, 0xff, 0xdd)
-        self.label_left.set_color(self.color)
+        self.label.set_color(self.color)
         self.currentOpacity = 255
-        self.data = label_left #By default the items data is simply its label
+        self.data = label #By default the items data is simply its label
         
-        self.label_left.set_ellipsize(pango.ELLIPSIZE_END)
+        self.label.set_line_wrap(True)
         
         #Text is actually scaled down in 'regular' position so that it doesn't get jaggies when zoomed in
-        self.currentZoom = self.scale_step_medium
         self.currentOpacity = self.opacity_step_medium
         self.set_anchor_point_from_gravity(clutter.GRAVITY_WEST)
-        self.set_scale(self.currentZoom, self.currentZoom)
         self.set_opacity(self.currentOpacity)
         
-        #Set ellipses
-        if not max_width is None:
-            self.label_left.set_width( max_width - self.label_right.get_width() )
-            self.label_left.set_ellipsize(pango.ELLIPSIZE_END)
-        
-    def scaleLabel(self, level, timeline):
+    def set_selection_level(self, level, timeline):
        
         #Default values (Just in case)
-        zoomTo=0
         opacityTo = 255
 
-        
-        if level == self.SCALE_FULL:
-            zoomTo = self.scale_step_full
+        STATE_SELECTED, STATE_NEXT, STATE_UNSELECTED, STATE_OFFSCREEN
+        if level == STATE_SELECTED:
             opacityTo = self.opacity_step_full
             self.emit("selected")
-        elif level == self.SCALE_MEDIUM:
-            zoomTo = self.scale_step_medium
+        elif level == STATE_NEXT:
             opacityTo = self.opacity_step_medium
             self.emit("deselected")
-        elif level == self.SCALE_NONE:
-            zoomTo = self.scale_step_none
+        elif level == STATE_UNSELECTED:
             opacityTo = self.opacity_step_none
-        elif level == self.SCALE_OFFSCREEN:
-            zoomTo = self.scale_step_none
+        elif level == STATE_OFFSCREEN:
             opacityTo = 0
         
         #Do a check for any actual changes. If there's no change, just return without applying any behaviours    
-        if (zoomTo == self.currentZoom) and (opacityTo == self.currentOpacity):
+        if (opacityTo == self.currentOpacity):
             return None
     
         alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
-        self.behaviourScale = clutter.BehaviourScale(x_scale_start=self.currentZoom, y_scale_start=self.currentZoom, x_scale_end=zoomTo, y_scale_end=zoomTo, alpha=alpha) #scale_gravity=clutter.GRAVITY_WEST, 
         self.behaviourOpacity = clutter.BehaviourOpacity(opacity_start=self.currentOpacity, opacity_end=opacityTo, alpha=alpha)
-        self.behaviourScale.apply(self)
         self.behaviourOpacity.apply(self)
         
-        self.currentZoom = zoomTo
         self.currentOpacity = opacityTo
         
-    def get_zoom_level(self):
-        return self.zoomLevel
+    def set_background(self, texture, width_percent, height_percent):
+        if self.background is None:
+            texture.set_width(int(self.label.get_width() * width_percent))
+            texture.set_height(int(self.label.get_height() * height_percent))
+        else:
+            texture.set_width(self.background.get_width())
+            texture.set_height(self.background.get_height())
+            self.remove(self.background)
+        self.background = texture
+        
+        label_x = (self.background.get_width() - self.label.get_width()) / 2
+        label_y = (self.background.get_height() - self.label.get_height()) / 2
+        self.label.set_position(label_x, label_y)
+
+        self.add(self.background)
+        self.lower_child(self.background, self.label)
         
     def set_data(self, data):
         self.data = data

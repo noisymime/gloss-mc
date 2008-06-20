@@ -19,6 +19,11 @@
 			<size id="800x600">30</size>
 			<size id="1920x1080">25</size>
 		</font>
+		<colour id="font_colour">
+			<r>255</r>
+			<g>255</g>
+			<b>255</b>
+		</colour>
 
 		<dimensions type="relativeToStage">
 			<width>30%</width>

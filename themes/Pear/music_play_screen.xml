@@ -23,6 +23,7 @@
 			     1.50 means that the item will be 1.x times the height as the font etc
 		 -->
 		<item_height_percent>1.00</item_height_percent>
+		<item_width_percent>1.00</item_width_percent>
 		
 		<!-- These are the opacity and scale values for the 3 possible steps in the menu
 		     Make all the values the same if you do not want these effects -->

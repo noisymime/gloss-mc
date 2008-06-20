@@ -22,7 +22,7 @@
              Eg: 1.00 means that each item will be the same height as the font,
                  1.50 means that the item will be 1.x times the height as the font etc
          -->
-        <item_height_percent>1.00</item_height_percent>
+        <item_height_percent>1.10</item_height_percent>
         <item_width_percent>1.00</item_width_percent>
         
         <!-- These are the opacity and scale values for the 3 possible steps in the menu
@@ -30,9 +30,6 @@
         <opacity_step0>255</opacity_step0>
         <opacity_step1>135</opacity_step1>
         <opacity_step2>135</opacity_step2>
-        <scale_step0>1</scale_step0>
-        <scale_step1>1</scale_step1>
-        <scale_step2>1</scale_step2>
         
         <transition_fps>30</transition_fps>
         <transition_frames>10</transition_frames>

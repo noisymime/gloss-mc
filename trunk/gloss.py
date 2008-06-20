@@ -36,7 +36,8 @@ def find_modules():
             path = mod_dir + "/" + fs_object
             if os.path.isdir(path) and (not fs_object[0] == "."):
                 tmp_dir = mod_dir+"/"+fs_object+"/"+fs_object
-                print "Found Module: " + fs_object
+                #Only print the module if its not the tests one
+                if not fs_object == "tests": print "Found Module: " + fs_object
                 modules.append(__import__(tmp_dir))
 
 class MainApp:
@@ -51,6 +52,8 @@ class MainApp:
         self.stage.connect('button-press-event', self.on_button_press_event)
         #hide the cursor
         self.stage.hide_cursor()
+        
+        self.show_tests = False
         
         #Create a master mySQL connection
         self.dbMgr = mythDB()
@@ -91,6 +94,9 @@ class MainApp:
             if arg == "--debug":
                 print "Using debug mode"
                 self.glossMgr.debug = True
+            elif arg == "--tests":
+                self.show_tests = True
+                print "Showing tests"
 
         #Update splash status msg
         self.splashScreen.set_msg("Creating menus")
@@ -105,8 +111,8 @@ class MainApp:
             
             tempMod = mods.Module(self.glossMgr, self.dbMgr)
             title =  tempMod.title
+            if title == "Tests" and not (self.show_tests): continue
             if self.glossMgr.debug: print "Loading module: %s" % title
-            #print title
             
             self.splashScreen.set_msg("Loading "+title)
             temp_menu_item = MainMenu.addItem(title)

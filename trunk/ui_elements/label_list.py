@@ -89,6 +89,9 @@ class LabelList(clutter.Group):
         themeMgr.setup_actor(self, element, parent)
         (self.width, self.height) = themeMgr.get_dimensions(element, parent)
         
+        #Update the displayMax and roll_point
+        height = self.get_item_height()
+        
         #Set the up/down images + the selector bar
         #This assumes images go in the bottom right corner, will add flexibility later
         img_element_up = themeMgr.find_element(img_element, "id", "image_up")
@@ -111,6 +114,10 @@ class LabelList(clutter.Group):
         if not img_element_selector_bar is None:
             img_element_selector_bar = img_element_selector_bar.childNodes
             self.selector_bar = themeMgr.get_texture("selector_bar", parent=self, element=img_element_selector_bar)
+            selector_bar_height_percent = themeMgr.find_child_value(img_element_selector_bar, "height_percent")
+            if selector_bar_height_percent is None: selector_bar_height_percent = 1.00
+            bar_height = int(height * float(selector_bar_height_percent))
+            self.selector_bar.set_height(bar_height)
             self.selector_bar.y_offset = self.selector_bar.get_y()
             self.selector_bar.set_width(self.width)
             self.selector_bar.show()
@@ -123,8 +130,7 @@ class LabelList(clutter.Group):
             img_element_item = img_element_item.childNodes
             self.inactive_item_background = themeMgr.get_texture("inactive_background", self, element = img_element_item)
         
-        #Update the displayMax and roll_point
-        height = self.get_item_height()
+
         
         self.displayMax = math.floor(self.height / height)
         #For the moment, the roll_point_x is just the ends of the list

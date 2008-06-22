@@ -22,8 +22,8 @@ class MusicObjectRow(ImageRow):
         self.sleep = False
         
         self.objectLibrary = []
-        self.loaded_objects = 0
         self.timeline = None
+        self.loaded_max = 0
         
     def add_object(self, object):
         self.objectLibrary.append(object)
@@ -34,48 +34,47 @@ class MusicObjectRow(ImageRow):
     def load_image_range(self, start, end, as_thread = False, thread_data = None):
         #External timeline can be set by other objects as a form of 'lock'. If external timeline is running, thread will be paused
         self.external_timeline = None
+        self.buffer = 5
         
         self.emit("load-begin")
         #Do a check so we don't reload anything that's already been done
-        if start < self.loaded_objects:
+        if start < self.loaded_max:
             start = self.loaded_objects
         for i in range(start, end):
             object = self.objectLibrary[i]
             print "loading: " + object.name
-            pixbuf = object.get_image(size = self.image_size)
-            #If there is currently motion, we need to pause this work
-            #if self.should_sleep():
-            #    time.sleep(0.1)
-            #if self.sleep: 
-                #self.timeline.connect('completed', self.restart_cb)
-                #time.sleep(self.music_player.sleep_time)
-
-            
-            if pixbuf == object.PENDING_DOWNLOAD:
-                #Get the temporary image
-                if as_thread: clutter.threads_enter()
+            if i > (self.num_columns + self.buffer):
                 pixbuf = object.get_default_image()
-                tmpImage = ImageFrame(pixbuf, self.image_size, use_reflection = True, quality = ImageFrame.QUALITY_FAST) #clutter.Texture()
-                object.connect("image-found", self.set_image_cb, object, tmpImage)
-                if as_thread: clutter.threads_leave()
-            elif not pixbuf is None:
-                #If we're performing this loading as a seperate thread, we need to lock the Clutter threads
-                if as_thread: clutter.threads_enter()
-                tmpImage = ImageFrame(pixbuf, self.image_size, use_reflection=True, quality = ImageFrame.QUALITY_FAST)
-                if as_thread: clutter.threads_leave()
             else:
-                if as_thread: clutter.threads_enter()
-                pixbuf = object.get_default_image()
-                tmpImage = ImageFrame(pixbuf, self.image_size, use_reflection = True, quality = ImageFrame.QUALITY_FAST) #clutter.Texture()
-                if as_thread: clutter.threads_leave()
+                pixbuf = object.get_image(size = self.image_size)
 
-            self.add_texture_group(tmpImage)
-            self.loaded_objects += 1
+            self.process_pixbuf(pixbuf, object)
 
+        self.loaded_max = (self.num_columns + self.buffer)
         self.emit("load-complete")
         return False
-        #print "Finished threads"
-         
+     
+    def process_pixbuf(self, pixbuf, object):
+        if pixbuf == object.PENDING_DOWNLOAD:
+            #Get the temporary image
+            #if as_thread: clutter.threads_enter()
+            pixbuf = object.get_default_image()
+            tmpImage = ImageFrame(pixbuf, self.image_size, use_reflection = True, quality = ImageFrame.QUALITY_FAST) #clutter.Texture()
+            object.connect("image-found", self.set_image_cb, object, tmpImage)
+            #if as_thread: clutter.threads_leave()
+        elif not pixbuf is None:
+            #If we're performing this loading as a seperate thread, we need to lock the Clutter threads
+            #if as_thread: clutter.threads_enter()
+            tmpImage = ImageFrame(pixbuf, self.image_size, use_reflection=True, quality = ImageFrame.QUALITY_FAST)
+            #if as_thread: clutter.threads_leave()
+        else:
+            #if as_thread: clutter.threads_enter()
+            pixbuf = object.get_default_image()
+            tmpImage = ImageFrame(pixbuf, self.image_size, use_reflection = True, quality = ImageFrame.QUALITY_FAST) #clutter.Texture()
+            #if as_thread: clutter.threads_leave()
+
+        self.add_texture_group(tmpImage)
+        
     #A simple callback funtion to set the image of an artist/album after it has completed a download
     def set_image_cb(self, data, music_object, tmpImage):
         #if self.glossMgr.debug:
@@ -85,24 +84,26 @@ class MusicObjectRow(ImageRow):
             clutter.threads_enter()
             tmpImage.set_pixbuf(pixbuf)
             clutter.threads_leave()
-    
-    def restart_cb(self, data):
-        self.sleep = True
-        
-    def should_sleep(self):
-        ret_val = False
-        #if self.sleep:
-        #    return True
-        
-        if not self.external_timeline is None:
-            if self.external_timeline.is_playing():
-                ret_val = True
-        
-        if not self.timeline is None:
-            if self.timeline.is_playing():
-                ret_val = True
-                
-        return ret_val
             
     def get_current_object(self):
         return self.objectLibrary[self.currentSelection]
+    
+    def move_common(self, newItem):
+        if (newItem + self.buffer) > self.loaded_max:
+            max_load = newItem + int(self.num_columns / 2 + 1)
+            for i in range(self.loaded_max, max_load):
+                object = self.objectLibrary[i]
+                img_frame = self.textureLibrary[i]
+                print "loading: " + object.name
+                pixbuf = object.get_image(size = self.image_size)
+                
+                if pixbuf == object.PENDING_DOWNLOAD:
+                    #Get the temporary image
+                    pixbuf = object.get_default_image()
+                    object.connect("image-found", self.set_image_cb, object, img_frame)
+                
+                img_frame.set_pixbuf(pixbuf)
+                
+            self.loaded_max = max_load
+                
+        ImageRow.move_common(self, newItem)

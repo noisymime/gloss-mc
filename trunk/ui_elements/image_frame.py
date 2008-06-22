@@ -83,7 +83,7 @@ class ImageFrame(clutter.Group):
         if self.use_reflection:
             self.set_reflection(True)               
         else:
-                self.reflection = None
+            self.reflection = None
     
     #Turns reflections on and off
     def set_reflection(self, toggle):
@@ -92,12 +92,16 @@ class ImageFrame(clutter.Group):
             return
         
         self.use_reflection = toggle
-        if not self.reflection is None:
+        if self.use_reflection:
+            if not self.reflection is None:
+                self.remove(self.reflection)
+                self.reflection = None
+            self.reflection = Texture_Reflection(self.main_pic)
+            self.add(self.reflection)
+            self.reflection.show()
+        else:
             self.remove(self.reflection)
             self.reflection = None
-        self.reflection = Texture_Reflection(self.main_pic)
-        self.add(self.reflection)
-        self.reflection.show()
         
     def get_texture(self):
         return self.main_pic

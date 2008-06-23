@@ -213,12 +213,24 @@ class LabelQueue(clutter.Group):
     
     #Removes all items from the list
     def clear(self):
+        timeline = clutter.Timeline(15,30)
+        timeline.connect("completed", self.reset_item_group)
+        alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
+        self.behaviour_opacity = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=alpha)
+        self.behaviour_opacity.apply(self.item_group)
+        
+        timeline.start()
+        
+    def reset_item_group(self, data):
         for item in self.items:
             self.item_group.remove(item)
             item = None
         self.items = []
         self.selected = 0
         
+        self.item_group.set_position(0, 0)
+        self.item_group.set_opacity(255)
+        self.behaviour_opacity = None
     
     def display(self):
         if self.displayMax > len(self.items):

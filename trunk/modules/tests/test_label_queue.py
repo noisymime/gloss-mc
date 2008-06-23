@@ -28,6 +28,8 @@ class Module(clutter.Group):
             self.add_string_item("here is a string that gets added")
         if event.keyval == clutter.keysyms.q:
             clutter.main_quit()
+        if event.keyval == clutter.keysyms.o:
+            self.queue.clear()
         if event.keyval == clutter.keysyms.Escape:
             self.stage.remove(self)
             return True

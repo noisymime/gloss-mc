@@ -176,7 +176,7 @@ class MythBackendConnection(threading.Thread):
             (self.pipe_rfd, self.pipe_wfd) = os.pipe()
             self.videoPlayer.begin_playback(self.pipe_rfd)
         
-        print "BEGINNING PLAYBACK!"
+        print "TV Player: BEGINNING PLAYBACK!"
         self.Playing = True
         while self.Playing:
             #print "Begin loop"
@@ -201,11 +201,12 @@ class MythBackendConnection(threading.Thread):
             elif (request_size > request_size_step) and (num_bytes != request_size):
                 request_size -= request_size_step
                 if num_bytes < request_size and self.videoPlayer.glossMgr.debug:
-                    print "TV_PLAYER: Failed to receive full allocation"
-            #print "End optimisation"
+                    print "TV_PLAYER: (Warning) Failed to receive full allocation. Adjusting request size"
         
         print "Ending playback"
-        self.stop()
+        self.videoPlayer.stop()
+        self.videoPlayer.glossMgr.kill_plugin()
+        #self.stop()
         
     def message_socket_mgr(self, msg_socket):
         #Do the protocol version check
@@ -276,10 +277,11 @@ class MythBackendConnection(threading.Thread):
         if not self.pipe_wfd is None: 
             os.close(self.pipe_wfd)
             self.pipe_wfd = None
-        if not self.pipe_rfd is None: 
+        if not self.pipe_rfd is None:
             os.close(self.pipe_rfd)
             self.pipe_rfd = None
         
         if not self.data_socket_id is None:
             end_transfer_cmd = "QUERY_FILETRANSFER "+str(self.data_socket_id) +"[]:[]DONE"
             self.send_cmd(self.sock, end_transfer_cmd)
+            

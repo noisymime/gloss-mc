@@ -20,6 +20,7 @@ class MediaController(gobject.GObject):
     def __init__(self, glossMgr):
         gobject.GObject.__init__(self)
         self.stage = glossMgr.stage
+        self.glossMgr = glossMgr
         #self.media_element = clutter.Media()
         
         self.use_osd = True

@@ -36,6 +36,7 @@
 		
 		<texture id="selector_bar">
 			<image>active_bar.png</image>
+			<height_percent>1.20</height_percent>
 			<dimensions type="relativeToSelf">
 				<width>100%</width>
 				<height>relative</height>

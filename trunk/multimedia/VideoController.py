@@ -91,6 +91,7 @@ class VideoController(MediaController):
                 return
             
             if struc.get_name() == "missing-plugin":
+                self.glossMgr.display_msg("Missing Plugin", message.structure.to_string())
                 print "GStreamer Error (missing-plugin): " + message.structure.to_string()
                 self.isPlaying = False
                 self.video_texture.set_playing(False)

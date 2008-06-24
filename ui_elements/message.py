@@ -24,15 +24,6 @@ class Message():
         
         self.main_group = clutter.Group()
         
-        """
-        pixbuf = gtk.gdk.pixbuf_new_from_file(self.theme_dir + "/splash_box.png")
-        self.box = clutter.Texture()
-        self.box.set_pixbuf(pixbuf)
-        self.box.set_opacity(int(255 * 0.75))
-        self.box.set_height(int(self.stage.get_height()* 0.3))
-        self.main_group.add(self.box)
-        """
-        
         width = int(self.stage.get_width()* 0.4)
         height = int(self.stage.get_height()* 0.3)
         self.box = RoundedRectangle(width, height, clutter.color_parse('White'))
@@ -78,6 +69,11 @@ class Message():
         self.detail.set_width(width)
         self.message.set_width(width)
 
+        box_height = self.message.get_height() + self.detail.get_height() + (self.message.get_y() - self.box.get_y())
+        if box_height > self.stage.get_height(): box_height = self.stage.get_height()
+        self.box.set_height(box_height)
+        box_y = int( (self.stage.get_height() - box_height) /2 )
+        self.main_group.set_y(box_y)
 
         self.main_group.set_opacity(0)      
         self.backdrop.set_opacity(0)

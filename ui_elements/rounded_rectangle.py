@@ -28,11 +28,11 @@ class RoundedRectangle(clutter.Group):
         #context = self.cairo_create()
         self.texture = CairoTexture(self.width, self.height)
 
-        self.setup_rounded_context()
-        self.refresh()
-        
         self.add(self.texture)
         self.texture.show()
+        
+        self.setup_rounded_context()
+        self.refresh()
         
     def setup_rounded_context(self):        
         # Round corners
@@ -43,6 +43,11 @@ class RoundedRectangle(clutter.Group):
         radius_x = self.RADIUS
         radius_y = self.RADIUS
         
+        old_tex = self.texture
+        self.texture = CairoTexture(self.width, self.height)
+        self.add(self.texture)
+        self.texture.show()
+        self.remove(old_tex)
         context = self.texture.cairo_create()
         
         #Clear the texture
@@ -84,7 +89,6 @@ class RoundedRectangle(clutter.Group):
         #hr = height / float(pixbuf.get_height())
         #context.scale(wr,hr)
         
-        #ct.set_source_pixbuf(pixbuf,0,0)
         self.ct.rectangle(
                      (0, 0, self.width, self.height)
                      )
@@ -108,7 +112,10 @@ class RoundedRectangle(clutter.Group):
         clutter.Group.set_width(self, new_width)
         
     def set_height(self, new_height):
-        self.texture.set_height(new_height)
+        self.height = new_height
+        self.setup_rounded_context()
+        self.refresh()
+        
         clutter.Group.set_height(self,new_height)
         
     def set_size(self, new_width, new_height):

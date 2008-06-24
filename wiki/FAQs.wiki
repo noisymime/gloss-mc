@@ -47,3 +47,6 @@ No connection to MythTV Database can be made. Quitting
 
 *Q: I get big white boxes over everything!:*
  This is an upstream problem with Clutter + Compiz Fusion + Intel integrated graphics. The easiest way to fix this is to turn off compiz fusion. 
+
+*Q: The fonts are huge!:*
+ This typically happens on displays using a non-standard DPI. There are plans in place to fix this but no ETA has yet been decided. 

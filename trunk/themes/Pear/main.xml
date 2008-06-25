@@ -71,10 +71,7 @@
 
 		</label_list>
 
-		<item_gap>0</item_gap>
-		<num_visible_elements>4</num_visible_elements>
-
-				<!-- The following properties all relate to the image / textures that accompany each menu item -->
+		<!-- The following properties all relate to the image / textures that accompany each menu item -->
 		<image_frame id="menu_item_texture">
 			<dimensions type="relativeToStage">
 				<width>40%</width>
@@ -92,15 +89,6 @@
 				<options>None</options>
 		</image_transition>
 		
-		<!-- These are the opacity and scale values for the 3 possible steps in the menu
-		     Make all the values the same if you do not want these effects -->
-		<opacity_step0>255</opacity_step0>
-		<opacity_step1>135</opacity_step1>
-		<opacity_step2>50</opacity_step2>
-		<scale_step0>1</scale_step0>
-		<scale_step1>0.5</scale_step1>
-		<scale_step2>0.4</scale_step2>
-		
 		<!-- Used for transitioning between menus -->
 		<menu_transition>
 				<name>slide</name>
@@ -117,20 +105,6 @@
 		</dimensions>
 		<position type="blah">
 			<x>0</x>
-			<y>0</y>
-		</position>
-	</texture>
-
-	<texture id="selector_bar">
-		<image>active_bar.png</image>
-		<!-- This is a special property of selector bar the sets the height of the bar relative to the menu items its selecting -->
-		<height_percent>120</height_percent>
-		<dimensions type="relativeToStage">
-			<width>40%</width>
-			<height>default</height>
-		</dimensions>
-		<position type="relativeToParent">
-			<x>-50</x>
 			<y>0</y>
 		</position>
 	</texture>

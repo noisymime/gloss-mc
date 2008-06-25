@@ -18,10 +18,13 @@ class Interface(clutter.Group):
         self.glossMgr = glossMgr
         self.stage = self.glossMgr.get_stage()
         self.itemGroup = clutter.Group()
+        self.image_group = None
         self.setup_ui(self.glossMgr.themeMgr, "main", self)
         
         self.selected = 0
         self.off = 0
+        self.is_ready = False
+        self.ang = 0.0
         
         #Setup input queue controller
         self.input_queue = InputQueue()
@@ -43,13 +46,11 @@ class Interface(clutter.Group):
         menu.font = fontString
         
         #setup the menu_image properties
-        menu.useReflection = "True" == (themeMgr.find_child_value(element, "menu_item_texture.use_image_reflections"))
-        menu_image_node = themeMgr.get_subnode(element, "menu_item_texture")
-        if not menu_image_node is None:
-            #Set the position
-            (x, y) = themeMgr.get_position(menu_image_node, self.stage)
-            menu.menu_image_x = int(x)
-            menu.menu_image_y = int(y)
+        tmp_frame = themeMgr.get_imageFrame("menu_item_texture")
+        self.menu_image_size = int(tmp_frame.img_size)
+        self.use_reflection = tmp_frame.use_reflection
+        self.menu_image_x = tmp_frame.get_x()
+        self.menu_image_y = tmp_frame.get_y()
         
         #Setup the menu image transition
         image_transition = themeMgr.find_child_value(element, "menu_item_texture.image_transition.name")
@@ -83,19 +84,30 @@ class Interface(clutter.Group):
             label_width = 0
         
         newItem = WheelListItem(self, itemLabel)
-        #self.menuItems.append(newItem)
         self.itemGroup.add(newItem)
+        self.step = 360.0 / self.itemGroup.get_n_children()
         
         return newItem
     
     def display(self):
+        self.step = 360.0 / self.itemGroup.get_n_children()
+        self.add(self.itemGroup)
+        
+        if not self.is_ready: self.setup_behaviours()
+        
+        self.displayed = True
+        self.selectFirst(False)
+        self.stage.add(self)
+
+
+        self.itemGroup.show()
+        self.show()
+        
+    def setup_behaviours(self):
         self.timeline = clutter.Timeline(20, 60)
         self.input_queue.set_timeline(self.timeline)
         alpha_sine_inc = clutter.Alpha(self.timeline, clutter.sine_inc_func)
-        self.step = 360.0 / self.itemGroup.get_n_children()
-        self.ang = 0.0
         (stage_width, stage_height) = self.stage.get_size()
-        self.add(self.itemGroup)
         
         for i in range(self.itemGroup.get_n_children()):
             tmpTexturesGroup = self.itemGroup.get_nth_child(i).itemTexturesGroup
@@ -139,21 +151,17 @@ class Interface(clutter.Group):
             tmpItem.behaviour_ellipse.apply(tmpItem)
             tmpTexturesGroup.behaviour_opacity.apply(tmpItem)
             tmpTexturesGroup.behaviour_scale.apply(tmpItem)
-            
-            #tmpItem.set_position(-tmpTexturesGroup.get_width()*2, -1000)
 
             self.ang = self.ang + self.step
             tmpTexturesGroup.show()
             tmpTexturesGroup.show_all()
-            #tmpItem.show()
+            
+        self.is_ready = True
         
-        self.selectFirst(False)
-        self.stage.add(self)
-
-        self.itemGroup.show()
-        self.show()
+    def selectFirst(self, moveBar=False):
+        if not self.is_ready:
+            self.setup_behaviours()
         
-    def selectFirst(self, moveBar):
         for i in range(self.itemGroup.get_n_children()):
             
             ang_start = -90.0
@@ -263,6 +271,10 @@ class Interface(clutter.Group):
     def get_group_y(self):
         return self.itemGroup.get_y()
         return int(self.get_current_item().get_y())
+    def get_selector_bar(self):
+        return None
+    def undisplay(self):
+        pass
     
 class WheelListItem(MenuItem):
 

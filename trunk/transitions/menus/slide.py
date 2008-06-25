@@ -30,7 +30,7 @@ class Transition:
         
         #self.exit_behaviour_scale.apply(oldGroup)
         #self.exit_behaviour_opacity.apply(fromMenu.get_current_item().itemTexturesGroup)
-        self.exit_behaviour_opacity.apply(fromMenu.image_group)
+        if not fromMenu.image_group is None: self.exit_behaviour_opacity.apply(fromMenu.image_group)
         self.exit_behaviour_opacity.apply(fromMenu)
         self.exit_behaviour_path.apply(fromMenu)
         
@@ -55,7 +55,7 @@ class Transition:
         self.entrance_behaviour_path = clutter.BehaviourPath(self.alpha, knots_entering)
         
         
-        self.entrance_behaviour_opacity.apply(toMenu.image_group)#get_current_item().get_item_textures())
+        if not toMenu.image_group is None: self.entrance_behaviour_opacity.apply(toMenu.image_group)#get_current_item().get_item_textures())
         self.entrance_behaviour_opacity.apply(toMenu)
         self.entrance_behaviour_path.apply(toMenu)
 
@@ -63,7 +63,7 @@ class Transition:
         toMenu.display()
         
         #Finally, move the selector bar
-        fromMenu.get_selector_bar().hide()
+        if not fromMenu.get_selector_bar() is None: fromMenu.get_selector_bar().hide()
         bar = toMenu.get_selector_bar()
         if not bar is None:
             bar.show()

@@ -56,9 +56,9 @@ class coverViewer(ImageGrid):
     
     def get_current_item(self):
         if self.textureLibrary[self.currentSelection].isFolder:
-            return None #self.folderLibrary[(self.currentSelection-len(self.folderLibrary))]
+            return self.textureLibrary[self.currentSelection]#self.folderLibrary[(self.currentSelection-len(self.folderLibrary))]
         else:
-            return self.textureLibrary[(self.currentSelection-len(self.folderLibrary))+1]
+            return self.textureLibrary[self.currentSelection]#self.textureLibrary[(self.currentSelection-len(self.folderLibrary))+1]
     
     def set_details_update(self, on_off, details):
         self.update_details = on_off

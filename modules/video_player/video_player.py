@@ -232,7 +232,7 @@ class Module():
                 #Find whether the current item is a folder or video
                 item = self.currentViewer.get_current_item()
                 if item.isFolder:
-                    self.glossMgr.display_msg("Msg", "Its a folder")
+                    self.glossMgr.display_msg("Msg", "Folders are not yet supported (%s)" % item.title.get_text())
                 else:
                     self.play_video()
             

@@ -101,20 +101,6 @@ class Module:
             return False
         else:
             return True
-        
-    #This filters for image files starting with "."
-    def filterPreviewImageFile(self, fileName):
-        #Strip out any directory info
-        filename_structure = fileName.split("/")
-        fileName = filename_structure[ len(filename_structure)-1 ]
-        
-        extension = fileName[-3:] #Get 3 letter extension
-        if not extension in self.image_file_types:
-            return False
-        elif not fileName[0] == ".":
-            return False
-        else:
-            return True
             
     #This makes sure we only take in sound files
     def filterSoundFile(self, fileName):
@@ -129,11 +115,12 @@ class Module:
         if file_list is None: file_list = []
         new_file_list = os.listdir(dirPath)
         for fs_object in new_file_list:
-                if not showHidden and fs_object[0] == ".": break
-                path = dirPath + "/" + fs_object
-                if os.path.isdir(path):
-                    self.os_listdir_recursive(path, file_list)
-                else: file_list.append(path)
+            if (not showHidden) and (fs_object[0] == "."): 
+                continue
+            path = dirPath + "/" + fs_object
+            if os.path.isdir(path):
+                self.os_listdir_recursive(path, file_list)
+            else: file_list.append(path)
 
         return file_list
     
@@ -462,6 +449,7 @@ class Module:
                 img_list = os.listdir(subdir)
                 img_list_temp = []
                 for img in img_list:
+                    if img[0] == ".": continue
                     img = subdir + "/" + img
                     img_list_temp.append(img)
                 img_list = img_list_temp
@@ -469,12 +457,7 @@ class Module:
                 #Attempt to get the thumbnail images
                 #print img_list
                 
-                img_list_preview = filter(self.filterPreviewImageFile, img_list)
-                if len(img_list_preview) > 0:
-                    img_list = img_list_preview
-                #If not, just use the full images
-                else:
-                    img_list = filter(self.filterImageFile, img_list)
+                img_list = filter(self.filterImageFile, img_list)
                     
                 img_previewer = image_previewer(self.glossMgr.stage)
                 #Set the max preview img sizes (These come from the slideshow.xml theme file

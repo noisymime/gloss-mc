@@ -56,3 +56,6 @@ class Module(clutter.Group):
         
     def add_string_item(self, string):
         self.queue.add_item(string)
+        
+    def stop(self):
+        self.stage.remove(self)

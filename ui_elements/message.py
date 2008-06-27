@@ -69,7 +69,7 @@ class Message():
         self.detail.set_width(width)
         self.message.set_width(width)
 
-        box_height = self.message.get_height() + self.detail.get_height() + (self.message.get_y() - self.box.get_y())
+        box_height = self.message.get_height() + self.detail.get_height() + (self.message.get_y() - self.box.get_y())*2
         if box_height > self.stage.get_height(): box_height = self.stage.get_height()
         self.box.set_height(box_height)
         box_y = int( (self.stage.get_height() - box_height) /2 )
@@ -112,7 +112,8 @@ class Message():
         if len(self.msgQueue) > 0:
             (title, text) = self.msgQueue.pop()
             self.display_msg(title, text)
+        else:
+            self.glossMgr.ui_overide = None
         
     def on_key_press_event (self, stage, event):
         self.hide_msg()
-        self.glossMgr.ui_overide = None

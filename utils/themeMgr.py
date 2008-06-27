@@ -10,15 +10,24 @@ class ThemeMgr:
 	
 	defaultTheme = "default"
 	currentTheme = "default"
-	currentTheme = "Pear"
-	#currentTheme = "Mich"
-	#currentTheme = "Gloxygen"
+	currentTheme = "Gloxygen"
 	
-	def __init__(self, glossMgr):
+	def __init__(self, glossMgr, theme=None):
 		self.stage = glossMgr.stage
 		self.glossMgr = glossMgr
 		self.docs = []
 		self.default_docs = []
+		
+		#Check the db for a theme setting, if it doesn't exist, we create an entry using the current theme
+		if not theme is None: 
+			self.currentTheme = theme
+			glossMgr.dbMgr.set_setting("gloss_theme", self.currentTheme)
+		else:
+			db_theme = glossMgr.dbMgr.get_setting("gloss_theme")
+			if db_theme is None:
+				glossMgr.dbMgr.set_setting("gloss_theme", self.currentTheme)
+			else:
+				self.currentTheme = db_theme
 		
 		current_theme_dir = self.theme_dir + self.currentTheme
 		self.importDocs(current_theme_dir, self.docs)

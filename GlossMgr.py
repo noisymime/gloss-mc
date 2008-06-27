@@ -23,7 +23,7 @@ __version__=  '0.1'
 class GlossMgr:
     theme_dir = "themes/"
 
-    def __init__ (self, stage):
+    def __init__ (self, stage, dbMgr, theme=None):
         self.stage = stage
         self.menus = []
         self.menuHistory = [] #A list that contains menus in the order that they've been viewed
@@ -31,8 +31,9 @@ class GlossMgr:
         self.debug = False #Debug flag
         self.ui_overide = None
         self.uiMsg = Message(self)
+        self.dbMgr = dbMgr
         
-        self.themeMgr = ThemeMgr(self)
+        self.themeMgr = ThemeMgr(self, theme)
         
         #Set the menu interface
         element = self.themeMgr.search_docs("menu", "main").childNodes

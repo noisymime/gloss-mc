@@ -85,18 +85,25 @@ class MainApp:
         #clutter.threads_add_timeout(500, self.loadGloss())
     
     def loadGloss(self):
-        #Create the Gloss Manager
-        self.glossMgr = GlossMgr(self.stage)
-
-        
+        theme = None
         #loop through the args
-        for arg in self.args:
+        for i in range(0, len(self.args)):
+            arg = self.args[i]
             if arg == "--debug":
                 print "Using debug mode"
                 self.glossMgr.debug = True
             elif arg == "--tests":
                 self.show_tests = True
                 print "Showing tests"
+            elif arg == "--theme":
+                theme = self.args[i+1]
+                print "Using theme %s" % theme
+        
+        #Create the Gloss Manager
+        self.glossMgr = GlossMgr(self.stage, self.dbMgr, theme=theme)
+
+        
+
 
         #Update splash status msg
         self.splashScreen.set_msg("Creating menus")

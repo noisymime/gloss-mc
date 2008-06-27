@@ -95,7 +95,12 @@ class mythDB():
             print "Error: Could not establish connection to SQL server. Unable to obtain setting '" + setting_name + "'"
             return None
         
-        sql = "INSERT INTO settings VALUES('%s', '%s', '%s')" % (setting, value, self.localHost)
+        #First check if the setting already exists and delete it if it does
+        if not self.get_setting(setting) is None:
+            sql = "DELETE FROM settings WHERE value = '%s' AND hostname = '%s'" % (setting, self.localHost)
+            self.cursor.execute(sql)
+        
+        sql = "REPLACE INTO settings VALUES('%s', '%s', '%s')" % (setting, value, self.localHost)
         self.cursor.execute(sql)
     
     #Gets the backend server details, which, in theory, can be different from the SQL server details and/or default port

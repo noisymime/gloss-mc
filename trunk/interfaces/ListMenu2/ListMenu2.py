@@ -41,6 +41,10 @@ class Interface(clutter.Group):
     def setup(self, themeMgr):
         element = themeMgr.search_docs("menu", "main").childNodes
         
+        #Sets the stages background colour
+        colour = themeMgr.get_colour(element, "menu", subnode=True)
+        if not colour is None: self.stage.set_color(colour)
+        
         #setup the menu_image properties
         tmp_frame = themeMgr.get_imageFrame("menu_item_texture")
         self.menu_image_size = int(tmp_frame.img_size)
@@ -191,4 +195,7 @@ class MenuListItem (ListItem):
     
     def get_item_textures(self):
         return self.menu_item.itemTexturesGroup
+    
+    def get_text(self):
+        return self.menu_item.get_text()
         

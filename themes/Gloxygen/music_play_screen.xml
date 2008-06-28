@@ -23,6 +23,7 @@
 			     1.50 means that the item will be 1.x times the height as the font etc
 		 -->
 		<item_height_percent>1.00</item_height_percent>
+		<item_width_percent>1.00</item_width_percent>
 		
 		<!-- These are the opacity and scale values for the 3 possible steps in the menu
 		     Make all the values the same if you do not want these effects -->
@@ -88,7 +89,7 @@
 		</dimensions>
 		<position type="relativeToStage">
 			<x>10%</x>
-			<y>35%</y>
+			<y>30%</y>
 		</position>
 	</image_frame>
 	
@@ -117,12 +118,12 @@
 	<!-- These labels make up the currently playing song details -->
 	<group id="music_play_screen_song_details">
 		<dimensions type="relativeToStage">
-			<width>25%</width>
+			<width>30%</width>
 			<height>20%</height>
 		</dimensions>
-		<position type="relativeToParent">
-			<x>0</x>
-			<y>0</y>
+		<position type="relativeToStage">
+			<x>10%</x>
+			<y>15%</y>
 		</position>
 	</group>
 	<label id="music_play_screen_song_heading">

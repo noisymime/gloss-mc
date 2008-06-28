@@ -10,6 +10,7 @@ print_help()
 	echo "	--debug			Start gloss in debug mode"
 	echo "	--theme [theme name]	Force use of a certain theme"
 	echo "	--show-themes		Prints a list of available themes"
+	echo "	--tests			Display testing module"
 	echo "	--version		Display the gloss version"
 	exit
 }

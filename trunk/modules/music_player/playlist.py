@@ -1,4 +1,5 @@
 import gobject
+import os
 from multimedia.AudioController import AudioController
 
 class Playlist(gobject.GObject):
@@ -43,6 +44,11 @@ class Playlist(gobject.GObject):
         
         current_song = self.songs[self.position]
         current_song_filename = self.musicPlayer.base_dir + "/" + current_song.directory + "/" + current_song.filename
+        
+        #Make sure the file exists and we can read it
+        if not os.access(current_song_filename, os.R_OK):
+            self.glossMgr.display_msg("Access Error", "Unable to playback file '%s'" % current_song_filename)
+        
         current_song_uri = "file://" + current_song_filename
         if self.glossMgr.debug: print "Music_Player: Attempting to play file '%s'" % current_song_filename
         self.audio_controller.play_audio(current_song_uri)

@@ -50,6 +50,7 @@ class song:
     def get_image_from_ID3(self):
         #Basic check first up to make sure the filename is set
         if self.filename is None:
+            if self.music_player.glossMgr.debug: print "Music_Player: Attempting to load ID3 image from song '%s', but have no filename to look up" % self.name
             return None
         
         tag = eyeD3.Tag()
@@ -58,6 +59,7 @@ class song:
         
         #Make sure the file exists and we can read it
         if not os.access(filename, os.R_OK):
+            if self.music_player.glossMgr.debug: print "Music_Player: Attempting to read ID3 image on file '%s', however do not appear to have read permission" % filename
             return None
         
         tag.link(filename)

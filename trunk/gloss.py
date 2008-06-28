@@ -86,12 +86,13 @@ class MainApp:
     
     def loadGloss(self):
         theme = None
+        debug = False
         #loop through the args
         for i in range(0, len(self.args)):
             arg = self.args[i]
             if arg == "--debug":
                 print "Using debug mode"
-                self.glossMgr.debug = True
+                debug = True
             elif arg == "--tests":
                 self.show_tests = True
                 print "Showing tests"
@@ -101,9 +102,7 @@ class MainApp:
         
         #Create the Gloss Manager
         self.glossMgr = GlossMgr(self.stage, self.dbMgr, theme=theme)
-
-        
-
+        self.glossMgr.debug = debug
 
         #Update splash status msg
         self.splashScreen.set_msg("Creating menus")

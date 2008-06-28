@@ -1,0 +1,46 @@
+#!/bin/bash
+install_dir=/usr/share/gloss
+version="0.1"
+
+print_help()
+{
+	echo "Usage: gloss [options]"
+	echo "Options:"
+	echo "	--help			Display this text"
+	echo "	--debug			Start gloss in debug mode"
+	echo "	--theme [theme name]	Force use of a certain theme"
+	echo "	--show-themes		Prints a list of available themes"
+	echo "	--version		Display the gloss version"
+	exit
+}
+
+print_themes()
+{
+	echo "Available themes:"
+	ls -1 --color=never $install_dir/themes
+	exit
+}
+
+print_version()
+{
+	echo "Gloss version $version"
+	exit
+}
+
+arg_string=""
+for i in $*
+do
+	case $i in
+		--help ) print_help
+		;;
+		--show-themes ) print_themes
+		;;
+		--version ) print_version
+		;;
+		* ) arg_string=$arg_string" "$i
+		
+	esac
+
+done
+
+python $install_dir/gloss.py $arg_string

@@ -212,7 +212,7 @@
 			</texture>
 			
 			<texture id="image_up">
-				<image>up.png</image>
+				<image>shared/up.png</image>
 				<dimensions type="relativeToStage">
 					<width>3%</width>
 					<height>3%</height>
@@ -224,7 +224,7 @@
 			</texture>
 			
 			<texture id="image_down">
-				<image>down.png</image>
+				<image>shared/down.png</image>
 				<dimensions type="relativeToStage">
 					<width>3%</width>
 					<height>3%</height>

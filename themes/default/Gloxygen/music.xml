@@ -14,10 +14,10 @@
 	<label_list id="music_albums">		
 		<font id="main">
 			<face>Tahoma</face>
-			<size id="default">30</size>
-			<size id="1024x768">38</size>
-			<size id="800x600">30</size>
-			<size id="1920x1080">25</size>
+			<size id="default">20</size>
+			<size id="1024x768">22</size>
+			<size id="800x600">18</size>
+			<size id="1920x1080">28</size>
 		</font>
 
 		<dimensions type="relativeToStage">
@@ -31,13 +31,14 @@
 		
 		<texture id="selector_bar">
 			<image>active_bar.png</image>
+			<height_percent>1.20</height_percent>
 			<dimensions type="relativeToSelf">
 				<width>100%</width>
 				<height>relative</height>
 			</dimensions>
 			<position type="relativeToParent">
 				<x>-20</x>
-				<y>-10%</y>
+				<y>0</y>
 			</position>
 		</texture>
 
@@ -65,10 +66,10 @@
 	<label_list id="music_songs">		
 		<font id="main">
 			<face>Tahoma</face>
-			<size id="default">30</size>
-			<size id="1024x768">38</size>
-			<size id="800x600">30</size>
-			<size id="1920x1080">25</size>
+			<size id="default">20</size>
+			<size id="1024x768">22</size>
+			<size id="800x600">18</size>
+			<size id="1920x1080">28</size>
 		</font>
 
 		<dimensions type="relativeToStage">

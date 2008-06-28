@@ -20,6 +20,7 @@ class MusicObjectRow(ImageRow):
         ImageRow.__init__(self, glossMgr, width, height, columns)
         self.music_player = music_player
         self.sleep = False
+        self.glossMgr = glossMgr
         
         self.objectLibrary = []
         self.timeline = None
@@ -42,7 +43,7 @@ class MusicObjectRow(ImageRow):
             start = self.loaded_objects
         for i in range(start, end):
             object = self.objectLibrary[i]
-            print "loading: " + object.name
+            if self.glossMgr.debug: print "Music_Player: loading: " + object.name
             if i > (self.num_columns + self.buffer):
                 pixbuf = object.get_default_image()
             else:

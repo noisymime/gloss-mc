@@ -282,6 +282,7 @@ class Module:
         
     def update_main_img(self, data = None):
         #clutter.threads_enter()
+
         pixbuf = self.current_albums[self.list1.selected].get_image()
         if not pixbuf is None:
             self.main_img.set_pixbuf(pixbuf)

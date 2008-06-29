@@ -152,13 +152,6 @@ class osd_channel(clutter.Group):
         self.stage = glossMgr.stage
         
         self.box = self.glossMgr.themeMgr.get_texture("tv_osd_box", self.stage, None)
-        """
-        pixbuf = gtk.gdk.pixbuf_new_from_file("ui/splash_box.png")
-        self.box = clutter.Texture()
-        self.box.set_pixbuf(pixbuf)
-        self.box.set_opacity(int(255 * 0.75))
-        self.box.set_height(int(self.stage.get_height()* 0.15))
-        """
         self.add(self.box)
        
         self.logo = clutter.Texture()
@@ -169,9 +162,11 @@ class osd_channel(clutter.Group):
         self.logo.set_position(20, pos_y )
         self.add(self.logo)
 
+        text_colour = clutter.color_parse('Black')
+
         self.name = clutter.Label()
         self.name.set_font_name(self.font + str(self.name_font_size))
-        self.name.set_color(clutter.color_parse('White'))
+        self.name.set_color(text_colour)
         pos_x = self.logo.get_x() + int (self.logo.get_width() * 1.1)
         pos_x = pos_x 
         self.name.set_position(pos_x, 0)
@@ -180,7 +175,7 @@ class osd_channel(clutter.Group):
         
         self.prog_title = clutter.Label()
         self.prog_title.set_font_name(self.font + str(self.prog_title_font_size))
-        self.prog_title.set_color(clutter.color_parse('White'))
+        self.prog_title.set_color(text_colour)
         self.prog_title.set_position(\
                                  self.name.get_x(),\
                                  self.name.get_y() + self.name.get_height()\
@@ -189,7 +184,7 @@ class osd_channel(clutter.Group):
         
         self.detail = clutter.Label()
         self.detail.set_font_name(self.font + str(self.detail_font_size))
-        self.detail.set_color(clutter.color_parse('White'))
+        self.detail.set_color(text_colour)
         self.detail.set_position(\
                                  self.prog_title.get_x(),\
                                  self.prog_title.get_y() + self.prog_title.get_height()\

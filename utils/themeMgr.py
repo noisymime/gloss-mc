@@ -3,6 +3,7 @@ import clutter
 import pygtk
 import gtk
 from ui_elements.image_frame import ImageFrame
+from ui_elements.rounded_rectangle import RoundedRectangle
 from xml.dom import minidom
 
 class ThemeMgr:
@@ -315,15 +316,21 @@ class ThemeMgr:
 		
 		#Setup the pixbuf
 		src = self.find_child_value(element, "image")
+		rect = self.find_child_value(element, "rounded_rectangle")
 		#Special case to handle no image
 		if src == "None":
 			return texture
-		if src is None:
+		elif not src is None:
+			src = self.theme_dir + self.currentTheme + "/" + src
+			pixbuf = gtk.gdk.pixbuf_new_from_file(src)
+			texture.set_pixbuf(pixbuf)
+		elif not rect is None:
+			colour_element = self.search_docs("texture", name).getElementsByTagName("texture")
+			colour_element = self.find_element(colour_element, "id", "rect_colour")
+			colour = self.get_colour(colour_element, "rect_colour", False)
+			texture = RoundedRectangle(20, 20, colour)
+		elif (src is None) and (rect is None):
 			return None
-		
-		src = self.theme_dir + self.currentTheme + "/" + src
-		pixbuf = gtk.gdk.pixbuf_new_from_file(src)
-		texture.set_pixbuf(pixbuf)
 		
 		#Setup general actor properties
 		self.setup_actor(texture, element, parent)

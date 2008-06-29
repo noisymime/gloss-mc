@@ -44,12 +44,11 @@ class GlossMgr:
         self.set_menu_transition("slide")
         
         #The background is a bit messy due to the depth issues :(
-        background = self.themeMgr.get_texture("background", None, None)
-        background.set_size(self.stage.get_width(), self.stage.get_height())
-
-        background.show()
+        self.background = self.themeMgr.get_texture("background", None, None)
+        self.background.set_size(self.stage.get_width(), self.stage.get_height())
+        self.background.show()
         
-        self.stage.add(background)
+        self.stage.add(self.background)
 
         self.currentPlugin = None
         

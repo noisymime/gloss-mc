@@ -76,17 +76,11 @@ class Module:
         
         colour = clutter.color_parse('White')
         font_string = "Tahoma 30"
+        heading_label = self.glossMgr.themeMgr.get_label("music_heading")
         self.heading = musicHeading(colour, font_string)
         self.heading.set_width(self.stage.get_width())
-        self.heading.set_position(0, 250)
-        """
-        self.artist_label_1.set_position(200, 200)
-        self.artist_label_2.set_position(200, 200)
-        self.artist_label_3.set_position(200, 200)
-        self.artist_label_1.set_color(clutter.color_parse('White'))
-        self.artist_label_2.set_color(clutter.color_parse('White'))
-        self.artist_label_3.set_color(clutter.color_parse('White'))
-        """
+        self.heading.set_position(0, heading_label.get_y())
+
     
     #Get the images dir setting our of the DB
     #But also creates the setting if it doesn't already exist
@@ -308,7 +302,7 @@ class Module:
         self.opacity_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=self.alpha)
         
         #Create a backdrop for the player. In this case we just use the same background as the menus
-        self.backdrop = glossMgr.get_themeMgr().get_texture("background", None, None)
+        self.backdrop = clutter.CloneTexture(glossMgr.background) #glossMgr.get_themeMgr().get_texture("background", None, None)
         self.backdrop.set_size(self.stage.get_width(), self.stage.get_height())
         self.backdrop.set_opacity(0)
         self.backdrop.show()
@@ -359,6 +353,7 @@ class Module:
         self.opacity_behaviour_outgoing.apply(self.loading_img)
         
         self.stage.add(self.artistImageRow)
+        self.artistImageRow.set_position(0, 40)
         self.artistImageRow.set_opacity(0)
         self.artistImageRow.select_first()
         self.artistImageRow.show()

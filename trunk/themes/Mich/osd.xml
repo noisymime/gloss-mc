@@ -12,10 +12,16 @@
 	</texture>
 
 	<texture id="tv_osd_box">
-		<image>osd/splash_box.png</image>
+		<rounded_rectangle>
+			<colour id="rect_colour">
+				<r>100</r>
+				<g>100</g>
+				<b>100</b>
+			</colour>
+		</rounded_rectangle>
 		<dimensions type="relativeToStage">
-			<width>50%</width>
-			<height>30%</height>
+			<width>70%</width>
+			<height>20%</height>
 		</dimensions>
 		<opacity>188</opacity>
 	</texture>

@@ -124,8 +124,7 @@ class MainApp:
         MainMenu = self.glossMgr.create_menu()
         self.glossMgr.addMenu(MainMenu)
         #Update splash status msg
-        self.splashScreen.set_msg("Connecting to MythTV server")        
-        
+        self.splashScreen.set_msg("Connecting to MythTV server")
 
         #Load all modules
         for mods in modules:
@@ -136,12 +135,17 @@ class MainApp:
             if self.glossMgr.debug: print "Loading module: %s" % title
             
             self.splashScreen.set_msg("Loading "+title)
+            #while gtk.events_pending():
+            #    gtk.main_iteration(0)
             temp_menu_item = MainMenu.addItem(title)
             temp_menu_item.add_image_from_texture(tempMod.menu_image)
             temp_menu_item.setAction(tempMod.action())
          
-        self.splashScreen.remove_elegant()
+        timeline_remove = self.splashScreen.remove_elegant()
+        timeline_remove.connect("completed", self.finish_load, MainMenu)
         self.stage.connect('key-press-event', self.glossMgr.on_key_press_event)
+        
+    def finish_load(self, data, MainMenu):
         MainMenu.display()
 
         MainMenu.selectFirst(True)

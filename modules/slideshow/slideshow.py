@@ -176,7 +176,7 @@ class Module:
         self.backdrop_behaviour = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
         self.menu_behaviour = clutter.BehaviourOpacity(opacity_start=255, opacity_end=0, alpha=alpha)
         self.backdrop_behaviour.apply(self.backdrop)
-        self.menu_behaviour.apply(self.menu.getItemGroup())
+        #self.menu_behaviour.apply(self.menu.getItemGroup())
         timeline_backdrop.start()
         
         
@@ -398,7 +398,7 @@ class Module:
         self.stop_behaviour.apply(self.currentTexture)
         self.stop_behaviour.apply(self.backdrop)
         self.stop_behaviour.apply(self.overlay)
-        self.menu_behaviour.apply(self.menu.getItemGroup())
+        #self.menu_behaviour.apply(self.menu.getItemGroup())
         timeline_stop.connect('completed', self.destroySlideshow)
         timeline_stop.start()
         

@@ -119,6 +119,8 @@ class SplashScr(clutter.Group):
         self.behaviour_opacity.apply(self)
         timeline_opacity.start()       
         
+        return timeline_opacity
+        
     def set_msg(self, msg):
         self.message.set_text(msg)
         

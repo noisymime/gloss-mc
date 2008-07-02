@@ -1,5 +1,6 @@
 #!/bin/bash
 install_dir=/usr/share/gloss
+install_dir=/home/josh/eclipse/gloss
 version="0.1 (r255)"
 
 print_help()

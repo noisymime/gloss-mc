@@ -72,19 +72,15 @@ class MainApp:
         else:
             self.stage.set_size(width, height)
         
-        #now that the size is set, we can show the stage    
+        #now that the size is set, we can fade in the stage
+        self.stage.set_opacity(0)
         self.stage.show()
+        timeline = clutter.Timeline(20,40)
+        alpha = clutter.Alpha(timeline, clutter.ramp_inc_func)
+        self.behaviour_opacity = clutter.BehaviourOpacity(opacity_start=0, opacity_end=255, alpha=alpha)
+        self.behaviour_opacity.apply(self.stage)
+        timeline.start()
         
-        #Display a loading / splash screen
-        self.splashScreen = SplashScr(self.stage)
-        self.splashScreen.display()
-        
-        #clutter.threads_enter()
-        gobject.timeout_add(500, self.loadGloss)
-        #clutter.threads_leave()
-        #clutter.threads_add_timeout(500, self.loadGloss())
-    
-    def loadGloss(self):
         theme = None
         debug = False
         #loop through the args
@@ -103,6 +99,18 @@ class MainApp:
         #Create the Gloss Manager
         self.glossMgr = GlossMgr(self.stage, self.dbMgr, theme=theme)
         self.glossMgr.debug = debug
+        
+        #Display a loading / splash screen
+        self.splashScreen = SplashScr(self.glossMgr)
+        self.splashScreen.display()
+        
+        #clutter.threads_enter()
+        gobject.timeout_add(500, self.loadGloss)
+        #clutter.threads_leave()
+        #clutter.threads_add_timeout(500, self.loadGloss())
+    
+    def loadGloss(self):
+
 
         #Update splash status msg
         self.splashScreen.set_msg("Creating menus")

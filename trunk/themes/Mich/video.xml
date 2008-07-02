@@ -24,7 +24,7 @@
 	</texture>
 	
 	<video_cover_viewer id="main">
-		<video_default_src>video_player/video_default.png</video_default_src>
+		<video_default_src>video_player/videos.png</video_default_src>
 		<folder_img_src>video_player/mv_gallery_folder_sel.png</folder_img_src>
 		<dimensions type="relativeToStage">
 			<width>60%</width>

@@ -13,9 +13,10 @@ class SplashScr(clutter.Group):
     message_font_size = 30
     detail_font_size = 22
     
-    def __init__(self, stage):
+    def __init__(self, glossMgr):
         clutter.Group.__init__ (self)
-        self.stage = stage
+        self.glossMgr = glossMgr
+        self.stage = self.glossMgr.stage
         
         self.backdrop = clutter.Rectangle()
         self.backdrop.set_color(clutter.color_parse('Black'))
@@ -44,7 +45,7 @@ class SplashScr(clutter.Group):
         """
         self.centre_group.add(self.box)        
        
-        self.spinner = Spinner()
+        self.spinner = Spinner(self.glossMgr)
         height = int(self.box.get_height() * 0.90)
         height = height + (height % 2) # Make sure that the dimension is even
         self.spinner.set_height(height)

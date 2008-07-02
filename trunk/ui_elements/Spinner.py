@@ -3,11 +3,12 @@ import gtk
 
 class Spinner (clutter.Texture):
     
-    def __init__(self):
+    def __init__(self, glossMgr):
         clutter.Texture.__init__ (self)
         
         #Theme me please
-        pixbuf = gtk.gdk.pixbuf_new_from_file("themes/spinner.svg")
+        theme = glossMgr.themeMgr.currentTheme
+        pixbuf = gtk.gdk.pixbuf_new_from_file("themes/%s/spinner.svg" % theme)
         self.set_pixbuf(pixbuf)
      
     def start(self):  

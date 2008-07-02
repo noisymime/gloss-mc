@@ -63,8 +63,15 @@ class MainApp:
         self.connected = True
         
         #Do an initial lookup for GUI size
-        width = int(self.dbMgr.get_setting("GuiWidth"))
-        height = int(self.dbMgr.get_setting("GuiHeight"))
+        (width, height) = (self.dbMgr.get_setting("GuiWidth"), self.dbMgr.get_setting("GuiHeight"))
+        if not width is None:
+            width = int(width)
+        else:
+            width = 0
+        if not height is None:
+            height = int(height)
+        else:
+            height = 0
         #Set stage size
         if width == 0 and height == 0:
             self.stage.fullscreen()

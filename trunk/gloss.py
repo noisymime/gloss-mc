@@ -135,8 +135,10 @@ class MainApp:
             if self.glossMgr.debug: print "Loading module: %s" % title
             
             self.splashScreen.set_msg("Loading "+title)
-            #while gtk.events_pending():
+            #x=0
+            #while (gtk.events_pending()) and (x<5):
             #    gtk.main_iteration(0)
+            #    x += 1
             temp_menu_item = MainMenu.addItem(title)
             temp_menu_item.add_image_from_texture(tempMod.menu_image)
             temp_menu_item.setAction(tempMod.action())

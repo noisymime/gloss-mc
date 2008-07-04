@@ -144,9 +144,9 @@ class Interface(clutter.Group):
         self.input_queue.set_timeline(self.label_list.timeline)
         
         #Show the current menu item's graphic
-        self.label_list.get_current_item().get_item_textures().show()
-        self.image_group.add(self.label_list.get_current_item().get_item_textures())
-        #self.menuItems[self.selected].itemTexturesGroup.show()
+        if not self.label_list.get_current_item() is None:
+            self.label_list.get_current_item().get_item_textures().show()
+            self.image_group.add(self.label_list.get_current_item().get_item_textures())
         
     def get_current_item(self):
         return self.label_list.get_current_item()

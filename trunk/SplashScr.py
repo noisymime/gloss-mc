@@ -33,16 +33,6 @@ class SplashScr(clutter.Group):
         self.box = RoundedRectangle(width, height, clutter.color_parse('White'))
         self.box.set_opacity(int(255 * 0.55))
         
-        """
-        backbox1 = RoundedRectangle(width+10, height+10, clutter.color_parse('Black'))
-        backbox1.set_opacity(200)
-        backbox1.set_position(-5, -5)
-        backbox2 = RoundedRectangle(width+12, height+12, clutter.color_parse('White'))
-        backbox2.set_position(-6, -6)
-        
-        self.centre_group.add(backbox2)
-        self.centre_group.add(backbox1)
-        """
         self.centre_group.add(self.box)        
        
         self.spinner = Spinner(self.glossMgr)
@@ -123,6 +113,14 @@ class SplashScr(clutter.Group):
         
     def set_msg(self, msg):
         self.message.set_text(msg)
+        
+        (x1, y1, x2, y2) = self.message.get_coords()
+        if x2 > self.box.get_width():
+            new_width = int(x2 * 1.10)
+            self.box.set_width(new_width)
+            
+            new_x = int( (self.stage.get_width() - new_width) / 2 )
+            self.centre_group.set_x(new_x)
         
     def set_details(self, detail):
         self.detail.set_text(detail)

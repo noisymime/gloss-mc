@@ -150,11 +150,11 @@ class GlossMgr:
                     self.currentMenu = self.menuHistory[-1]
         #print event.hardware_keycode
         
-    def kill_plugin(self):
+    def kill_plugin(self, kill_plugin=True):
         """Kills any currently running plugin/module"""
         
         if not self.currentPlugin is None:
-            self.currentPlugin.stop()
+            if kill_plugin: self.currentPlugin.stop()
             self.currentPlugin = None
             
             timeline_stop = clutter.Timeline(10,30)

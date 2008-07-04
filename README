@@ -1,0 +1,100 @@
+Gloss 0.1 README.
+===================
+
+Gloss is intended to be a drop-in replacement for the existing MythTV frontend.
+It is written in Python however uses the Clutter OpenGL framework with the intent of 
+producing a visually richer interface than the existing MythTV frontend. 
+
+Gloss currently requires:
+
+  * Clutter >= 0.6
+  * Clutter-gst
+  * Clutter-cairo
+  * pyclutter
+  * eyed3
+  * MythTV backend = 0.21
+
+The official website is:                
+   http://gloss-project.org
+The developer blog is at
+   http://noisymime.org/blog/?cat=11
+Please log any bugs at:               
+   http://code.google.com/p/gloss-mc/issues/list
+
+Gloss is GPLv3 licensed.
+
+
+INSTALLATION
+====
+
+Gloss does not need to be compiled or installed to be executed, you simply need 
+to run the included 'gloss' script, optionally with 1 or more of the following arguments:
+
+ --help
+        Show these options
+
+ --debug
+	Turn on debugging (default=no):
+	  Show extra debug message as gloss is running. Use if possible when providing bug reports
+
+ --theme <name>        
+	Specify the theme to use.
+
+ --show-themes
+        Display a list of available themes
+
+  --tests          
+	Turn on the tests module
+
+  --version
+        Print the current gloss version
+
+
+VERSIONING
+====
+
+Gloss uses the common "Linux kernel" versioning system, where
+even-numbered minor versions are stable and odd-numbered minor
+versions are development snapshots.
+
+
+HACKING
+====
+
+If you want to hack on and improve gloss, please join the chat on channel #gloss @ chat.freenode.net
+
+
+BUGS
+====
+
+Before logging any bugs, please see the FAQ at:
+  http://code.google.com/p/gloss-mc/wiki/FAQs
+
+Bugs should be reported to the Gloss tracker at:
+  http://code.google.com/p/gloss-mc/issues/list
+
+In the report you should include:
+* what system you're running Gloss on;
+* which version of Clutter you are using;
+* which version of Mythtv backend;
+* which video card and which drivers you are using;
+* a backtrace if applicable;
+* how to reproduce the bug.
+
+If the bug exposes a crash, the exact text printed
+
+
+RELEASE NOTES
+====
+
+Release Notes for Gloss 0.1.0
+-------------------------------
+
+* First major release. Should be considered a developers version only as it requires significant testing. However:
+
+  * All modules included with 0.1 have been tested to work on a standard, unaltered MythTV 0.21 setup. This does not mean, however,
+    that they will work on *your* MythTV 0.21 system. 
+
+  * Live TV playback is dependant on gstreamers ability to play whatever format your video is capture in. This is
+    known to work at least with DVB-T mpeg2-ts broadcasts
+

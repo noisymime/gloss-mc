@@ -29,6 +29,7 @@ class Module:
         self.currentChannel = 0
 
         self.isRunning = False
+        self.changing_channels = False
         
     def setup_ui(self):
         self.menu_image = self.glossMgr.themeMgr.get_texture("mythtv_menu_image", None, None)
@@ -40,7 +41,7 @@ class Module:
     def begin(self, glossMgr):
         self.glossMgr = glossMgr
         #self.buffer_file_reader = open("test.mpg","r")
-        self.loading_scr = SplashScr(self.stage)
+        self.loading_scr = SplashScr(self.glossMgr)
         self.loading_scr.set_msg("Starting TV...")
         self.loading_scr.backdrop.set_opacity(180)
         self.loading_scr.display_elegant()
@@ -68,6 +69,8 @@ class Module:
         self.videoController.stop_video()
         if self.myConn:
             self.myConn.stop() # Stops the backend / frontend streaming
+            if not self.changing_channels:
+                self.glossMgr.kill_plugin(kill_plugin=False)
         
     def stop_video(self):
         self.myConn.stop() 
@@ -77,18 +80,18 @@ class Module:
             #Handle up/down presses for OSD
             if (event.keyval == clutter.keysyms.Up) or (event.keyval == clutter.keysyms.Down):
                 self.osd.on_key_press_event(event, self)
-            
-            self.videoController.on_key_press_event(event)
-            
-            if (event.keyval == clutter.keysyms.Return):
+                return False
+            elif (event.keyval == clutter.keysyms.Return):
                 if self.osd.on_screen:
                     chanNum = self.osd.currentChannel.channum
                     self.set_channel(chanNum)
                     
-                    
+                return False
+            else:       
+                self.videoController.on_key_press_event(event)
+
         if event.keyval == clutter.keysyms.Escape:
             return True
-        #print event.hardware_keycode
 
 
         """if event.keyval == clutter.keysyms.p:
@@ -119,7 +122,9 @@ class Module:
         return tempMenu
     
     def set_channel(self, channum):
-        self.loading_scr = SplashScr(self.stage)
+        self.changing_channels = True
+        
+        self.loading_scr = SplashScr(self.glossMgr)
         self.loading_scr.set_msg("Loading Channel ")
         self.loading_scr.set_details(self.osd.currentChannel.name)
         self.loading_scr.backdrop.set_opacity(180)
@@ -134,7 +139,9 @@ class Module:
 
     def complete_change(self, data):
         self.videoController.unpause_video()
-        self.loading_scr.remove_elegant()                   
+        self.loading_scr.remove_elegant() 
+        
+        self.changing_channels = False                  
             
 import pango
 class osd_channel(clutter.Group):

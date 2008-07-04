@@ -205,7 +205,6 @@ class MythBackendConnection(threading.Thread):
         
         print "Ending playback"
         self.videoPlayer.stop()
-        self.videoPlayer.glossMgr.kill_plugin()
         #self.stop()
         
     def message_socket_mgr(self, msg_socket):

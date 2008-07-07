@@ -15,40 +15,36 @@ Gloss was developed on Ubuntu so hence I can give the best instructions for how 
   # `sudo apt-get update`
   # `sudo apt-get install libclutter-0.6-0 libclutter-gst-0.6-0 libclutter-cairo-0.6-0 python-clutter python-mysqldb python-gst0.10 subversion eyed3 gstreamer0.10-fluendo-mpegdemux jackd  gstreamer0.10-plugins-bad gstreamer0.10-plugins-ugly`
 
-=== SVN === 
+= General =
 
-Using the SVN of Clutter is currently not recommended and may cause unpredictable behaviour. If you wish to compile from source, please use the release tarballs available at http://clutter-project.org/sources
-The following instructions are a rough guide for Ubuntu Gutsy
+=== Compile Clutter from source === 
 
-  # `sudo apt-get install libgtk2.0-dev gtk-doc-tools gcc libpango1.0-dev libsdl-pango-dev python automake1.9 subversion gstreamer0.10-fluendo-mpegdemux python-cairo-dev jackd python-mysqldb python-dev python-gtk2-dev python-gst0.10 python-gobject-dev libgstreamer-plugins-base0.10-dev python-gobject-doc gstreamer0.10-plugins-bad gstreamer0.10-plugins-bad-multiverse gstreamer0.10-plugins-ugly eyed3`
-  # `svn co http://svn.o-hand.com/repos/clutter/trunk clutter`
-  # `cd clutter/clutter`
-  # `./autogen.sh`
-  # `sudo make install`
-  # `cd ../clutter-gst`
-  # `./autogen.sh`
-  # `sudo make install`
-  # `cd ../clutter-cairo`
-  # `./autogen.sh`
-  # `sudo make install`
-  # `cd ../bindings/pyclutter`
-  # `./autogen.sh`
-  # `sudo make install`
+Releases of Clutter can be downloaded from: http://www.clutter-project.org/sources/
 
 == Getting Gloss ==
+
 Once you have Clutter installed, getting Gloss running should be fairly easy:
+
+=== Release ===
+
+Download the latest release of Gloss: http://code.google.com/p/gloss-mc/downloads/list
+
+=== SVN ===
+
   # `svn checkout http://gloss-mc.googlecode.com/svn/trunk/ gloss-mc`
   # `cd gloss-mc`
-  # `python gloss.py`
 
-If you are experiencing problem with Gloss, you can also try starting it with:
-`python gloss.py --debug` which should provide additional debug output.
+=== Debian / Ubuntu apt ===
 
-*Note:* If you used the SVN installation of Clutter and receive an error similar to:
+Gloss is maintained iin an apt repository that can be found @ https://launchpad.net/~gloss-development/+archive
 
-`ImportError: libclutter-glx-0.5.so.0: cannot open shared object file: No such file or directory`
 
-Type the following to fix:
+== Running Gloss ==
+Gloss can be started simply with:
+  # `./gloss`
 
-`sudo ldconfig` (Thanks netwolfuk)
-~~`export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib`~~
+from within the gloss-mc directory
+
+If you are experiencing problem with Gloss, you can also try starting it with any of the following options:
+  # `./gloss --help`: Display the various start up options
+  # `./gloss --debug`: Provide additional debug output

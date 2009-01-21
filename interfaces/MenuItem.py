@@ -46,9 +46,9 @@ class MenuItem (clutter.Label):
 
         
     def add_image_from_path(self, path, x, y, width=None, height=None):
-        tempTexture = clutter.Texture()
+        tempTexture = cluttergtk.Texture()
         pixbuf = gtk.gdk.pixbuf_new_from_file(path)
-        tempTexture.set_pixbuf(pixbuf)
+        tempTexture.set_from_pixbuf(pixbuf)
         
         if not width is None: tempTexture.set_width(width)
         if not height is None: tempTexture.set_height(height)
@@ -61,10 +61,10 @@ class MenuItem (clutter.Label):
         if texture is None: print "NO TEXTURE!"
 
             
-        pixbuf = texture.get_pixbuf()
+        #pixbuf = texture.get_pixbuf()
         size = self.menu.menu_image_size
         reflection = self.menu.use_reflection
-        texture = ImageFrame(pixbuf, size, reflection)
+        #texture = ImageFrame(pixbuf, size, reflection)
         
         #Rotate appropriately
         """

@@ -44,6 +44,7 @@ class Module:
                 print "Music DB Version error: Expected version %s, found version %s" % (self.required_schema_version, dbSchema)
                 print "Music Player will not be available"
                 self.version_check = False
+                self.setup_ui()
                 return
         
         self.artistImageRow = MusicObjectRow(self.glossMgr, self.stage.get_width(), 200, self.num_columns, self)

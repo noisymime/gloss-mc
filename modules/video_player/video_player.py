@@ -4,7 +4,7 @@ import gobject
 import pango
 import clutter
 import os
-from clutter import cluttergst
+import cluttergst
 from multimedia.VideoController import VideoController
 from modules.video_player.elements.cover_viewer import coverViewer
 from modules.video_player.elements.video_details import video_details

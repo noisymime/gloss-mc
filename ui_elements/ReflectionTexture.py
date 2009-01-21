@@ -1,7 +1,7 @@
 import cairo
 import clutter
 import gtk
-from clutter.cluttercairo import CairoTexture
+from cluttercairo import CairoTexture
 
 
 class Texture_Reflection (CairoTexture):

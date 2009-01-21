@@ -5,7 +5,7 @@ import os
 import clutter
 import gobject
 
-from clutter import cluttergst
+import cluttergst
 from modules.myth_tv_player.MythBackendConn import MythBackendConnection
 from modules.myth_tv_player.tv_db_controller import tv_db_controller
 from SplashScr import SplashScr

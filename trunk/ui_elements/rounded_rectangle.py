@@ -1,7 +1,7 @@
 import cairo
 import clutter
 import gtk
-from clutter.cluttercairo import CairoTexture
+from cluttercairo import CairoTexture
 
 """
 This element is a Clutter Group that displays as a rectangle of arbitary size

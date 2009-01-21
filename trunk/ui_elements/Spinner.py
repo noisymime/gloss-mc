@@ -1,15 +1,16 @@
+import cluttergtk
 import clutter
 import gtk
 
-class Spinner (clutter.Texture):
+class Spinner (cluttergtk.Texture):
     
     def __init__(self, glossMgr):
-        clutter.Texture.__init__ (self)
+        cluttergtk.Texture.__init__ (self)
         
         #Theme me please
         theme = glossMgr.themeMgr.currentTheme
         pixbuf = gtk.gdk.pixbuf_new_from_file("themes/%s/spinner.svg" % theme)
-        self.set_pixbuf(pixbuf)
+        self.set_from_pixbuf(pixbuf)
      
     def start(self):  
         self.timeline = clutter.Timeline(40,20)

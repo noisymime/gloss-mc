@@ -1,4 +1,11 @@
-import sys, clutter, clutter.cluttergst, gst, pygst, gtk, pygtk, gobject
+import sys
+import clutter
+import cluttergst
+import gst
+import pygst
+import gtk
+import pygtk
+import gobject
 import threading
 import os
 from multimedia.MediaController import MediaController
@@ -10,7 +17,7 @@ class AudioController(MediaController):
         self.isPlaying = False
         
         # Primary audio object
-        self.audio = clutter.cluttergst.Audio()
+        self.audio = cluttergst.Audio()
         self.audio.connect("eos", self.stream_complete)
         self.media_element = self.audio    
         

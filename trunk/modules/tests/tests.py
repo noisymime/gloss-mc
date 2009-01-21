@@ -1,5 +1,5 @@
 import clutter
-from clutter import cluttergst
+import cluttergst
 from ui_elements.image_preview import image_previewer
 import time
 import os.path

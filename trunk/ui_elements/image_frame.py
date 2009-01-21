@@ -1,6 +1,7 @@
 import pygtk
 import gtk
 import pango
+import cluttergtk
 import clutter
 import os
 from ui_elements.ReflectionTexture import Texture_Reflection
@@ -20,11 +21,11 @@ class ImageFrame(clutter.Group):
         self.orig_pixbuf = pixbuf
         
         
-        self.main_pic = clutter.Texture()
+        self.main_pic = cluttergtk.Texture()
         self.reflection = None
         #self.reflection = Texture_Reflection(self.main_pic)
 
-        self.set_pixbuf(pixbuf)               
+        self.set_from_pixbuf(pixbuf)               
         self.add(self.main_pic)
         
     def resize_pixbuf(self, pixbuf):
@@ -66,7 +67,7 @@ class ImageFrame(clutter.Group):
         
         return pixbuf
         
-    def set_pixbuf(self, pixbuf):
+    def set_from_pixbuf(self, pixbuf):
         self.orig_pixbuf = pixbuf
         if pixbuf is None:
             self.main_pic.hide()
@@ -74,7 +75,7 @@ class ImageFrame(clutter.Group):
             return
         else:
             self.pixbuf = self.resize_pixbuf(pixbuf)
-            self.main_pic.set_pixbuf(self.pixbuf)
+            self.main_pic.set_from_pixbuf(self.pixbuf)
             self.main_pic.set_position(self.x, self.y)
             self.main_pic.show()
         

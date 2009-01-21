@@ -1,10 +1,13 @@
 import os
+#import cluttergtk
 import clutter
 import pygtk
 import gtk
 from ui_elements.image_frame import ImageFrame
 from ui_elements.rounded_rectangle import RoundedRectangle
+from ui_elements.gloss_texture import GlossTexture
 from xml.dom import minidom
+
 
 class ThemeMgr:
 	theme_dir = "themes/"
@@ -179,8 +182,11 @@ class ThemeMgr:
 		(width, height) = self.get_dimensions(element, parent)
 		if (not height is None) and (not height == "default"): 
 			if height == "relative":
-				xy_ratio = float(actor.get_height()) / float(actor.get_width())
-				height = int(width * xy_ratio)
+				if actor.get_width() == 0:
+					height = 0
+				else:
+					xy_ratio = float(actor.get_height()) / float(actor.get_width())
+					height = int(width * xy_ratio)
 			actor.set_height(height)
 		if (not width is None) and (not width == "default"): 
 			actor.set_width(width)
@@ -304,7 +310,7 @@ class ThemeMgr:
 	def get_texture(self, name, parent=None, texture=None, element=None):
 		texture_src = None
 		if texture is None:
-			texture = clutter.Texture()
+			texture = GlossTexture()
 		if parent is None:
 			parent = self.stage
 
@@ -323,7 +329,7 @@ class ThemeMgr:
 		elif not src is None:
 			src = self.theme_dir + self.currentTheme + "/" + src
 			pixbuf = gtk.gdk.pixbuf_new_from_file(src)
-			texture.set_pixbuf(pixbuf)
+			texture.set_from_pixbuf(pixbuf)
 		elif not rect is None:
 			colour_element = self.search_docs("texture", name).getElementsByTagName("texture")
 			colour_element = self.find_element(colour_element, "id", "rect_colour")

@@ -1,4 +1,10 @@
-import sys, clutter, clutter.cluttergst, gst, pygst, gtk, pygtk, gobject
+import sys, clutter
+import cluttergst
+import gst
+import pygst
+import gtk
+import pygtk
+import gobject
 import threading
 import os
 from multimedia.MediaController import MediaController
@@ -11,9 +17,9 @@ class VideoController(MediaController):
         self.blackdrop = None
         
         # Primary video texture & sink definition
-        self.video_texture = clutter.cluttergst.VideoTexture()
+        self.video_texture = cluttergst.VideoTexture()
         self.media_element = self.video_texture
-        self.video_sink = clutter.cluttergst.VideoSink(self.video_texture)
+        self.video_sink = cluttergst.VideoSink(self.video_texture)
         self.video_texture.connect('size-change', self.set_fullscreen)
         self.video_texture.set_position(0,0)
         

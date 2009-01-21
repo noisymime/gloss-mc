@@ -58,12 +58,16 @@ class mythDB():
         
         return True
     
+    #Runs arbitary sql. Returns an empty array if there's a problem
     def run_sql(self, sql):
         if not self.connected:
             print "Unable to perform lookup, could not establish connection to SQL server"
             return None
     
-        self.cursor.execute(sql)
+        try:
+            self.cursor.execute(sql)
+        except:
+            return []
         # get the resultset as a tuple
         result = self.cursor.fetchall()
         return result

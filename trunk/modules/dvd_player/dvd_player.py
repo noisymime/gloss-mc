@@ -1,5 +1,5 @@
 import clutter
-from clutter import cluttergst
+import cluttergst
 from multimedia.VideoController import VideoController
 
 class Module:

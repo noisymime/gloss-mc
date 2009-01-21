@@ -114,6 +114,7 @@ class SplashScr(clutter.Group):
     def set_msg(self, msg):
         self.message.set_text(msg)
         
+        """
         (x1, y1, x2, y2) = self.message.get_coords()
         if x2 > self.box.get_width():
             new_width = int(x2 * 1.10)
@@ -121,6 +122,7 @@ class SplashScr(clutter.Group):
             
             new_x = int( (self.stage.get_width() - new_width) / 2 )
             self.centre_group.set_x(new_x)
+        """
         
     def set_details(self, detail):
         self.detail.set_text(detail)
